@@ -1,0 +1,19 @@
+﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace IdentityService.DAL.Configurations;
+
+public class EmployerIndustryConfiguration : IEntityTypeConfiguration<EmployerIndustry>
+{
+    public void Configure(EntityTypeBuilder<EmployerIndustry> builder)
+    {
+        builder.ToTable("EmployerIndustries");
+
+        builder.Property(e => e.Name)
+            .IsRequired()
+            .HasMaxLength(256);
+
+        builder.Property(e => e.NormalizedName)
+            .IsRequired()
+            .HasMaxLength(256);
+    }
+}

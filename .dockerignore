@@ -1,0 +1,17 @@
+**/bin/
+**/obj/
+**/.vs/
+**/.idea/
+**/.vscode/
+**/*.user
+**/*.suo
+**/*.cache
+
+**/node_modules/
+**/.angular/
+**/dist/
+**/coverage/
+
+*.md
+.git
+.gitignore
