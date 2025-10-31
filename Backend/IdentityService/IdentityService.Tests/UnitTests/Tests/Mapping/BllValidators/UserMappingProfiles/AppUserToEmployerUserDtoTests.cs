@@ -17,7 +17,7 @@ public class AppUserToEmployerUserDtoTests
     public void ShouldMapAppUserToEmployerUserDto()
     {
         // Arrange
-        var appUser = new AppUser
+        var appUser = new User
         {
             Id = Guid.NewGuid(),
             UserName = "company",
@@ -59,7 +59,7 @@ public class AppUserToEmployerUserDtoTests
     public void ShouldMapAppUserToEmployerUserDto_WithNullOptionalFields()
     {
         // Arrange
-        var appUser = new AppUser
+        var appUser = new User
         {
             Id = Guid.NewGuid(),
             UserName = "company",

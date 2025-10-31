@@ -6,7 +6,7 @@ public class RegisterEmployerCommandToAppUserProfile : Profile
 {
     public RegisterEmployerCommandToAppUserProfile()
     {
-        CreateMap<RegisterEmployerCommand, AppUser>()
+        CreateMap<RegisterEmployerCommand, User>()
             .ForMember(dest => dest.EmailConfirmed, opt =>
                 opt.MapFrom(_ => false))
             .ForMember(dest => dest.RegisteredAt, opt =>

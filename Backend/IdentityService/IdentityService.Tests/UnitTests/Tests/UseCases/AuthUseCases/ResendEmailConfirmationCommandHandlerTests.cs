@@ -10,7 +10,7 @@ namespace IdentityService.Tests.UnitTests.Tests.UseCases.AuthUseCases;
 
 public class ResendEmailConfirmationCommandHandlerTests
 {
-    private readonly Mock<UserManager<AppUser>> _userManagerMock;
+    private readonly Mock<UserManager<User>> _userManagerMock;
     private readonly Mock<IEmailSender> _emailSenderMock;
     private readonly Mock<ICachedService> _cachedServiceMock;
     private readonly Mock<ILogger<ResendEmailConfirmationCommandHandler>> _loggerMock;
@@ -18,8 +18,8 @@ public class ResendEmailConfirmationCommandHandlerTests
 
     public ResendEmailConfirmationCommandHandlerTests()
     {
-        _userManagerMock = new Mock<UserManager<AppUser>>(
-            Mock.Of<IUserStore<AppUser>>(), null!, null!, null!, null!, null!, null!, null!, null!);
+        _userManagerMock = new Mock<UserManager<User>>(
+            Mock.Of<IUserStore<User>>(), null!, null!, null!, null!, null!, null!, null!, null!);
         _emailSenderMock = new Mock<IEmailSender>();
         _cachedServiceMock = new Mock<ICachedService>();
         var configurationMock = new Mock<IConfiguration>();
@@ -42,7 +42,7 @@ public class ResendEmailConfirmationCommandHandlerTests
     {
         // Arrange
         var command = new ResendEmailConfirmationCommand("user@example.com");
-        var user = new AppUser { Id = Guid.NewGuid(), Email = command.Email, EmailConfirmed = false };
+        var user = new User { Id = Guid.NewGuid(), Email = command.Email, EmailConfirmed = false };
         var token = "confirmation-token";
         var code = "123456";
 
@@ -69,7 +69,7 @@ public class ResendEmailConfirmationCommandHandlerTests
     {
         // Arrange
         var command = new ResendEmailConfirmationCommand("user@example.com");
-        _userManagerMock.Setup(m => m.FindByEmailAsync(command.Email)).ReturnsAsync((AppUser)null!);
+        _userManagerMock.Setup(m => m.FindByEmailAsync(command.Email)).ReturnsAsync((User)null!);
 
         // Act
         var act = async () => await _handler.Handle(command, CancellationToken.None);
@@ -85,7 +85,7 @@ public class ResendEmailConfirmationCommandHandlerTests
     {
         // Arrange
         var command = new ResendEmailConfirmationCommand("user@example.com");
-        var user = new AppUser { Id = Guid.NewGuid(), Email = command.Email, EmailConfirmed = true };
+        var user = new User { Id = Guid.NewGuid(), Email = command.Email, EmailConfirmed = true };
         _userManagerMock.Setup(m => m.FindByEmailAsync(command.Email)).ReturnsAsync(user);
 
         // Act

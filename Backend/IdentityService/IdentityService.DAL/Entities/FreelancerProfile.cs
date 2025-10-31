@@ -10,5 +10,5 @@ public class FreelancerProfile : Entity
     public string? StripeAccountId { get; set; }
     public ICollection<Cv> Cvs { get; set; }
     public Guid UserId { get; set; }
-    public AppUser User { get; set; }
+    public User User { get; set; }
 }

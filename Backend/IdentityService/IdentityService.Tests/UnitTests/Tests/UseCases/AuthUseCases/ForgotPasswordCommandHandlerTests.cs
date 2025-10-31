@@ -10,7 +10,7 @@ namespace IdentityService.Tests.UnitTests.Tests.UseCases.AuthUseCases;
 
 public class ForgotPasswordCommandHandlerTests
 {
-    private readonly Mock<UserManager<AppUser>> _userManagerMock;
+    private readonly Mock<UserManager<User>> _userManagerMock;
     private readonly Mock<IEmailSender> _emailSenderMock;
     private readonly Mock<ICachedService> _cachedServiceMock;
     private readonly Mock<IConfiguration> _configurationMock;
@@ -19,8 +19,8 @@ public class ForgotPasswordCommandHandlerTests
 
     public ForgotPasswordCommandHandlerTests()
     {
-        _userManagerMock = new Mock<UserManager<AppUser>>(
-            Mock.Of<IUserStore<AppUser>>(), null, null, null, null, null, null, null, null);
+        _userManagerMock = new Mock<UserManager<User>>(
+            Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
         _emailSenderMock = new Mock<IEmailSender>();
         _cachedServiceMock = new Mock<ICachedService>();
         _configurationMock = new Mock<IConfiguration>();
@@ -43,7 +43,7 @@ public class ForgotPasswordCommandHandlerTests
     {
         // Arrange
         var command = new ForgotPasswordCommand("user@example.com", "https://reset.url");
-        var user = new AppUser { Id = Guid.NewGuid(), Email = command.Email };
+        var user = new User { Id = Guid.NewGuid(), Email = command.Email };
         var token = "reset-token";
         var code = "123456";
 
@@ -70,7 +70,7 @@ public class ForgotPasswordCommandHandlerTests
     {
         // Arrange
         var command = new ForgotPasswordCommand("user@example.com", "https://reset.url");
-        _userManagerMock.Setup(m => m.FindByEmailAsync(command.Email)).ReturnsAsync((AppUser)null);
+        _userManagerMock.Setup(m => m.FindByEmailAsync(command.Email)).ReturnsAsync((User)null);
 
         // Act
         var act = async () => await _handler.Handle(command, CancellationToken.None);

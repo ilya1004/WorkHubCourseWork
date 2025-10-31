@@ -52,7 +52,7 @@ public class UpdateFreelancerProfileCommandHandlerTests
             new FreelancerProfileDto("John", "Doe", "About", new[] { skillId1, skillId2 }, false),
             new MemoryStream(),
             "image/jpeg");
-        var user = new AppUser
+        var user = new User
         {
             Id = userId,
             FreelancerProfile = new FreelancerProfile
@@ -70,7 +70,7 @@ public class UpdateFreelancerProfileCommandHandlerTests
 
         _userContextMock.Setup(c => c.GetUserId()).Returns(userId);
         _usersRepositoryMock.Setup(r => r.GetByIdAsync(
-            userId, true, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<AppUser, object>>[]>()))
+            userId, true, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<User, object>>[]>()))
             .ReturnsAsync(user);
         _mapperMock.Setup(m => m.Map(command.FreelancerProfile, user.FreelancerProfile)).Returns(user.FreelancerProfile);
         _skillsRepositoryMock.Setup(r => r.ListAsync(It.IsAny<Expression<Func<CvSkill, bool>>>(), It.IsAny<CancellationToken>()))
@@ -102,8 +102,8 @@ public class UpdateFreelancerProfileCommandHandlerTests
 
         _userContextMock.Setup(c => c.GetUserId()).Returns(userId);
         _usersRepositoryMock.Setup(r => r.GetByIdAsync(
-            userId, true, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<AppUser, object>>[]>()))
-            .ReturnsAsync((AppUser)null!);
+            userId, true, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<User, object>>[]>()))
+            .ReturnsAsync((User)null!);
 
         // Act
         var act = async () => await _handler.Handle(command, CancellationToken.None);
@@ -123,7 +123,7 @@ public class UpdateFreelancerProfileCommandHandlerTests
             new FreelancerProfileDto("John", "Doe", null, null, false),
             new MemoryStream(),
             "text/plain");
-        var user = new AppUser
+        var user = new User
         {
             Id = userId,
             FreelancerProfile = new FreelancerProfile
@@ -135,7 +135,7 @@ public class UpdateFreelancerProfileCommandHandlerTests
 
         _userContextMock.Setup(c => c.GetUserId()).Returns(userId);
         _usersRepositoryMock.Setup(r => r.GetByIdAsync(
-            userId, true, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<AppUser, object>>[]>()))
+            userId, true, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<User, object>>[]>()))
             .ReturnsAsync(user);
         _mapperMock.Setup(m => m.Map(command.FreelancerProfile, user.FreelancerProfile)).Returns(user.FreelancerProfile);
 
@@ -159,7 +159,7 @@ public class UpdateFreelancerProfileCommandHandlerTests
             new FreelancerProfileDto("John", "Doe", null, null, true),
             null,
             null);
-        var user = new AppUser
+        var user = new User
         {
             Id = userId,
             FreelancerProfile = new FreelancerProfile
@@ -172,7 +172,7 @@ public class UpdateFreelancerProfileCommandHandlerTests
 
         _userContextMock.Setup(c => c.GetUserId()).Returns(userId);
         _usersRepositoryMock.Setup(r => r.GetByIdAsync(
-            userId, true, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<AppUser, object>>[]>()))
+            userId, true, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<User, object>>[]>()))
             .ReturnsAsync(user);
         _mapperMock.Setup(m => m.Map(command.FreelancerProfile, user.FreelancerProfile)).Returns(user.FreelancerProfile);
         _unitOfWorkMock.Setup(u => u.SaveAllAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);

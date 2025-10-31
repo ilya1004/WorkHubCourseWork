@@ -49,7 +49,7 @@ public class RefreshTokenCommandHandlerTests
         // Arrange
         var userId = Guid.NewGuid();
         var command = new RefreshTokenCommand("access-token", "refresh-token");
-        var user = new AppUser
+        var user = new User
         {
             Id = userId,
             Email = "user@example.com",
@@ -62,7 +62,7 @@ public class RefreshTokenCommandHandlerTests
         var newRefreshToken = "new-refresh-token";
 
         _tokenProviderMock.Setup(t => t.GetPrincipalFromExpiredToken(command.AccessToken)).Returns(principal);
-        _usersRepositoryMock.Setup(r => r.GetByIdAsync(userId, false, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<AppUser, object>>[]>()))
+        _usersRepositoryMock.Setup(r => r.GetByIdAsync(userId, false, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<User, object>>[]>()))
             .ReturnsAsync(user);
         _tokenProviderMock.Setup(t => t.GenerateAccessToken(user)).Returns(newAccessToken);
         _tokenProviderMock.Setup(t => t.GenerateRefreshToken()).Returns(newRefreshToken);
@@ -90,8 +90,8 @@ public class RefreshTokenCommandHandlerTests
         var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, userId.ToString()) }));
 
         _tokenProviderMock.Setup(t => t.GetPrincipalFromExpiredToken(command.AccessToken)).Returns(principal);
-        _usersRepositoryMock.Setup(r => r.GetByIdAsync(userId, false, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<AppUser, object>>[]>()))
-            .ReturnsAsync((AppUser)null!);
+        _usersRepositoryMock.Setup(r => r.GetByIdAsync(userId, false, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<User, object>>[]>()))
+            .ReturnsAsync((User)null!);
 
         // Act
         var act = async () => await _handler.Handle(command, CancellationToken.None);
@@ -108,7 +108,7 @@ public class RefreshTokenCommandHandlerTests
         // Arrange
         var userId = Guid.NewGuid();
         var command = new RefreshTokenCommand("access-token", "refresh-token");
-        var user = new AppUser
+        var user = new User
         {
             Id = userId,
             RefreshToken = "different-token",
@@ -117,7 +117,7 @@ public class RefreshTokenCommandHandlerTests
         var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, userId.ToString()) }));
 
         _tokenProviderMock.Setup(t => t.GetPrincipalFromExpiredToken(command.AccessToken)).Returns(principal);
-        _usersRepositoryMock.Setup(r => r.GetByIdAsync(userId, false, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<AppUser, object>>[]>()))
+        _usersRepositoryMock.Setup(r => r.GetByIdAsync(userId, false, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<User, object>>[]>()))
             .ReturnsAsync(user);
 
         // Act
@@ -135,7 +135,7 @@ public class RefreshTokenCommandHandlerTests
         // Arrange
         var userId = Guid.NewGuid();
         var command = new RefreshTokenCommand("access-token", "refresh-token");
-        var user = new AppUser
+        var user = new User
         {
             Id = userId,
             RefreshToken = command.RefreshToken,
@@ -144,7 +144,7 @@ public class RefreshTokenCommandHandlerTests
         var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, userId.ToString()) }));
 
         _tokenProviderMock.Setup(t => t.GetPrincipalFromExpiredToken(command.AccessToken)).Returns(principal);
-        _usersRepositoryMock.Setup(r => r.GetByIdAsync(userId, false, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<AppUser, object>>[]>()))
+        _usersRepositoryMock.Setup(r => r.GetByIdAsync(userId, false, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<User, object>>[]>()))
             .ReturnsAsync(user);
 
         // Act

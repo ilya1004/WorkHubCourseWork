@@ -4,7 +4,7 @@ namespace IdentityService.BLL.Abstractions.TokenProvider;
 
 public interface ITokenProvider
 {
-    string GenerateAccessToken(AppUser user);
+    string GenerateAccessToken(User user);
     string GenerateRefreshToken();
     ClaimsPrincipal GetPrincipalFromExpiredToken(string token);
 }

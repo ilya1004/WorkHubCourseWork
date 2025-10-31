@@ -8,15 +8,15 @@ namespace IdentityService.Tests.UnitTests.Tests.UseCases.AuthUseCases;
 
 public class LogoutUserCommandHandlerTests
 {
-    private readonly Mock<UserManager<AppUser>> _userManagerMock;
+    private readonly Mock<UserManager<User>> _userManagerMock;
     private readonly Mock<IUserContext> _userContextMock;
     private readonly Mock<ILogger<LogoutUserCommandHandler>> _loggerMock;
     private readonly LogoutUserCommandHandler _handler;
 
     public LogoutUserCommandHandlerTests()
     {
-        _userManagerMock = new Mock<UserManager<AppUser>>(
-            Mock.Of<IUserStore<AppUser>>(), null!, null!, null!, null!, null!, null!, null!, null!);
+        _userManagerMock = new Mock<UserManager<User>>(
+            Mock.Of<IUserStore<User>>(), null!, null!, null!, null!, null!, null!, null!, null!);
         _userContextMock = new Mock<IUserContext>();
         _loggerMock = new Mock<ILogger<LogoutUserCommandHandler>>();
 
@@ -28,7 +28,7 @@ public class LogoutUserCommandHandlerTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var user = new AppUser { Id = userId, RefreshToken = "refresh-token", RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(1) };
+        var user = new User { Id = userId, RefreshToken = "refresh-token", RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(1) };
         _userContextMock.Setup(c => c.GetUserId()).Returns(userId);
         _userManagerMock.Setup(m => m.FindByIdAsync(userId.ToString())).ReturnsAsync(user);
         _userManagerMock.Setup(m => m.UpdateAsync(user)).ReturnsAsync(IdentityResult.Success);
@@ -50,7 +50,7 @@ public class LogoutUserCommandHandlerTests
         // Arrange
         var userId = Guid.NewGuid();
         _userContextMock.Setup(c => c.GetUserId()).Returns(userId);
-        _userManagerMock.Setup(m => m.FindByIdAsync(userId.ToString())).ReturnsAsync((AppUser)null!);
+        _userManagerMock.Setup(m => m.FindByIdAsync(userId.ToString())).ReturnsAsync((User)null!);
 
         // Act
         var act = async () => await _handler.Handle(new LogoutUserCommand(), CancellationToken.None);
@@ -58,7 +58,7 @@ public class LogoutUserCommandHandlerTests
         // Assert
         await act.Should().ThrowAsync<NotFoundException>()
             .WithMessage($"User with ID '{userId}' not found");
-        _userManagerMock.Verify(m => m.UpdateAsync(It.IsAny<AppUser>()), Times.Never());
+        _userManagerMock.Verify(m => m.UpdateAsync(It.IsAny<User>()), Times.Never());
         _loggerMock.VerifyLog(LogLevel.Warning, $"User with ID '{userId}' not found during logout", Times.Once());
     }
 
@@ -67,7 +67,7 @@ public class LogoutUserCommandHandlerTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var user = new AppUser { Id = userId, RefreshToken = null, RefreshTokenExpiryTime = null };
+        var user = new User { Id = userId, RefreshToken = null, RefreshTokenExpiryTime = null };
         _userContextMock.Setup(c => c.GetUserId()).Returns(userId);
         _userManagerMock.Setup(m => m.FindByIdAsync(userId.ToString())).ReturnsAsync(user);
 
@@ -76,7 +76,7 @@ public class LogoutUserCommandHandlerTests
 
         // Assert
         await act.Should().NotThrowAsync();
-        _userManagerMock.Verify(m => m.UpdateAsync(It.IsAny<AppUser>()), Times.Never());
+        _userManagerMock.Verify(m => m.UpdateAsync(It.IsAny<User>()), Times.Never());
         _loggerMock.VerifyLog(LogLevel.Information, $"User with ID '{userId}' has already logout", Times.Once());
     }
 }

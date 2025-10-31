@@ -3,7 +3,7 @@ using ProjectsService.Domain.Primitives;
 
 namespace ProjectsService.Domain.Entities;
 
-public class ProjectReport : Entity
+public class Report : Entity
 {
     public string? Description { get; set; }
     public ReportStatus Status { get; set; }

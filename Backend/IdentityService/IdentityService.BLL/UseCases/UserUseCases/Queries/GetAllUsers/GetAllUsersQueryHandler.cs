@@ -2,9 +2,9 @@
 
 namespace IdentityService.BLL.UseCases.UserUseCases.Queries.GetAllUsers;
 
-public class GetAllUsersQueryHandler(IUnitOfWork unitOfWork, ILogger<GetAllUsersQueryHandler> logger) : IRequestHandler<GetAllUsersQuery, PaginatedResultModel<AppUser>>
+public class GetAllUsersQueryHandler(IUnitOfWork unitOfWork, ILogger<GetAllUsersQueryHandler> logger) : IRequestHandler<GetAllUsersQuery, PaginatedResultModel<User>>
 {
-    public async Task<PaginatedResultModel<AppUser>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
+    public async Task<PaginatedResultModel<User>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
     {
         logger.LogInformation("Getting all users with pagination - PageNo: {PageNo}, PageSize: {PageSize}", request.PageNo, request.PageSize);
 
@@ -26,7 +26,7 @@ public class GetAllUsersQueryHandler(IUnitOfWork unitOfWork, ILogger<GetAllUsers
         
         logger.LogInformation("Total users count: {TotalCount}", usersCount);
 
-        return new PaginatedResultModel<AppUser>
+        return new PaginatedResultModel<User>
         {
             Items = users.ToList(),
             TotalCount = usersCount,

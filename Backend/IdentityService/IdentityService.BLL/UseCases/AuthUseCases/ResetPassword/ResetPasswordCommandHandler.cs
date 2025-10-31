@@ -3,7 +3,7 @@
 namespace IdentityService.BLL.UseCases.AuthUseCases.ResetPassword;
 
 public class ResetPasswordCommandHandler(
-    UserManager<AppUser> userManager,
+    UserManager<User> userManager,
     ICachedService cachedService,
     ILogger<ResetPasswordCommandHandler> logger) : IRequestHandler<ResetPasswordCommand>
 {

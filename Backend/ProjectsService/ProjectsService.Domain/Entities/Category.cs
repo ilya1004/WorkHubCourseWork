@@ -6,5 +6,4 @@ public class Category : Entity
 {
     public string Name { get; set; }
     public string NormalizedName { get; set; }
-    public ICollection<Project> Projects { get; set; }
 }

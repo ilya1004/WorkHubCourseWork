@@ -39,7 +39,7 @@ public class GetCurrentFreelancerUserQueryHandlerTests
         // Arrange
         var userId = Guid.NewGuid();
         var query = new GetCurrentFreelancerUserQuery();
-        var user = new AppUser
+        var user = new User
         {
             Id = userId,
             UserName = "freelancer",
@@ -68,7 +68,7 @@ public class GetCurrentFreelancerUserQueryHandlerTests
             userId,
             false,
             It.IsAny<CancellationToken>(),
-            It.IsAny<Expression<Func<AppUser, object>>[]>()))
+            It.IsAny<Expression<Func<User, object>>[]>()))
             .ReturnsAsync(user);
         _mapperMock.Setup(m => m.Map<FreelancerUserDto>(user)).Returns(freelancerUserDto);
 
@@ -94,8 +94,8 @@ public class GetCurrentFreelancerUserQueryHandlerTests
             userId,
             false,
             It.IsAny<CancellationToken>(),
-            It.IsAny<Expression<Func<AppUser, object>>[]>()))
-            .ReturnsAsync((AppUser)null!);
+            It.IsAny<Expression<Func<User, object>>[]>()))
+            .ReturnsAsync((User)null!);
 
         // Act
         var act = async () => await _handler.Handle(query, CancellationToken.None);
@@ -103,7 +103,7 @@ public class GetCurrentFreelancerUserQueryHandlerTests
         // Assert
         await act.Should().ThrowAsync<NotFoundException>()
             .WithMessage($"User with ID '{userId}' not found");
-        _mapperMock.Verify(m => m.Map<FreelancerUserDto>(It.IsAny<AppUser>()), Times.Never());
+        _mapperMock.Verify(m => m.Map<FreelancerUserDto>(It.IsAny<User>()), Times.Never());
         _loggerMock.VerifyLog(LogLevel.Warning, $"User with ID '{userId}' not found", Times.Once());
     }
 }

@@ -6,12 +6,12 @@ namespace IdentityService.DAL.Repositories;
 
 public class UsersRepository(ApplicationDbContext context) : IUsersRepository
 {
-    public async Task<AppUser?> GetByIdAsync(Guid id, bool withTracking = true, CancellationToken cancellationToken = default,
-        params Expression<Func<AppUser, object>>[]? includesProperties)
+    public async Task<User?> GetByIdAsync(Guid id, bool withTracking = true, CancellationToken cancellationToken = default,
+        params Expression<Func<User, object>>[]? includesProperties)
     {
         var query = withTracking ? 
-            context.AppUsers.AsQueryable() :
-            context.AppUsers.AsQueryable().AsNoTracking();
+            context.Users.AsQueryable() :
+            context.Users.AsQueryable().AsNoTracking();
 
         if (includesProperties != null)
             foreach (var includeProperty in includesProperties)
@@ -20,10 +20,10 @@ public class UsersRepository(ApplicationDbContext context) : IUsersRepository
         return await query.FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
     }
 
-    public async Task<AppUser?> FirstOrDefaultAsync(Expression<Func<AppUser, bool>> filter, CancellationToken cancellationToken = default,
-        params Expression<Func<AppUser, object>>[]? includesProperties)
+    public async Task<User?> FirstOrDefaultAsync(Expression<Func<User, bool>> filter, CancellationToken cancellationToken = default,
+        params Expression<Func<User, object>>[]? includesProperties)
     {
-        var query = context.AppUsers.AsQueryable().AsNoTracking();
+        var query = context.Users.AsQueryable().AsNoTracking();
 
         if (includesProperties != null)
             foreach (var includeProperty in includesProperties)
@@ -32,10 +32,10 @@ public class UsersRepository(ApplicationDbContext context) : IUsersRepository
         return await query.FirstOrDefaultAsync(filter, cancellationToken);
     }
 
-    public async Task<IReadOnlyList<AppUser>> PaginatedListAllAsync(int offset, int limit, CancellationToken cancellationToken = default, 
-        params Expression<Func<AppUser, object>>[]? includesProperties)
+    public async Task<IReadOnlyList<User>> PaginatedListAllAsync(int offset, int limit, CancellationToken cancellationToken = default, 
+        params Expression<Func<User, object>>[]? includesProperties)
     {
-        var query = context.AppUsers.AsQueryable().AsNoTracking();
+        var query = context.Users.AsQueryable().AsNoTracking();
         
         if (includesProperties != null)
             foreach (var includeProperty in includesProperties)
@@ -48,10 +48,10 @@ public class UsersRepository(ApplicationDbContext context) : IUsersRepository
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyList<AppUser>> PaginatedListAsync(Expression<Func<AppUser, bool>>? filter, int offset, int limit,
-        CancellationToken cancellationToken = default, params Expression<Func<AppUser, object>>[]? includesProperties)
+    public async Task<IReadOnlyList<User>> PaginatedListAsync(Expression<Func<User, bool>>? filter, int offset, int limit,
+        CancellationToken cancellationToken = default, params Expression<Func<User, object>>[]? includesProperties)
     {
-        var query = context.AppUsers.AsQueryable().AsNoTracking();
+        var query = context.Users.AsQueryable().AsNoTracking();
 
         if (filter != null) query = query.Where(filter);
 
@@ -66,21 +66,21 @@ public class UsersRepository(ApplicationDbContext context) : IUsersRepository
             .ToListAsync(cancellationToken);
     }
 
-    public Task UpdateAsync(AppUser entity, CancellationToken cancellationToken = default)
+    public Task UpdateAsync(User entity, CancellationToken cancellationToken = default)
     {
-        context.AppUsers.Update(entity);
+        context.Users.Update(entity);
         return Task.CompletedTask;
     }
 
-    public Task DeleteAsync(AppUser entity, CancellationToken cancellationToken = default)
+    public Task DeleteAsync(User entity, CancellationToken cancellationToken = default)
     {
-        context.AppUsers.Remove(entity);
+        context.Users.Remove(entity);
         return Task.CompletedTask;
     }
 
-    public async Task<int> CountAsync(Expression<Func<AppUser, bool>>? filter, CancellationToken cancellationToken = default)
+    public async Task<int> CountAsync(Expression<Func<User, bool>>? filter, CancellationToken cancellationToken = default)
     {
-        var query = context.AppUsers.AsQueryable();
+        var query = context.Users.AsQueryable();
 
         if (filter != null) query = query.Where(filter);
 

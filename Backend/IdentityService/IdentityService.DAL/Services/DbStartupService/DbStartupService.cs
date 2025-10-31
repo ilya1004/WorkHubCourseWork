@@ -11,7 +11,7 @@ public class DbStartupService(
     IServiceProvider serviceProvider,
     RoleManager<IdentityRole<Guid>> roleManager,
     IUnitOfWork unitOfWork,
-    UserManager<AppUser> userManager,
+    UserManager<User> userManager,
     ILogger<DbStartupService> logger) : IDbStartupService
 {
     private const string EmployerId = "e13341b4-6532-41f6-9595-202525c7ff34";
@@ -67,7 +67,7 @@ public class DbStartupService(
         
         adminRole = await roleManager.FindByNameAsync(AppRoles.AdminRole);
 
-        var admin = new AppUser
+        var admin = new User
         {
             Id = Guid.NewGuid(),
             RegisteredAt = DateTime.UtcNow,
@@ -132,7 +132,7 @@ public class DbStartupService(
 
         var freelancerId = Guid.Parse(FreelancerId);
         
-        var freelancer = new AppUser
+        var freelancer = new User
         {
             Id = freelancerId,
             RegisteredAt = DateTime.UtcNow,
@@ -172,7 +172,7 @@ public class DbStartupService(
         
         var employerId = Guid.Parse(EmployerId);
         
-        var employer = new AppUser
+        var employer = new User
         {
             Id = employerId,
             RegisteredAt = DateTime.UtcNow,

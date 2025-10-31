@@ -5,7 +5,7 @@ using IdentityService.BLL.Settings;
 namespace IdentityService.BLL.UseCases.AuthUseCases.LoginUser;
 
 public class LoginUserCommandHandler(
-    SignInManager<AppUser> signInManager,
+    SignInManager<User> signInManager,
     IUnitOfWork unitOfWork,
     ITokenProvider tokenService,
     IOptions<JwtSettings> options,

@@ -34,7 +34,7 @@ public class TokenProviderTests
     public void GenerateAccessToken_ShouldReturnValidJwtToken()
     {
         // Arrange
-        var user = new AppUser
+        var user = new User
         {
             Id = Guid.NewGuid(),
             Email = "user@example.com",
@@ -73,7 +73,7 @@ public class TokenProviderTests
     public void GetPrincipalFromExpiredToken_ShouldReturnPrincipal_WhenTokenIsValid()
     {
         // Arrange
-        var user = new AppUser
+        var user = new User
         {
             Id = Guid.NewGuid(),
             Email = "user@example.com",
@@ -104,7 +104,7 @@ public class TokenProviderTests
         act.Should().Throw<SecurityTokenMalformedException>();
     }
 
-    private string GenerateTestToken(AppUser user, DateTime expires)
+    private string GenerateTestToken(User user, DateTime expires)
     {
         var claims = new[]
         {

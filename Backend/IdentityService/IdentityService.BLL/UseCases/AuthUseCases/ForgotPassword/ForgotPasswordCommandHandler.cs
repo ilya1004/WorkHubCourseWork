@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 namespace IdentityService.BLL.UseCases.AuthUseCases.ForgotPassword;
 
 public class ForgotPasswordCommandHandler(
-    UserManager<AppUser> userManager,
+    UserManager<User> userManager,
     IEmailSender emailSender,
     ICachedService cachedService,
     IConfiguration configuration,

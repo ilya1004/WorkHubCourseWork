@@ -4,7 +4,7 @@ using IdentityService.BLL.DTOs;
 namespace IdentityService.BLL.UseCases.FileUseCases.Queries.GetImageByUserId;
 
 public class GetImageByUserIdQueryHandler(
-    UserManager<AppUser> userManager,
+    UserManager<User> userManager,
     IBlobService blobService,
     ILogger<GetImageByUserIdQueryHandler> logger) : IRequestHandler<GetImageByUserIdQuery, FileResponseDto>
 {

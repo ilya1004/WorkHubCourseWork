@@ -3,7 +3,7 @@
 namespace IdentityService.BLL.UseCases.AuthUseCases.LogoutUser;
 
 public class LogoutUserCommandHandler(
-    UserManager<AppUser> userManager,
+    UserManager<User> userManager,
     IUserContext userContext,
     ILogger<LogoutUserCommandHandler> logger) : IRequestHandler<LogoutUserCommand>
 {

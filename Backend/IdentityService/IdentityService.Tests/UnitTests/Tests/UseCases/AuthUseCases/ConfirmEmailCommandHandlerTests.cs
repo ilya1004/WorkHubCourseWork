@@ -8,15 +8,15 @@ namespace IdentityService.Tests.UnitTests.Tests.UseCases.AuthUseCases;
 
 public class ConfirmEmailCommandHandlerTests
 {
-    private readonly Mock<UserManager<AppUser>> _userManagerMock;
+    private readonly Mock<UserManager<User>> _userManagerMock;
     private readonly Mock<ICachedService> _cachedServiceMock;
     private readonly Mock<ILogger<ConfirmEmailCommandHandler>> _loggerMock;
     private readonly ConfirmEmailCommandHandler _handler;
 
     public ConfirmEmailCommandHandlerTests()
     {
-        _userManagerMock = new Mock<UserManager<AppUser>>(
-            Mock.Of<IUserStore<AppUser>>(), null, null, null, null, null, null, null, null);
+        _userManagerMock = new Mock<UserManager<User>>(
+            Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
         _cachedServiceMock = new Mock<ICachedService>();
         _loggerMock = new Mock<ILogger<ConfirmEmailCommandHandler>>();
 
@@ -28,7 +28,7 @@ public class ConfirmEmailCommandHandlerTests
     {
         // Arrange
         var command = new ConfirmEmailCommand("user@example.com", "123456");
-        var user = new AppUser { Id = Guid.NewGuid(), Email = command.Email, EmailConfirmed = false };
+        var user = new User { Id = Guid.NewGuid(), Email = command.Email, EmailConfirmed = false };
         var token = "valid-token";
 
         _userManagerMock.Setup(m => m.FindByEmailAsync(command.Email)).ReturnsAsync(user);
@@ -50,7 +50,7 @@ public class ConfirmEmailCommandHandlerTests
     {
         // Arrange
         var command = new ConfirmEmailCommand("user@example.com", "123456");
-        _userManagerMock.Setup(m => m.FindByEmailAsync(command.Email)).ReturnsAsync((AppUser)null);
+        _userManagerMock.Setup(m => m.FindByEmailAsync(command.Email)).ReturnsAsync((User)null);
 
         // Act
         var act = async () => await _handler.Handle(command, CancellationToken.None);
@@ -66,7 +66,7 @@ public class ConfirmEmailCommandHandlerTests
     {
         // Arrange
         var command = new ConfirmEmailCommand("user@example.com", "123456");
-        var user = new AppUser { Id = Guid.NewGuid(), Email = command.Email, EmailConfirmed = true };
+        var user = new User { Id = Guid.NewGuid(), Email = command.Email, EmailConfirmed = true };
         _userManagerMock.Setup(m => m.FindByEmailAsync(command.Email)).ReturnsAsync(user);
 
         // Act
@@ -83,7 +83,7 @@ public class ConfirmEmailCommandHandlerTests
     {
         // Arrange
         var command = new ConfirmEmailCommand("user@example.com", "123456");
-        var user = new AppUser { Id = Guid.NewGuid(), Email = command.Email, EmailConfirmed = false };
+        var user = new User { Id = Guid.NewGuid(), Email = command.Email, EmailConfirmed = false };
         _userManagerMock.Setup(m => m.FindByEmailAsync(command.Email)).ReturnsAsync(user);
         _cachedServiceMock.Setup(c => c.GetAsync(command.Code, It.IsAny<CancellationToken>())).ReturnsAsync((string)null);
 
@@ -101,7 +101,7 @@ public class ConfirmEmailCommandHandlerTests
     {
         // Arrange
         var command = new ConfirmEmailCommand("user@example.com", "123456");
-        var user = new AppUser { Id = Guid.NewGuid(), Email = command.Email, EmailConfirmed = false };
+        var user = new User { Id = Guid.NewGuid(), Email = command.Email, EmailConfirmed = false };
         var token = "invalid-token";
         _userManagerMock.Setup(m => m.FindByEmailAsync(command.Email)).ReturnsAsync(user);
         _cachedServiceMock.Setup(c => c.GetAsync(command.Code, It.IsAny<CancellationToken>())).ReturnsAsync(token);

@@ -12,7 +12,7 @@ namespace IdentityService.Tests.UnitTests.Tests.UseCases.UserUseCases.Commands;
 
 public class RegisterEmployerCommandHandlerTests
 {
-    private readonly Mock<UserManager<AppUser>> _userManagerMock;
+    private readonly Mock<UserManager<User>> _userManagerMock;
     private readonly Mock<RoleManager<IdentityRole<Guid>>> _roleManagerMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<IMapper> _mapperMock;
@@ -24,8 +24,8 @@ public class RegisterEmployerCommandHandlerTests
 
     public RegisterEmployerCommandHandlerTests()
     {
-        _userManagerMock = new Mock<UserManager<AppUser>>(
-            Mock.Of<IUserStore<AppUser>>(), null!, null!, null!, null!, null!, null!, null!, null!);
+        _userManagerMock = new Mock<UserManager<User>>(
+            Mock.Of<IUserStore<User>>(), null!, null!, null!, null!, null!, null!, null!, null!);
         _roleManagerMock = new Mock<RoleManager<IdentityRole<Guid>>>(
             Mock.Of<IRoleStore<IdentityRole<Guid>>>(), null!, null!, null!, null!);
         _unitOfWorkMock = new Mock<IUnitOfWork>();
@@ -58,15 +58,15 @@ public class RegisterEmployerCommandHandlerTests
     {
         // Arrange
         var command = new RegisterEmployerCommand("employer", "Tech Corp", "employer@example.com", "P@ssw0rd123");
-        var user = new AppUser { Id = Guid.NewGuid(), Email = command.Email };
+        var user = new User { Id = Guid.NewGuid(), Email = command.Email };
         var employerProfile = new EmployerProfile { Id = Guid.NewGuid(), UserId = user.Id };
         var role = new IdentityRole<Guid> { Id = Guid.NewGuid(), Name = AppRoles.EmployerRole };
         var token = "confirmation-token";
         var code = "123456";
 
-        _userManagerMock.Setup(m => m.FindByEmailAsync(command.Email)).ReturnsAsync((AppUser)null!);
+        _userManagerMock.Setup(m => m.FindByEmailAsync(command.Email)).ReturnsAsync((User)null!);
         _roleManagerMock.Setup(r => r.FindByNameAsync(AppRoles.EmployerRole)).ReturnsAsync(role);
-        _mapperMock.Setup(m => m.Map<AppUser>(command)).Returns(user);
+        _mapperMock.Setup(m => m.Map<User>(command)).Returns(user);
         _userManagerMock.Setup(m => m.CreateAsync(user, command.Password)).ReturnsAsync(IdentityResult.Success);
         _mapperMock.Setup(m => m.Map<EmployerProfile>(command)).Returns(employerProfile);
         _employerProfilesRepositoryMock.Setup(r => r.AddAsync(employerProfile, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
@@ -93,7 +93,7 @@ public class RegisterEmployerCommandHandlerTests
     {
         // Arrange
         var command = new RegisterEmployerCommand("employer", "Tech Corp", "employer@example.com", "P@ssw0rd123");
-        var user = new AppUser { Id = Guid.NewGuid(), Email = command.Email };
+        var user = new User { Id = Guid.NewGuid(), Email = command.Email };
 
         _userManagerMock.Setup(m => m.FindByEmailAsync(command.Email)).ReturnsAsync(user);
 
@@ -103,7 +103,7 @@ public class RegisterEmployerCommandHandlerTests
         // Assert
         await act.Should().ThrowAsync<AlreadyExistsException>()
             .WithMessage($"A user with the email '{command.Email}' already exists.");
-        _userManagerMock.Verify(m => m.CreateAsync(It.IsAny<AppUser>(), It.IsAny<string>()), Times.Never());
+        _userManagerMock.Verify(m => m.CreateAsync(It.IsAny<User>(), It.IsAny<string>()), Times.Never());
         _loggerMock.VerifyLog(LogLevel.Warning, $"User with email {command.Email} already exists", Times.Once());
     }
 
@@ -113,7 +113,7 @@ public class RegisterEmployerCommandHandlerTests
         // Arrange
         var command = new RegisterEmployerCommand("employer", "Tech Corp", "employer@example.com", "P@ssw0rd123");
 
-        _userManagerMock.Setup(m => m.FindByEmailAsync(command.Email)).ReturnsAsync((AppUser)null!);
+        _userManagerMock.Setup(m => m.FindByEmailAsync(command.Email)).ReturnsAsync((User)null!);
         _roleManagerMock.Setup(r => r.FindByNameAsync(AppRoles.EmployerRole)).ReturnsAsync((IdentityRole<Guid>)null!);
 
         // Act
@@ -122,7 +122,7 @@ public class RegisterEmployerCommandHandlerTests
         // Assert
         await act.Should().ThrowAsync<BadRequestException>()
             .WithMessage("User is not successfully registered. User Role is not successfully find");
-        _userManagerMock.Verify(m => m.CreateAsync(It.IsAny<AppUser>(), It.IsAny<string>()), Times.Never());
+        _userManagerMock.Verify(m => m.CreateAsync(It.IsAny<User>(), It.IsAny<string>()), Times.Never());
         _loggerMock.VerifyLog(LogLevel.Error, "Employer role not found", Times.Once());
     }
 
@@ -131,13 +131,13 @@ public class RegisterEmployerCommandHandlerTests
     {
         // Arrange
         var command = new RegisterEmployerCommand("employer", "Tech Corp", "employer@example.com", "P@ssw0rd123");
-        var user = new AppUser { Id = Guid.NewGuid(), Email = command.Email };
+        var user = new User { Id = Guid.NewGuid(), Email = command.Email };
         var role = new IdentityRole<Guid> { Id = Guid.NewGuid(), Name = AppRoles.EmployerRole };
         var errors = new[] { new IdentityError { Description = "Invalid password" } };
 
-        _userManagerMock.Setup(m => m.FindByEmailAsync(command.Email)).ReturnsAsync((AppUser)null!);
+        _userManagerMock.Setup(m => m.FindByEmailAsync(command.Email)).ReturnsAsync((User)null!);
         _roleManagerMock.Setup(r => r.FindByNameAsync(AppRoles.EmployerRole)).ReturnsAsync(role);
-        _mapperMock.Setup(m => m.Map<AppUser>(command)).Returns(user);
+        _mapperMock.Setup(m => m.Map<User>(command)).Returns(user);
         _userManagerMock.Setup(m => m.CreateAsync(user, command.Password)).ReturnsAsync(IdentityResult.Failed(errors));
 
         // Act

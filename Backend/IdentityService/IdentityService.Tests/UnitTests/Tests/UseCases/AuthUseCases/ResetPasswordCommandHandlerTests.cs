@@ -8,15 +8,15 @@ namespace IdentityService.Tests.UnitTests.Tests.UseCases.AuthUseCases;
 
 public class ResetPasswordCommandHandlerTests
 {
-    private readonly Mock<UserManager<AppUser>> _userManagerMock;
+    private readonly Mock<UserManager<User>> _userManagerMock;
     private readonly Mock<ICachedService> _cachedServiceMock;
     private readonly Mock<ILogger<ResetPasswordCommandHandler>> _loggerMock;
     private readonly ResetPasswordCommandHandler _handler;
 
     public ResetPasswordCommandHandlerTests()
     {
-        _userManagerMock = new Mock<UserManager<AppUser>>(
-            Mock.Of<IUserStore<AppUser>>(), null!, null!, null!, null!, null!, null!, null!, null!);
+        _userManagerMock = new Mock<UserManager<User>>(
+            Mock.Of<IUserStore<User>>(), null!, null!, null!, null!, null!, null!, null!, null!);
         _cachedServiceMock = new Mock<ICachedService>();
         _loggerMock = new Mock<ILogger<ResetPasswordCommandHandler>>();
 
@@ -28,7 +28,7 @@ public class ResetPasswordCommandHandlerTests
     {
         // Arrange
         var command = new ResetPasswordCommand("user@example.com", "NewP@ssw0rd123", "123456");
-        var user = new AppUser { Id = Guid.NewGuid(), Email = command.Email };
+        var user = new User { Id = Guid.NewGuid(), Email = command.Email };
         var token = "reset-token";
 
         _userManagerMock.Setup(m => m.FindByEmailAsync(command.Email)).ReturnsAsync(user);
@@ -50,7 +50,7 @@ public class ResetPasswordCommandHandlerTests
     {
         // Arrange
         var command = new ResetPasswordCommand("user@example.com", "NewP@ssw0rd123", "123456");
-        _userManagerMock.Setup(m => m.FindByEmailAsync(command.Email)).ReturnsAsync((AppUser)null!);
+        _userManagerMock.Setup(m => m.FindByEmailAsync(command.Email)).ReturnsAsync((User)null!);
 
         // Act
         var act = async () => await _handler.Handle(command, CancellationToken.None);
@@ -66,7 +66,7 @@ public class ResetPasswordCommandHandlerTests
     {
         // Arrange
         var command = new ResetPasswordCommand("user@example.com", "NewP@ssw0rd123", "123456");
-        var user = new AppUser { Id = Guid.NewGuid(), Email = command.Email };
+        var user = new User { Id = Guid.NewGuid(), Email = command.Email };
         _userManagerMock.Setup(m => m.FindByEmailAsync(command.Email)).ReturnsAsync(user);
         _cachedServiceMock.Setup(c => c.GetAsync(command.Code, It.IsAny<CancellationToken>())).ReturnsAsync((string)null!);
 
@@ -84,7 +84,7 @@ public class ResetPasswordCommandHandlerTests
     {
         // Arrange
         var command = new ResetPasswordCommand("user@example.com", "NewP@ssw0rd123", "123456");
-        var user = new AppUser { Id = Guid.NewGuid(), Email = command.Email };
+        var user = new User { Id = Guid.NewGuid(), Email = command.Email };
         var token = "reset-token";
         var errors = new[] { new IdentityError { Description = "Password too weak" } };
         _userManagerMock.Setup(m => m.FindByEmailAsync(command.Email)).ReturnsAsync(user);

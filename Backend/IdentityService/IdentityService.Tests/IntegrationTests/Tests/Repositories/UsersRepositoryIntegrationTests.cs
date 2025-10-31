@@ -27,7 +27,7 @@ public class UsersRepositoryIntegrationTests : IClassFixture<IntegrationTestsFix
 
         // Act
         var retrievedUser = await unitOfWork.UsersRepository.GetByIdAsync(
-            (await scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>().FindByNameAsync("Admin"))!.Id,
+            (await scope.ServiceProvider.GetRequiredService<UserManager<User>>().FindByNameAsync("Admin"))!.Id,
             withTracking: false
         );
 
@@ -70,7 +70,7 @@ public class UsersRepositoryIntegrationTests : IClassFixture<IntegrationTestsFix
         // Arrange
         using var scope = _fixture.Factory.Services.CreateScope();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-        Expression<Func<AppUser, bool>> filter = u => u.UserName == "Pavlusha";
+        Expression<Func<User, bool>> filter = u => u.UserName == "Pavlusha";
 
         // Act
         var retrievedUser = await unitOfWork.UsersRepository.FirstOrDefaultAsync(
@@ -111,7 +111,7 @@ public class UsersRepositoryIntegrationTests : IClassFixture<IntegrationTestsFix
         // Arrange
         using var scope = _fixture.Factory.Services.CreateScope();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-        Expression<Func<AppUser, bool>> filter = u => u.UserName!.Contains("a");
+        Expression<Func<User, bool>> filter = u => u.UserName!.Contains("a");
 
         // Act
         var result = await unitOfWork.UsersRepository.PaginatedListAsync(filter, 0, 2);
@@ -127,7 +127,7 @@ public class UsersRepositoryIntegrationTests : IClassFixture<IntegrationTestsFix
         // Arrange
         using var scope = _fixture.Factory.Services.CreateScope();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
         var user = await userManager.FindByNameAsync("Moonlight");
 
         // Act
@@ -148,8 +148,8 @@ public class UsersRepositoryIntegrationTests : IClassFixture<IntegrationTestsFix
         // Arrange
         using var scope = _fixture.Factory.Services.CreateScope();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
-        var user = new AppUser
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+        var user = new User
         {
             Id = Guid.NewGuid(),
             UserName = "todelete",
@@ -178,7 +178,7 @@ public class UsersRepositoryIntegrationTests : IClassFixture<IntegrationTestsFix
         // Arrange
         using var scope = _fixture.Factory.Services.CreateScope();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-        Expression<Func<AppUser, bool>> filter = u => u.Role!.Name == "Freelancer";
+        Expression<Func<User, bool>> filter = u => u.Role!.Name == "Freelancer";
 
         // Act
         var count = await unitOfWork.UsersRepository.CountAsync(filter);
@@ -204,7 +204,7 @@ public class UsersRepositoryIntegrationTests : IClassFixture<IntegrationTestsFix
         // Assert
         result1.Should().NotBeNull();
         cachedData.Should().NotBeNull();
-        var cachedUser = JsonSerializer.Deserialize<AppUser>(cachedData!);
+        var cachedUser = JsonSerializer.Deserialize<User>(cachedData!);
         cachedUser.Should().NotBeNull();
         cachedUser!.Id.Should().Be(IntegrationTestsFixture.EmployerId);
         result2.Should().NotBeNull();
@@ -218,7 +218,7 @@ public class UsersRepositoryIntegrationTests : IClassFixture<IntegrationTestsFix
         using var scope = _fixture.Factory.Services.CreateScope();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
         var distributedCache = scope.ServiceProvider.GetRequiredService<IDistributedCache>();
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
         var user = await userManager.FindByNameAsync("Pavlusha");
         await unitOfWork.UsersRepository.GetByIdAsync(IntegrationTestsFixture.EmployerId, withTracking: false);
 
@@ -242,8 +242,8 @@ public class UsersRepositoryIntegrationTests : IClassFixture<IntegrationTestsFix
         using var scope = _fixture.Factory.Services.CreateScope();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
         var distributedCache = scope.ServiceProvider.GetRequiredService<IDistributedCache>();
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
-        var user = new AppUser
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+        var user = new User
         {
             Id = Guid.NewGuid(),
             UserName = "todeletecache",

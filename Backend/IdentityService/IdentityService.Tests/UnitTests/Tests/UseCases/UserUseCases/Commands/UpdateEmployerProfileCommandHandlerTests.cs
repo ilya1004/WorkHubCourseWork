@@ -51,7 +51,7 @@ public class UpdateEmployerProfileCommandHandlerTests
             new EmployerProfileDto("New Corp", "About", industryId, false),
             new MemoryStream(),
             "image/jpeg");
-        var user = new AppUser
+        var user = new User
         {
             Id = userId,
             EmployerProfile = new EmployerProfile { Id = Guid.NewGuid() },
@@ -61,7 +61,7 @@ public class UpdateEmployerProfileCommandHandlerTests
 
         _userContextMock.Setup(c => c.GetUserId()).Returns(userId);
         _usersRepositoryMock.Setup(r => r.GetByIdAsync(
-            userId, true, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<AppUser, object>>[]>()))
+            userId, true, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<User, object>>[]>()))
             .ReturnsAsync(user);
         _mapperMock.Setup(m => m.Map(command.EmployerProfile, user.EmployerProfile)).Returns(user.EmployerProfile);
         _industriesRepositoryMock.Setup(r => r.GetByIdAsync(industryId, It.IsAny<CancellationToken>())).ReturnsAsync(industry);
@@ -92,8 +92,8 @@ public class UpdateEmployerProfileCommandHandlerTests
 
         _userContextMock.Setup(c => c.GetUserId()).Returns(userId);
         _usersRepositoryMock.Setup(r => r.GetByIdAsync(
-            userId, true, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<AppUser, object>>[]>()))
-            .ReturnsAsync((AppUser)null!);
+            userId, true, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<User, object>>[]>()))
+            .ReturnsAsync((User)null!);
 
         // Act
         var act = async () => await _handler.Handle(command, CancellationToken.None);
@@ -115,7 +115,7 @@ public class UpdateEmployerProfileCommandHandlerTests
             new EmployerProfileDto("New Corp", null, industryId, false),
             null,
             null);
-        var user = new AppUser
+        var user = new User
         {
             Id = userId,
             EmployerProfile = new EmployerProfile { Id = Guid.NewGuid() }
@@ -123,7 +123,7 @@ public class UpdateEmployerProfileCommandHandlerTests
 
         _userContextMock.Setup(c => c.GetUserId()).Returns(userId);
         _usersRepositoryMock.Setup(r => r.GetByIdAsync(
-            userId, true, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<AppUser, object>>[]>()))
+            userId, true, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<User, object>>[]>()))
             .ReturnsAsync(user);
         _mapperMock.Setup(m => m.Map(command.EmployerProfile, user.EmployerProfile)).Returns(user.EmployerProfile);
         _industriesRepositoryMock.Setup(r => r.GetByIdAsync(industryId, It.IsAny<CancellationToken>())).ReturnsAsync((EmployerIndustry)null!);
@@ -147,7 +147,7 @@ public class UpdateEmployerProfileCommandHandlerTests
             new EmployerProfileDto("New Corp", null, null, false),
             new MemoryStream(),
             "text/plain");
-        var user = new AppUser
+        var user = new User
         {
             Id = userId,
             EmployerProfile = new EmployerProfile { Id = Guid.NewGuid() }
@@ -155,7 +155,7 @@ public class UpdateEmployerProfileCommandHandlerTests
 
         _userContextMock.Setup(c => c.GetUserId()).Returns(userId);
         _usersRepositoryMock.Setup(r => r.GetByIdAsync(
-            userId, true, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<AppUser, object>>[]>()))
+            userId, true, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<User, object>>[]>()))
             .ReturnsAsync(user);
         _mapperMock.Setup(m => m.Map(command.EmployerProfile, user.EmployerProfile)).Returns(user.EmployerProfile);
 
@@ -179,7 +179,7 @@ public class UpdateEmployerProfileCommandHandlerTests
             new EmployerProfileDto("New Corp", null, null, true),
             null,
             null);
-        var user = new AppUser
+        var user = new User
         {
             Id = userId,
             EmployerProfile = new EmployerProfile { Id = Guid.NewGuid() },
@@ -188,7 +188,7 @@ public class UpdateEmployerProfileCommandHandlerTests
 
         _userContextMock.Setup(c => c.GetUserId()).Returns(userId);
         _usersRepositoryMock.Setup(r => r.GetByIdAsync(
-            userId, true, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<AppUser, object>>[]>()))
+            userId, true, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<User, object>>[]>()))
             .ReturnsAsync(user);
         _mapperMock.Setup(m => m.Map(command.EmployerProfile, user.EmployerProfile)).Returns(user.EmployerProfile);
         _unitOfWorkMock.Setup(u => u.SaveAllAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);

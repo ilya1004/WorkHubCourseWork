@@ -75,9 +75,9 @@ public class UsersControllerTests
     {
         // Arrange
         var request = new GetPaginatedListRequest(2, 20);
-        var paginatedResult = new PaginatedResultModel<AppUser>
+        var paginatedResult = new PaginatedResultModel<User>
         {
-            Items = [new AppUser { UserName = "user" }],
+            Items = [new User { UserName = "user" }],
             TotalCount = 1,
             PageNo = 2,
             PageSize = 20
@@ -99,7 +99,7 @@ public class UsersControllerTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var user = new AppUser { Id = userId, UserName = "user" };
+        var user = new User { Id = userId, UserName = "user" };
         _mediatorMock.Setup(m => m.Send(It.Is<GetUserByIdQuery>(q => q.Id == userId), _cancellationToken))
             .ReturnsAsync(user);
 

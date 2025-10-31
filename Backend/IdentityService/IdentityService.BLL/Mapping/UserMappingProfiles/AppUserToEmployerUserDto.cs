@@ -6,7 +6,7 @@ public class AppUserToEmployerUserDto : Profile
 {
     public AppUserToEmployerUserDto()
     {
-        CreateMap<AppUser, EmployerUserDto>()
+        CreateMap<User, EmployerUserDto>()
             .ForMember(dest => dest.Id, opt =>
                 opt.MapFrom(src => src.Id.ToString()))
             .ForMember(dest => dest.UserName, opt =>

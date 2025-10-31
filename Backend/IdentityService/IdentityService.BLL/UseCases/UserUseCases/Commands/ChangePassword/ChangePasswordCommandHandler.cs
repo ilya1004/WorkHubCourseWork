@@ -1,7 +1,7 @@
 ﻿namespace IdentityService.BLL.UseCases.UserUseCases.Commands.ChangePassword;
 
 public class ChangePasswordCommandHandler(
-    UserManager<AppUser> userManager,
+    UserManager<User> userManager,
     ILogger<ChangePasswordCommandHandler> logger) : IRequestHandler<ChangePasswordCommand>
 {
     public async Task Handle(ChangePasswordCommand request, CancellationToken cancellationToken)

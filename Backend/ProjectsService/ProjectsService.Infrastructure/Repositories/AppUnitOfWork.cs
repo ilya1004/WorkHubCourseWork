@@ -11,27 +11,27 @@ public class AppUnitOfWork(
     IOptions<CacheOptions> options) : IUnitOfWork
 {
     private readonly Lazy<ICommandsRepository<Category>> _categoryCommandsRepository = 
-        new(() => new CachedCommandsRepository<Category>(new CommandsRepository<Category>(commandsDbContext), distributedCache));
+        new(() => new CachedCommandsRepository<Category>(new AppRepository<Category>(commandsDbContext), distributedCache));
     
     private readonly Lazy<IQueriesRepository<Category>> _categoryQueriesRepository =
         new(() => new CachedQueriesRepository<Category>(new QueriesRepository<Category>(queriesDbContext), distributedCache, options));
     
     private readonly Lazy<ICommandsRepository<FreelancerApplication>> _freelancerApplicationCommandsRepository =
         new(() => new CachedCommandsRepository<FreelancerApplication>(
-            new CommandsRepository<FreelancerApplication>(commandsDbContext), distributedCache));
+            new AppRepository<FreelancerApplication>(commandsDbContext), distributedCache));
     
     private readonly Lazy<IQueriesRepository<FreelancerApplication>> _freelancerApplicationQueriesRepository =
         new(() => new CachedQueriesRepository<FreelancerApplication>(
             new QueriesRepository<FreelancerApplication>(queriesDbContext), distributedCache, options));
     
     private readonly Lazy<ICommandsRepository<Lifecycle>> _lifecycleCommandsRepository =
-        new(() => new CachedCommandsRepository<Lifecycle>(new CommandsRepository<Lifecycle>(commandsDbContext), distributedCache));
+        new(() => new CachedCommandsRepository<Lifecycle>(new AppRepository<Lifecycle>(commandsDbContext), distributedCache));
     
     private readonly Lazy<IQueriesRepository<Lifecycle>> _lifecycleQueriesRepository =
         new(() => new CachedQueriesRepository<Lifecycle>(new QueriesRepository<Lifecycle>(queriesDbContext), distributedCache, options));
     
     private readonly Lazy<ICommandsRepository<Project>> _projectCommandsRepository =
-        new(() => new CachedCommandsRepository<Project>(new CommandsRepository<Project>(commandsDbContext), distributedCache));
+        new(() => new CachedCommandsRepository<Project>(new AppRepository<Project>(commandsDbContext), distributedCache));
     
     private readonly Lazy<IQueriesRepository<Project>> _projectQueriesRepository =
         new(() => new CachedQueriesRepository<Project>(new QueriesRepository<Project>(queriesDbContext), distributedCache, options));

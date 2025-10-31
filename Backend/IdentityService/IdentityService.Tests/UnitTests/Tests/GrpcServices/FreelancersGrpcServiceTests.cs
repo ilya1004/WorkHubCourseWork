@@ -27,7 +27,7 @@ public class FreelancersGrpcServiceTests
         // Arrange
         var freelancerId = Guid.NewGuid();
         var request = new GetFreelancerByIdRequest { Id = freelancerId.ToString() };
-        var appUser = new AppUser
+        var appUser = new User
         {
             Id = freelancerId,
             FreelancerProfile = new FreelancerProfile { StripeAccountId = "acct_123" }
@@ -53,7 +53,7 @@ public class FreelancersGrpcServiceTests
         // Arrange
         var freelancerId = Guid.NewGuid();
         var request = new GetFreelancerByIdRequest { Id = freelancerId.ToString() };
-        var appUser = new AppUser { Id = freelancerId, FreelancerProfile = null };
+        var appUser = new User { Id = freelancerId, FreelancerProfile = null };
         _mediatorMock.Setup(m => m.Send(It.Is<GetUserByIdQuery>(q => q.Id == freelancerId), CancellationToken.None))
             .ReturnsAsync(appUser);
 

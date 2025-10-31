@@ -6,7 +6,7 @@ public class RegisterFreelancerCommandToAppUserProfile : Profile
 {
     public RegisterFreelancerCommandToAppUserProfile()
     {
-        CreateMap<RegisterFreelancerCommand, AppUser>()
+        CreateMap<RegisterFreelancerCommand, User>()
             .ForMember(dest => dest.EmailConfirmed, opt =>
                 opt.MapFrom(_ => false))
             .ForMember(dest => dest.RegisteredAt, opt =>

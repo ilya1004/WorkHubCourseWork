@@ -1,19 +1,25 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using System.Reflection;
 
 namespace IdentityService.DAL.Data;
 
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-    : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>(options)
+public class ApplicationDbContext : DbContext
 {
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) :
+        base(options) { }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+        builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
 
-    public DbSet<AppUser> AppUsers { get; set; }
+    public DbSet<User> Users { get; set; }
+    public DbSet<Role> Roles { get; set; }
     public DbSet<FreelancerProfile> FreelancerProfiles { get; set; }
-    public DbSet<CvSkill> FreelancerSkills { get; set; }
     public DbSet<EmployerProfile> EmployerProfiles { get; set; }
     public DbSet<EmployerIndustry> EmployerIndustries { get; set; }
+    public DbSet<Cv> Cvs { get; set; }
+    public DbSet<CvSkill> CvSkills { get; set; }
+    public DbSet<CvLanguage> CvLanguages { get; set; }
+    public DbSet<CvWorkExperience> CvWorkExperiences { get; set; }
 }

@@ -29,10 +29,10 @@ public class GetAllUsersQueryHandlerTests
         var pageNo = 2;
         var pageSize = 5;
         var query = new GetAllUsersQuery(pageNo, pageSize);
-        var users = new List<AppUser>
+        var users = new List<User>
         {
-            new AppUser { Id = Guid.NewGuid(), UserName = "user1", Email = "user1@example.com" },
-            new AppUser { Id = Guid.NewGuid(), UserName = "user2", Email = "user2@example.com" }
+            new User { Id = Guid.NewGuid(), UserName = "user1", Email = "user1@example.com" },
+            new User { Id = Guid.NewGuid(), UserName = "user2", Email = "user2@example.com" }
         };
         var totalCount = 12;
 
@@ -40,7 +40,7 @@ public class GetAllUsersQueryHandlerTests
             (pageNo - 1) * pageSize,
             pageSize,
             It.IsAny<CancellationToken>(),
-            It.IsAny<Expression<Func<AppUser, object>>[]>()))
+            It.IsAny<Expression<Func<User, object>>[]>()))
             .ReturnsAsync(users);
         _usersRepositoryMock.Setup(r => r.CountAsync(null, It.IsAny<CancellationToken>())).ReturnsAsync(totalCount);
 
@@ -49,7 +49,7 @@ public class GetAllUsersQueryHandlerTests
 
         // Assert
         var result = await act();
-        result.Should().BeEquivalentTo(new PaginatedResultModel<AppUser>
+        result.Should().BeEquivalentTo(new PaginatedResultModel<User>
         {
             Items = users,
             TotalCount = totalCount,
@@ -68,14 +68,14 @@ public class GetAllUsersQueryHandlerTests
         var pageNo = 1;
         var pageSize = 10;
         var query = new GetAllUsersQuery(pageNo, pageSize);
-        var users = new List<AppUser>();
+        var users = new List<User>();
         var totalCount = 0;
 
         _usersRepositoryMock.Setup(r => r.PaginatedListAllAsync(
             0,
             pageSize,
             It.IsAny<CancellationToken>(),
-            It.IsAny<Expression<Func<AppUser, object>>[]>()))
+            It.IsAny<Expression<Func<User, object>>[]>()))
             .ReturnsAsync(users);
         _usersRepositoryMock.Setup(r => r.CountAsync(null, It.IsAny<CancellationToken>())).ReturnsAsync(totalCount);
 
@@ -84,7 +84,7 @@ public class GetAllUsersQueryHandlerTests
 
         // Assert
         var result = await act();
-        result.Should().BeEquivalentTo(new PaginatedResultModel<AppUser>
+        result.Should().BeEquivalentTo(new PaginatedResultModel<User>
         {
             Items = users,
             TotalCount = totalCount,

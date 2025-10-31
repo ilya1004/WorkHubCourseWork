@@ -18,7 +18,7 @@ public class AppUserToFreelancerUserDtoTests
     {
         // Arrange
         var skillId = Guid.NewGuid();
-        var appUser = new AppUser
+        var appUser = new User
         {
             Id = Guid.NewGuid(),
             UserName = "freelancer",
@@ -64,7 +64,7 @@ public class AppUserToFreelancerUserDtoTests
     public void ShouldMapAppUserToFreelancerUserDto_WithNullOptionalFields()
     {
         // Arrange
-        var appUser = new AppUser
+        var appUser = new User
         {
             Id = Guid.NewGuid(),
             UserName = "freelancer",

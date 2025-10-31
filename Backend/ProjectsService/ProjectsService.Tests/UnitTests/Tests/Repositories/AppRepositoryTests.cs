@@ -4,19 +4,19 @@ using ProjectsService.Infrastructure.Repositories;
 
 namespace ProjectsService.Tests.UnitTests.Tests.Repositories;
 
-public class CommandsRepositoryTests
+public class AppRepositoryTests
 {
     private readonly CommandsDbContext _context;
-    private readonly CommandsRepository<Project> _repository;
+    private readonly AppRepository<Project> _repository;
 
-    public CommandsRepositoryTests()
+    public AppRepositoryTests()
     {
         var options = new DbContextOptionsBuilder<CommandsDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
         
         _context = new CommandsDbContext(options);
-        _repository = new CommandsRepository<Project>(_context);
+        _repository = new AppRepository<Project>(_context);
     }
 
     [Fact]
@@ -27,7 +27,8 @@ public class CommandsRepositoryTests
         {
             Id = Guid.NewGuid(), 
             Title = "Test Project",
-            Description = "Test Description"
+            Description = "Test Description",
+            Budget = 100m
         };
 
         // Act
@@ -47,12 +48,14 @@ public class CommandsRepositoryTests
         {
             Id = Guid.NewGuid(), 
             Title = "Initial Project",
-            Description = "Test Description"
+            Description = "Test Description",
+            Budget = 100m
         };
         await _context.Set<Project>().AddAsync(project);
         await _context.SaveChangesAsync();
 
         project.Title = "Updated Title";
+        project.Description = "Updated Description";
 
         // Act
         await _repository.UpdateAsync(project);
@@ -61,6 +64,7 @@ public class CommandsRepositoryTests
         // Assert
         var updatedProject = await _context.Set<Project>().FindAsync(project.Id);
         updatedProject.Title.Should().Be("Updated Title");
+        updatedProject.Title.Should().Be("Updated Description");
     }
 
     [Fact]
@@ -83,5 +87,26 @@ public class CommandsRepositoryTests
         // Assert
         var deletedProject = await _context.Set<Project>().FindAsync(project.Id);
         deletedProject.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task AddProject_WithoutTitle_ShouldThrowValidationException()
+    {
+        // Arrange
+        var project = new Project
+        {
+            Id = Guid.NewGuid(),
+            Title = null,
+        };
+
+        // Act
+        var action = async () =>
+        {
+            await _context.Set<Project>().AddAsync(project);
+            await _context.SaveChangesAsync();
+        };
+
+        // Assert
+        await action.Should().ThrowAsync<DbUpdateException>();
     }
 }

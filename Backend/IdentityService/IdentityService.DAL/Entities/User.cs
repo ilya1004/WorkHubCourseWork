@@ -1,13 +1,17 @@
-﻿namespace IdentityService.DAL.Entities;
+﻿using IdentityService.DAL.Primitives;
 
-public class AppUser : IdentityUser<Guid>
+namespace IdentityService.DAL.Entities;
+
+public class User : Entity
 {
     public DateTime RegisteredAt { get; set; }
     public string? ImageUrl { get; set; }
+    public string Email { get; set; }
+    public string PasswordHash { get; set; }
     public string? RefreshToken { get; set; }
     public DateTime? RefreshTokenExpiryTime { get; set; }
     public FreelancerProfile? FreelancerProfile { get; set; }
     public EmployerProfile? EmployerProfile { get; set; }
     public Guid RoleId { get; set; }
-    public AppRole? Role { get; set; }
+    public Role? Role { get; set; }
 }

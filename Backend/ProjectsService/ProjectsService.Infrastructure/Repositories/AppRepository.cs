@@ -3,7 +3,7 @@ using ProjectsService.Infrastructure.Data;
 
 namespace ProjectsService.Infrastructure.Repositories;
 
-public class CommandsRepository<TEntity>(CommandsDbContext context) : ICommandsRepository<TEntity> where TEntity : Entity
+public class AppRepository<TEntity>(CommandsDbContext context) : ICommandsRepository<TEntity> where TEntity : Entity
 {
     private readonly DbSet<TEntity> _entities = context.Set<TEntity>();
 

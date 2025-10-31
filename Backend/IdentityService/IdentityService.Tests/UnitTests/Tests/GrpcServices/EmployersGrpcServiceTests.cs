@@ -27,7 +27,7 @@ public class EmployersGrpcServiceTests
         // Arrange
         var employerId = Guid.NewGuid();
         var request = new GetEmployerByIdRequest { Id = employerId.ToString() };
-        var appUser = new AppUser
+        var appUser = new User
         {
             Id = employerId,
             EmployerProfile = new EmployerProfile { StripeCustomerId = "cust_123" }
@@ -53,7 +53,7 @@ public class EmployersGrpcServiceTests
         // Arrange
         var employerId = Guid.NewGuid();
         var request = new GetEmployerByIdRequest { Id = employerId.ToString() };
-        var appUser = new AppUser { Id = employerId, EmployerProfile = null };
+        var appUser = new User { Id = employerId, EmployerProfile = null };
         _mediatorMock.Setup(m => m.Send(It.Is<GetUserByIdQuery>(q => q.Id == employerId), CancellationToken.None))
             .ReturnsAsync(appUser);
 

@@ -24,7 +24,7 @@ public static class DependencyInjection
         services.AddTransient<GlobalLoggingMiddleware>();
         services.AddTransient<GlobalExceptionHandlingMiddleware>();
         
-        services.AddIdentity<AppUser, IdentityRole<Guid>>(options =>
+        services.AddIdentity<User, IdentityRole<Guid>>(options =>
             {
                 options.Password.RequiredLength = 8;
                 options.Password.RequireLowercase = true;

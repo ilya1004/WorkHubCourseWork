@@ -20,7 +20,7 @@ public class RegisterFreelancerCommandToAppUserProfileTests
         var command = new RegisterFreelancerCommand("freelancer", "John", "Doe", "john@example.com", "P@ssw0rd123");
 
         // Act
-        var appUser = _mapper.Map<AppUser>(command);
+        var appUser = _mapper.Map<User>(command);
 
         // Assert
         appUser.Should().NotBeNull();

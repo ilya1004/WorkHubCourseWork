@@ -14,5 +14,5 @@ public class Project : Entity
     public Guid? CategoryId { get; set; }
     public Category? Category { get; set; }
     public ICollection<FreelancerApplication> FreelancerApplications { get; set; }
-    public ICollection<ProjectReport> Reports { get; set; }
+    public ICollection<Report> Reports { get; set; }
 }

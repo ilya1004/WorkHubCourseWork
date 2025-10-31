@@ -8,15 +8,15 @@ namespace IdentityService.Tests.UnitTests.Tests.UseCases.FileUseCases;
 
 public class GetImageByUserIdQueryHandlerTests
 {
-    private readonly Mock<UserManager<AppUser>> _userManagerMock;
+    private readonly Mock<UserManager<User>> _userManagerMock;
     private readonly Mock<IBlobService> _blobServiceMock;
     private readonly Mock<ILogger<GetImageByUserIdQueryHandler>> _loggerMock;
     private readonly GetImageByUserIdQueryHandler _handler;
 
     public GetImageByUserIdQueryHandlerTests()
     {
-        _userManagerMock = new Mock<UserManager<AppUser>>(
-            Mock.Of<IUserStore<AppUser>>(), null!, null!, null!, null!, null!, null!, null!, null!);
+        _userManagerMock = new Mock<UserManager<User>>(
+            Mock.Of<IUserStore<User>>(), null!, null!, null!, null!, null!, null!, null!, null!);
         _blobServiceMock = new Mock<IBlobService>();
         _loggerMock = new Mock<ILogger<GetImageByUserIdQueryHandler>>();
 
@@ -30,7 +30,7 @@ public class GetImageByUserIdQueryHandlerTests
         var userId = Guid.NewGuid();
         var imageId = Guid.NewGuid();
         var command = new GetImageByUserIdQuery(userId);
-        var user = new AppUser { Id = userId, ImageUrl = imageId.ToString() };
+        var user = new User { Id = userId, ImageUrl = imageId.ToString() };
         var stream = new MemoryStream();
         var contentType = "image/jpeg";
         var fileResponse = new FileResponseDto(stream, contentType);
@@ -55,7 +55,7 @@ public class GetImageByUserIdQueryHandlerTests
         var userId = Guid.NewGuid();
         var command = new GetImageByUserIdQuery(userId);
 
-        _userManagerMock.Setup(m => m.FindByIdAsync(userId.ToString())).ReturnsAsync((AppUser)null!);
+        _userManagerMock.Setup(m => m.FindByIdAsync(userId.ToString())).ReturnsAsync((User)null!);
 
         // Act
         var act = async () => await _handler.Handle(command, CancellationToken.None);
@@ -73,7 +73,7 @@ public class GetImageByUserIdQueryHandlerTests
         // Arrange
         var userId = Guid.NewGuid();
         var command = new GetImageByUserIdQuery(userId);
-        var user = new AppUser { Id = userId, ImageUrl = null };
+        var user = new User { Id = userId, ImageUrl = null };
 
         _userManagerMock.Setup(m => m.FindByIdAsync(userId.ToString())).ReturnsAsync(user);
 

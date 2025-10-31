@@ -13,7 +13,7 @@ namespace IdentityService.Tests.UnitTests.Tests.UseCases.AuthUseCases;
 
 public class LoginUserCommandHandlerTests
 {
-    private readonly Mock<SignInManager<AppUser>> _signInManagerMock;
+    private readonly Mock<SignInManager<User>> _signInManagerMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<ITokenProvider> _tokenProviderMock;
     private readonly Mock<ILogger<LoginUserCommandHandler>> _loggerMock;
@@ -22,13 +22,13 @@ public class LoginUserCommandHandlerTests
 
     public LoginUserCommandHandlerTests()
     {
-        var userManagerMock = new Mock<UserManager<AppUser>>(
-            Mock.Of<IUserStore<AppUser>>(), null!, null!, null!, null!, null!, null!, null!, null!);
+        var userManagerMock = new Mock<UserManager<User>>(
+            Mock.Of<IUserStore<User>>(), null!, null!, null!, null!, null!, null!, null!, null!);
         
-        _signInManagerMock = new Mock<SignInManager<AppUser>>(
+        _signInManagerMock = new Mock<SignInManager<User>>(
             userManagerMock.Object,
             Mock.Of<IHttpContextAccessor>(),
-            Mock.Of<IUserClaimsPrincipalFactory<AppUser>>(),
+            Mock.Of<IUserClaimsPrincipalFactory<User>>(),
             null!, null!, null!, null!);
 
         _unitOfWorkMock = new Mock<IUnitOfWork>();
@@ -59,7 +59,7 @@ public class LoginUserCommandHandlerTests
     {
         // Arrange
         var command = new LoginUserCommand("user@example.com", "P@ssw0rd123");
-        var user = new AppUser
+        var user = new User
         {
             Id = Guid.NewGuid(),
             Email = command.Email,
@@ -70,9 +70,9 @@ public class LoginUserCommandHandlerTests
         var refreshToken = "refresh-token";
 
         _usersRepositoryMock.Setup(r => r.FirstOrDefaultAsync(
-            It.IsAny<Expression<Func<AppUser, bool>>>(),
+            It.IsAny<Expression<Func<User, bool>>>(),
             It.IsAny<CancellationToken>(),
-            It.IsAny<Expression<Func<AppUser, object>>[]>()))
+            It.IsAny<Expression<Func<User, object>>[]>()))
             .ReturnsAsync(user);
         _signInManagerMock.Setup(m => m.CheckPasswordSignInAsync(user, command.Password, false))
             .ReturnsAsync(SignInResult.Success);
@@ -99,10 +99,10 @@ public class LoginUserCommandHandlerTests
         // Arrange
         var command = new LoginUserCommand("user@example.com", "P@ssw0rd123");
         _usersRepositoryMock.Setup(r => r.FirstOrDefaultAsync(
-            It.IsAny<Expression<Func<AppUser, bool>>>(),
+            It.IsAny<Expression<Func<User, bool>>>(),
             It.IsAny<CancellationToken>(),
-            It.IsAny<Expression<Func<AppUser, object>>[]>()))
-            .ReturnsAsync((AppUser)null!);
+            It.IsAny<Expression<Func<User, object>>[]>()))
+            .ReturnsAsync((User)null!);
 
         // Act
         var act = async () => await _handler.Handle(command, CancellationToken.None);
@@ -118,11 +118,11 @@ public class LoginUserCommandHandlerTests
     {
         // Arrange
         var command = new LoginUserCommand("user@example.com", "P@ssw0rd123");
-        var user = new AppUser { Id = Guid.NewGuid(), Email = command.Email, EmailConfirmed = true };
+        var user = new User { Id = Guid.NewGuid(), Email = command.Email, EmailConfirmed = true };
         _usersRepositoryMock.Setup(r => r.FirstOrDefaultAsync(
-            It.IsAny<Expression<Func<AppUser, bool>>>(),
+            It.IsAny<Expression<Func<User, bool>>>(),
             It.IsAny<CancellationToken>(),
-            It.IsAny<Expression<Func<AppUser, object>>[]>()))
+            It.IsAny<Expression<Func<User, object>>[]>()))
             .ReturnsAsync(user);
         _signInManagerMock.Setup(m => m.CheckPasswordSignInAsync(user, command.Password, false))
             .ReturnsAsync(SignInResult.Failed);
@@ -141,11 +141,11 @@ public class LoginUserCommandHandlerTests
     {
         // Arrange
         var command = new LoginUserCommand("user@example.com", "P@ssw0rd123");
-        var user = new AppUser { Id = Guid.NewGuid(), Email = command.Email, EmailConfirmed = false };
+        var user = new User { Id = Guid.NewGuid(), Email = command.Email, EmailConfirmed = false };
         _usersRepositoryMock.Setup(r => r.FirstOrDefaultAsync(
-            It.IsAny<Expression<Func<AppUser, bool>>>(),
+            It.IsAny<Expression<Func<User, bool>>>(),
             It.IsAny<CancellationToken>(),
-            It.IsAny<Expression<Func<AppUser, object>>[]>()))
+            It.IsAny<Expression<Func<User, object>>[]>()))
             .ReturnsAsync(user);
         _signInManagerMock.Setup(m => m.CheckPasswordSignInAsync(user, command.Password, false))
             .ReturnsAsync(SignInResult.Success);

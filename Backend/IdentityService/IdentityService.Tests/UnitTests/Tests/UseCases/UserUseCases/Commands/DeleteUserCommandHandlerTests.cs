@@ -34,10 +34,10 @@ public class DeleteUserCommandHandlerTests
         var userId = Guid.NewGuid();
         var imageId = Guid.NewGuid();
         var command = new DeleteUserCommand(userId);
-        var user = new AppUser { Id = userId, ImageUrl = imageId.ToString() };
+        var user = new User { Id = userId, ImageUrl = imageId.ToString() };
 
         _usersRepositoryMock.Setup(r => r.GetByIdAsync(
-            userId, false, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<AppUser, object>>[]>()))
+            userId, false, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<User, object>>[]>()))
             .ReturnsAsync(user);
         _blobServiceMock.Setup(b => b.DeleteAsync(imageId, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         _usersRepositoryMock.Setup(r => r.DeleteAsync(user, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
@@ -60,10 +60,10 @@ public class DeleteUserCommandHandlerTests
         // Arrange
         var userId = Guid.NewGuid();
         var command = new DeleteUserCommand(userId);
-        var user = new AppUser { Id = userId, ImageUrl = null };
+        var user = new User { Id = userId, ImageUrl = null };
 
         _usersRepositoryMock.Setup(r => r.GetByIdAsync(
-            userId, false, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<AppUser, object>>[]>()))
+            userId, false, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<User, object>>[]>()))
             .ReturnsAsync(user);
         _usersRepositoryMock.Setup(r => r.DeleteAsync(user, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         _unitOfWorkMock.Setup(u => u.SaveAllAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
@@ -87,8 +87,8 @@ public class DeleteUserCommandHandlerTests
         var command = new DeleteUserCommand(userId);
 
         _usersRepositoryMock.Setup(r => r.GetByIdAsync(
-            userId, false, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<AppUser, object>>[]>()))
-            .ReturnsAsync((AppUser)null);
+            userId, false, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<User, object>>[]>()))
+            .ReturnsAsync((User)null);
 
         // Act
         var act = async () => await _handler.Handle(command, CancellationToken.None);
@@ -97,7 +97,7 @@ public class DeleteUserCommandHandlerTests
         await act.Should().ThrowAsync<NotFoundException>()
             .WithMessage($"User with ID '{userId}' not found");
         _blobServiceMock.Verify(b => b.DeleteAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never());
-        _usersRepositoryMock.Verify(r => r.DeleteAsync(It.IsAny<AppUser>(), It.IsAny<CancellationToken>()), Times.Never());
+        _usersRepositoryMock.Verify(r => r.DeleteAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()), Times.Never());
         _unitOfWorkMock.Verify(u => u.SaveAllAsync(It.IsAny<CancellationToken>()), Times.Never());
         _loggerMock.VerifyLog(LogLevel.Warning, $"User with ID {userId} not found", Times.Once());
     }

@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 namespace IdentityService.BLL.UseCases.UserUseCases.Commands.RegisterEmployer;
 
 public class RegisterEmployerCommandHandler(
-    UserManager<AppUser> userManager,
+    UserManager<User> userManager,
     RoleManager<IdentityRole<Guid>> roleManager,
     IUnitOfWork unitOfWork,
     IMapper mapper,
@@ -28,7 +28,7 @@ public class RegisterEmployerCommandHandler(
             throw new AlreadyExistsException($"A user with the email '{request.Email}' already exists.");
         }
 
-        var user = mapper.Map<AppUser>(request);
+        var user = mapper.Map<User>(request);
 
         var role = await roleManager.FindByNameAsync(AppRoles.EmployerRole);
 

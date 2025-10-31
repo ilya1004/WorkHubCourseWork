@@ -2,9 +2,9 @@
 
 public class GetUserByIdQueryHandler(
     IUnitOfWork unitOfWork,
-    ILogger<GetUserByIdQueryHandler> logger) : IRequestHandler<GetUserByIdQuery, AppUser>
+    ILogger<GetUserByIdQueryHandler> logger) : IRequestHandler<GetUserByIdQuery, User>
 {
-    public async Task<AppUser> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
+    public async Task<User> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
     {
         logger.LogInformation("Getting user by ID: {UserId}", request.Id);
 

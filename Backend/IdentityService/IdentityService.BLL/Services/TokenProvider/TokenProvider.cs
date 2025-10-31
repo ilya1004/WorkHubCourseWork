@@ -12,7 +12,7 @@ public class TokenProvider(
     IOptions<JwtSettings> options,
     ILogger<TokenProvider> logger) : ITokenProvider
 {
-    public string GenerateAccessToken(AppUser user)
+    public string GenerateAccessToken(User user)
     {
         logger.LogInformation("Generating access token for user {UserId}", user.Id);
         

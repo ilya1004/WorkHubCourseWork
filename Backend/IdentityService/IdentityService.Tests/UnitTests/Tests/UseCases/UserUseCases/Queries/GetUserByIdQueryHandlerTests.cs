@@ -30,7 +30,7 @@ public class GetUserByIdQueryHandlerTests
         // Arrange
         var userId = Guid.NewGuid();
         var query = new GetUserByIdQuery(userId);
-        var user = new AppUser
+        var user = new User
         {
             Id = userId,
             UserName = "user",
@@ -44,7 +44,7 @@ public class GetUserByIdQueryHandlerTests
             userId,
             false,
             It.IsAny<CancellationToken>(),
-            It.IsAny<Expression<Func<AppUser, object>>[]>()))
+            It.IsAny<Expression<Func<User, object>>[]>()))
             .ReturnsAsync(user);
 
         // Act
@@ -68,8 +68,8 @@ public class GetUserByIdQueryHandlerTests
             userId,
             false,
             It.IsAny<CancellationToken>(),
-            It.IsAny<Expression<Func<AppUser, object>>[]>()))
-            .ReturnsAsync((AppUser)null!);
+            It.IsAny<Expression<Func<User, object>>[]>()))
+            .ReturnsAsync((User)null!);
 
         // Act
         var act = async () => await _handler.Handle(query, CancellationToken.None);

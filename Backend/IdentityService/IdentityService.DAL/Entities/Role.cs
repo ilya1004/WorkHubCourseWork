@@ -1,8 +1,8 @@
-﻿using IdentityService.DAL.Primitives;
+using IdentityService.DAL.Primitives;
 
 namespace IdentityService.DAL.Entities;
 
-public class EmployerIndustry : Entity
+public class Role : Entity
 {
     public string Name { get; set; }
     public string NormalizedName { get; set; }

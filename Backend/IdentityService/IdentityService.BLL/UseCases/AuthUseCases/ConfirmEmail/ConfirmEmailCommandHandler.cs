@@ -3,7 +3,7 @@
 namespace IdentityService.BLL.UseCases.AuthUseCases.ConfirmEmail;
 
 public class ConfirmEmailCommandHandler(
-    UserManager<AppUser> userManager,
+    UserManager<User> userManager,
     ICachedService cachedService,
     ILogger<ConfirmEmailCommandHandler> logger) : IRequestHandler<ConfirmEmailCommand>
 {
