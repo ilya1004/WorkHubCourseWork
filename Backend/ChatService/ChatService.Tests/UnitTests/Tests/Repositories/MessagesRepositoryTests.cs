@@ -25,8 +25,8 @@ public class MessagesRepositoryTests : MongoTestBase
         {
             Id = Guid.NewGuid(),
             ChatId = Guid.NewGuid(),
-            SenderId = Guid.NewGuid(),
-            ReceiverId = Guid.NewGuid(),
+            SenderUserId = Guid.NewGuid(),
+            ReceiverUserId = Guid.NewGuid(),
             Text = "Hello",
             CreatedAt = DateTime.UtcNow.TruncateToMilliseconds(),
             Type = MessageType.Text

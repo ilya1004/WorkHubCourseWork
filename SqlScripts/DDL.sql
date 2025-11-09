@@ -6,15 +6,13 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Table: Roles
 CREATE TABLE "Roles" (
     "Id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    "Name" VARCHAR(256) NOT NULL,
-    "NormalizedName" VARCHAR(256) NOT NULL
+    "Name" VARCHAR(256) NOT NULL
 );
 
 -- Table: EmployerIndustries
 CREATE TABLE "EmployerIndustries" (
     "Id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    "Name" VARCHAR(256) NOT NULL,
-    "NormalizedName" VARCHAR(256) NOT NULL
+    "Name" VARCHAR(256) NOT NULL
 );
 
 -- Table: Users
@@ -26,6 +24,8 @@ CREATE TABLE "Users" (
     "PasswordHash" VARCHAR(256) NOT NULL,
     "RefreshToken" VARCHAR(256),
     "RefreshTokenExpiryTime" TIMESTAMP WITH TIME ZONE,
+    "IsEmailConfirmed" BOOLEAN NOT NULL DEFAULT FALSE,
+    "IsActive" BOOLEAN NOT NULL DEFAULT TRUE,
     "RoleId" UUID NOT NULL REFERENCES "Roles" ("Id") ON DELETE RESTRICT
 );
 
@@ -34,6 +34,7 @@ CREATE TABLE "FreelancerProfiles" (
     "Id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "FirstName" VARCHAR(256) NOT NULL,
     "LastName" VARCHAR(256) NOT NULL,
+    "Nickname" VARCHAR(256) NOT NULL,
     "About" TEXT,
     "StripeAccountId" VARCHAR(256),
     "UserId" UUID NOT NULL REFERENCES "Users" ("Id") ON DELETE RESTRICT
@@ -73,7 +74,6 @@ CREATE TABLE "CvWorkExperiences" (
 CREATE TABLE "CvSkills" (
     "Id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "Name" VARCHAR(256) NOT NULL,
-    "NormalizedName" VARCHAR(256) NOT NULL,
     "ExperienceInYears" INTEGER,
     "CvId" UUID NOT NULL REFERENCES "Cvs" ("Id") ON DELETE RESTRICT
 );
@@ -82,7 +82,6 @@ CREATE TABLE "CvSkills" (
 CREATE TABLE "CvLanguages" (
     "Id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "Name" VARCHAR(256) NOT NULL,
-    "NormalizedName" VARCHAR(256) NOT NULL,
     "Level" VARCHAR(256) NOT NULL,
     "CvId" UUID NOT NULL REFERENCES "Cvs" ("Id") ON DELETE RESTRICT
 );
@@ -98,9 +97,9 @@ CREATE UNIQUE INDEX IX_EmployerProfiles_UserId ON "EmployerProfiles" ("UserId");
 
 CREATE INDEX IX_EmployerProfiles_IndustryId ON "EmployerProfiles" ("IndustryId");
 
-CREATE UNIQUE INDEX IX_Roles_NormalizedName ON "Roles" ("NormalizedName");
+CREATE UNIQUE INDEX IX_Roles_Name ON "Roles" ("Name");
 
-CREATE UNIQUE INDEX IX_EmployerIndustries_NormalizedName ON "EmployerIndustries" ("NormalizedName");
+CREATE UNIQUE INDEX IX_EmployerIndustries_Name ON "EmployerIndustries" ("Name");
 
 CREATE INDEX IX_Cvs_FreelancerUserId ON "Cvs" ("FreelancerUserId");
 
@@ -117,8 +116,7 @@ CREATE INDEX IX_CvLanguages_CvId ON "CvLanguages" ("CvId");
 -- Table: Categories
 CREATE TABLE "Categories" (
     "Id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    "Name" VARCHAR(256) NOT NULL,
-    "NormalizedName" VARCHAR(256) NOT NULL
+    "Name" VARCHAR(256) NOT NULL
 );
 
 -- Table: Projects
@@ -143,7 +141,7 @@ CREATE TABLE "Lifecycles" (
     "WorkStartDate" TIMESTAMP WITH TIME ZONE NOT NULL,
     "WorkDeadline" TIMESTAMP WITH TIME ZONE NOT NULL,
     "AcceptanceStatus" VARCHAR(256) NOT NULL DEFAULT 'Pending',
-    "Status" VARCHAR(256) NOT NULL DEFAULT 'Draft',
+    "ProjectStatus" VARCHAR(256) NOT NULL DEFAULT 'Draft',
     "ProjectId" UUID NOT NULL REFERENCES "Projects" ("Id") ON DELETE RESTRICT
 );
 
@@ -177,7 +175,7 @@ CREATE TABLE "StarredProjects" (
 
 -- Indexes
 
-CREATE UNIQUE INDEX IX_Categories_NormalizedName ON "Categories" ("NormalizedName");
+CREATE UNIQUE INDEX IX_Categories_Name ON "Categories" ("Name");
 
 CREATE INDEX IX_Projects_EmployerUserId ON "Projects" ("EmployerUserId");
 CREATE INDEX IX_Projects_FreelancerUserId ON "Projects" ("FreelancerUserId") WHERE "FreelancerUserId" IS NOT NULL;

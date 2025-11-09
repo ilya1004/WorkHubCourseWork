@@ -28,8 +28,8 @@ public class CreateChatCommandToChatTests
 
         // Assert
         chat.Should().NotBeNull();
-        chat.EmployerId.Should().Be(command.EmployerId);
-        chat.FreelancerId.Should().Be(command.FreelancerId);
+        chat.EmployerUserId.Should().Be(command.EmployerId);
+        chat.FreelancerUserId.Should().Be(command.FreelancerId);
         chat.ProjectId.Should().Be(command.ProjectId);
         chat.Id.Should().NotBeEmpty();
         chat.IsActive.Should().BeTrue();

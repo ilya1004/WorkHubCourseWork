@@ -23,7 +23,7 @@ public class CreateProjectCommandToLifecycle : Profile
                 opt.MapFrom(src => src.Lifecycle.WorkDeadline))
             .ForMember(dest => dest.Project, opt =>
                 opt.Ignore())
-            .ForMember(dest => dest.Status, opt =>
+            .ForMember(dest => dest.ProjectStatus, opt =>
                 opt.MapFrom(_ => ProjectStatus.Published));
     }
 }

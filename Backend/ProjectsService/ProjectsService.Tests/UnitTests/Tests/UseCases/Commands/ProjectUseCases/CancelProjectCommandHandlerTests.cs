@@ -36,7 +36,7 @@ public class CancelProjectCommandHandlerTests
         var userId = Guid.NewGuid();
         var paymentIntentId = Guid.NewGuid().ToString();
         var command = new CancelProjectCommand(projectId);
-        var project = new Project { Id = projectId, EmployerUserId = userId, Lifecycle = new Lifecycle { Status = ProjectStatus.AcceptingApplications }, PaymentIntentId = paymentIntentId };
+        var project = new Project { Id = projectId, EmployerUserId = userId, Lifecycle = new Lifecycle { ProjectStatus = ProjectStatus.AcceptingApplications }, PaymentIntentId = paymentIntentId };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
         _unitOfWorkMock.Setup(u => u.ProjectQueriesRepository.GetByIdAsync(projectId, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<Project, object>>[]>()))
@@ -51,7 +51,7 @@ public class CancelProjectCommandHandlerTests
         await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        project.Lifecycle.Status.Should().Be(ProjectStatus.Cancelled);
+        project.Lifecycle.ProjectStatus.Should().Be(ProjectStatus.Cancelled);
         _unitOfWorkMock.Verify(u => u.ProjectCommandsRepository.UpdateAsync(project, It.IsAny<CancellationToken>()), Times.Once());
         _unitOfWorkMock.Verify(u => u.SaveAllAsync(It.IsAny<CancellationToken>()), Times.Once());
         _paymentsProducerServiceMock.Verify(p => p.CancelPaymentAsync(paymentIntentId, It.IsAny<CancellationToken>()), Times.Once());
@@ -68,7 +68,7 @@ public class CancelProjectCommandHandlerTests
         var projectId = Guid.NewGuid();
         var userId = Guid.NewGuid();
         var command = new CancelProjectCommand(projectId);
-        var project = new Project { Id = projectId, EmployerUserId = userId, Lifecycle = new Lifecycle { Status = ProjectStatus.AcceptingApplications }, PaymentIntentId = null };
+        var project = new Project { Id = projectId, EmployerUserId = userId, Lifecycle = new Lifecycle { ProjectStatus = ProjectStatus.AcceptingApplications }, PaymentIntentId = null };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
         _unitOfWorkMock.Setup(u => u.ProjectQueriesRepository.GetByIdAsync(projectId, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<Project, object>>[]>()))
@@ -81,7 +81,7 @@ public class CancelProjectCommandHandlerTests
         await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        project.Lifecycle.Status.Should().Be(ProjectStatus.Cancelled);
+        project.Lifecycle.ProjectStatus.Should().Be(ProjectStatus.Cancelled);
         _unitOfWorkMock.Verify(u => u.ProjectCommandsRepository.UpdateAsync(project, It.IsAny<CancellationToken>()), Times.Once());
         _unitOfWorkMock.Verify(u => u.SaveAllAsync(It.IsAny<CancellationToken>()), Times.Once());
         _paymentsProducerServiceMock.Verify(p => p.CancelPaymentAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never());
@@ -118,7 +118,7 @@ public class CancelProjectCommandHandlerTests
         var projectId = Guid.NewGuid();
         var userId = Guid.NewGuid();
         var command = new CancelProjectCommand(projectId);
-        var project = new Project { Id = projectId, EmployerUserId = Guid.NewGuid(), Lifecycle = new Lifecycle { Status = ProjectStatus.AcceptingApplications } };
+        var project = new Project { Id = projectId, EmployerUserId = Guid.NewGuid(), Lifecycle = new Lifecycle { ProjectStatus = ProjectStatus.AcceptingApplications } };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
         _unitOfWorkMock.Setup(u => u.ProjectQueriesRepository.GetByIdAsync(projectId, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<Project, object>>[]>()))

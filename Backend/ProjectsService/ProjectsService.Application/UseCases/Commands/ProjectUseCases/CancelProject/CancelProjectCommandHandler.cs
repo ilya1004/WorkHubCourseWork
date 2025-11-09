@@ -36,7 +36,7 @@ public class CancelProjectCommandHandler(
         
         logger.LogInformation("Cancelling project {ProjectId}", request.ProjectId);
         
-        project.Lifecycle.Status = ProjectStatus.Cancelled;
+        project.Lifecycle.ProjectStatus = ProjectStatus.Cancelled;
         
         await unitOfWork.ProjectCommandsRepository.UpdateAsync(project, cancellationToken);
         await unitOfWork.SaveAllAsync(cancellationToken);

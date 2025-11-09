@@ -40,9 +40,9 @@ public class UpdateProjectCommandHandler(
             throw new NotFoundException($"Project lifecycle with ProjectId '{project.Id}' not found");
         }
         
-        if (lifecycle.Status != ProjectStatus.Published)
+        if (lifecycle.ProjectStatus != ProjectStatus.Published)
         {
-            logger.LogWarning("Invalid project status {Status} for update", lifecycle.Status);
+            logger.LogWarning("Invalid project status {Status} for update", lifecycle.ProjectStatus);
             
             throw new BadRequestException("You cannot edit this project after the start of accepting applications");
         }

@@ -19,8 +19,8 @@ public class MessagesRepositoryIntegrationTests(
             Id = Guid.NewGuid(),
             Text = "Hello!",
             ChatId = Guid.NewGuid(),
-            SenderId = Guid.NewGuid(),
-            ReceiverId = Guid.NewGuid(),
+            SenderUserId = Guid.NewGuid(),
+            ReceiverUserId = Guid.NewGuid(),
             CreatedAt = DateTime.UtcNow.TruncateToMilliseconds(),
             Type = MessageType.Text
         };
@@ -45,8 +45,8 @@ public class MessagesRepositoryIntegrationTests(
             Id = Guid.NewGuid(),
             Text = "Hello!",
             ChatId = Guid.NewGuid(),
-            SenderId = Guid.NewGuid(),
-            ReceiverId = Guid.NewGuid(),
+            SenderUserId = Guid.NewGuid(),
+            ReceiverUserId = Guid.NewGuid(),
             CreatedAt = DateTime.UtcNow,
             Type = MessageType.Text
         };
@@ -71,8 +71,8 @@ public class MessagesRepositoryIntegrationTests(
             Id = Guid.NewGuid(),
             Text = "Hello!",
             ChatId = Guid.NewGuid(),
-            SenderId = Guid.NewGuid(),
-            ReceiverId = Guid.NewGuid(),
+            SenderUserId = Guid.NewGuid(),
+            ReceiverUserId = Guid.NewGuid(),
             CreatedAt = DateTime.UtcNow.TruncateToMilliseconds(),
             Type = MessageType.Text
         };
@@ -111,17 +111,17 @@ public class MessagesRepositoryIntegrationTests(
         {
             new Message
             {
-                Id = Guid.NewGuid(), Text = "Message 1", ChatId = chatId, SenderId = Guid.NewGuid(), ReceiverId = Guid.NewGuid(),
+                Id = Guid.NewGuid(), Text = "Message 1", ChatId = chatId, SenderUserId = Guid.NewGuid(), ReceiverUserId = Guid.NewGuid(),
                 CreatedAt = DateTime.UtcNow.AddSeconds(-2), Type = MessageType.Text
             },
             new Message
             {
-                Id = Guid.NewGuid(), Text = "Message 2", ChatId = chatId, SenderId = Guid.NewGuid(), ReceiverId = Guid.NewGuid(),
+                Id = Guid.NewGuid(), Text = "Message 2", ChatId = chatId, SenderUserId = Guid.NewGuid(), ReceiverUserId = Guid.NewGuid(),
                 CreatedAt = DateTime.UtcNow.AddSeconds(-1), Type = MessageType.Text
             },
             new Message
             {
-                Id = Guid.NewGuid(), Text = "Message 3", ChatId = chatId, SenderId = Guid.NewGuid(), ReceiverId = Guid.NewGuid(),
+                Id = Guid.NewGuid(), Text = "Message 3", ChatId = chatId, SenderUserId = Guid.NewGuid(), ReceiverUserId = Guid.NewGuid(),
                 CreatedAt = DateTime.UtcNow, Type = MessageType.Text
             }
         };
@@ -149,12 +149,12 @@ public class MessagesRepositoryIntegrationTests(
         {
             new Message
             {
-                Id = Guid.NewGuid(), Text = "Message 1", ChatId = chatId, SenderId = Guid.NewGuid(), ReceiverId = Guid.NewGuid(),
+                Id = Guid.NewGuid(), Text = "Message 1", ChatId = chatId, SenderUserId = Guid.NewGuid(), ReceiverUserId = Guid.NewGuid(),
                 CreatedAt = DateTime.UtcNow, Type = MessageType.Text
             },
             new Message
             {
-                Id = Guid.NewGuid(), Text = "Message 2", ChatId = chatId, SenderId = Guid.NewGuid(), ReceiverId = Guid.NewGuid(),
+                Id = Guid.NewGuid(), Text = "Message 2", ChatId = chatId, SenderUserId = Guid.NewGuid(), ReceiverUserId = Guid.NewGuid(),
                 CreatedAt = DateTime.UtcNow, Type = MessageType.Text
             }
         };

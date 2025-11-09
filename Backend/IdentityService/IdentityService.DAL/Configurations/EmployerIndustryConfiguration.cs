@@ -11,9 +11,5 @@ public class EmployerIndustryConfiguration : IEntityTypeConfiguration<EmployerIn
         builder.Property(e => e.Name)
             .IsRequired()
             .HasMaxLength(256);
-
-        builder.Property(e => e.NormalizedName)
-            .IsRequired()
-            .HasMaxLength(256);
     }
 }

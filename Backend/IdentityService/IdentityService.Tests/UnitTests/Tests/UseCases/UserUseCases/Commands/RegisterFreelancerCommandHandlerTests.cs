@@ -44,9 +44,7 @@ public class RegisterFreelancerCommandHandlerTests
 
         _handler = new RegisterFreelancerCommandHandler(
             _userManagerMock.Object,
-            _roleManagerMock.Object,
             _unitOfWorkMock.Object,
-            _mapperMock.Object,
             _emailSenderMock.Object,
             _cachedServiceMock.Object,
             configurationMock.Object,

@@ -34,7 +34,7 @@ public class AcceptFreelancerApplicationCommandHandlerTests
         var applicationId = Guid.NewGuid();
         var userId = Guid.NewGuid();
         var command = new AcceptFreelancerApplicationCommand(projectId, applicationId);
-        var project = new Project { Id = projectId, EmployerUserId = userId, Lifecycle = new Lifecycle { Status = ProjectStatus.AcceptingApplications } };
+        var project = new Project { Id = projectId, EmployerUserId = userId, Lifecycle = new Lifecycle { ProjectStatus = ProjectStatus.AcceptingApplications } };
         var application = new FreelancerApplication { Id = applicationId, Status = ApplicationStatus.Pending };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
@@ -86,7 +86,7 @@ public class AcceptFreelancerApplicationCommandHandlerTests
         var applicationId = Guid.NewGuid();
         var userId = Guid.NewGuid();
         var command = new AcceptFreelancerApplicationCommand(projectId, applicationId);
-        var project = new Project { Id = projectId, EmployerUserId = Guid.NewGuid(), Lifecycle = new Lifecycle { Status = ProjectStatus.AcceptingApplications } };
+        var project = new Project { Id = projectId, EmployerUserId = Guid.NewGuid(), Lifecycle = new Lifecycle { ProjectStatus = ProjectStatus.AcceptingApplications } };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
         _unitOfWorkMock.Setup(u => u.ProjectQueriesRepository.GetByIdAsync(projectId, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<Project, object>>[]>()))
@@ -108,7 +108,7 @@ public class AcceptFreelancerApplicationCommandHandlerTests
         var applicationId = Guid.NewGuid();
         var userId = Guid.NewGuid();
         var command = new AcceptFreelancerApplicationCommand(projectId, applicationId);
-        var project = new Project { Id = projectId, EmployerUserId = userId, FreelancerUserId = Guid.NewGuid(), Lifecycle = new Lifecycle { Status = ProjectStatus.AcceptingApplications } };
+        var project = new Project { Id = projectId, EmployerUserId = userId, FreelancerUserId = Guid.NewGuid(), Lifecycle = new Lifecycle { ProjectStatus = ProjectStatus.AcceptingApplications } };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
         _unitOfWorkMock.Setup(u => u.ProjectQueriesRepository.GetByIdAsync(projectId, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<Project, object>>[]>()))
@@ -130,7 +130,7 @@ public class AcceptFreelancerApplicationCommandHandlerTests
         var applicationId = Guid.NewGuid();
         var userId = Guid.NewGuid();
         var command = new AcceptFreelancerApplicationCommand(projectId, applicationId);
-        var project = new Project { Id = projectId, EmployerUserId = userId, Lifecycle = new Lifecycle { Status = ProjectStatus.InProgress } };
+        var project = new Project { Id = projectId, EmployerUserId = userId, Lifecycle = new Lifecycle { ProjectStatus = ProjectStatus.InProgress } };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
         _unitOfWorkMock.Setup(u => u.ProjectQueriesRepository.GetByIdAsync(projectId, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<Project, object>>[]>()))
@@ -141,7 +141,7 @@ public class AcceptFreelancerApplicationCommandHandlerTests
 
         // Assert
         await act.Should().ThrowAsync<BadRequestException>().WithMessage("You can accept applications to this project only during accepting applications stage");
-        _loggerMock.VerifyLog(LogLevel.Warning, $"Invalid project status {project.Lifecycle.Status} for accepting applications", Times.Once());
+        _loggerMock.VerifyLog(LogLevel.Warning, $"Invalid project status {project.Lifecycle.ProjectStatus} for accepting applications", Times.Once());
     }
 
     [Fact]
@@ -152,7 +152,7 @@ public class AcceptFreelancerApplicationCommandHandlerTests
         var applicationId = Guid.NewGuid();
         var userId = Guid.NewGuid();
         var command = new AcceptFreelancerApplicationCommand(projectId, applicationId);
-        var project = new Project { Id = projectId, EmployerUserId = userId, Lifecycle = new Lifecycle { Status = ProjectStatus.AcceptingApplications } };
+        var project = new Project { Id = projectId, EmployerUserId = userId, Lifecycle = new Lifecycle { ProjectStatus = ProjectStatus.AcceptingApplications } };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
         _unitOfWorkMock.Setup(u => u.ProjectQueriesRepository.GetByIdAsync(projectId, It.IsAny<CancellationToken>(), It.IsAny<Expression<Func<Project, object>>[]>()))
@@ -178,7 +178,7 @@ public class AcceptFreelancerApplicationCommandHandlerTests
         var applicationId = Guid.NewGuid();
         var userId = Guid.NewGuid();
         var command = new AcceptFreelancerApplicationCommand(projectId, applicationId);
-        var project = new Project { Id = projectId, EmployerUserId = userId, Lifecycle = new Lifecycle { Status = ProjectStatus.AcceptingApplications } };
+        var project = new Project { Id = projectId, EmployerUserId = userId, Lifecycle = new Lifecycle { ProjectStatus = ProjectStatus.AcceptingApplications } };
         var application = new FreelancerApplication { Id = applicationId, Status = ApplicationStatus.Accepted };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);

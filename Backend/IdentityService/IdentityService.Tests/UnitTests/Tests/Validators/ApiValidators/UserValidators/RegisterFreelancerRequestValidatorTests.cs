@@ -31,7 +31,7 @@ public class RegisterFreelancerRequestValidatorTests
         var result = _validator.TestValidate(request);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.UserName)
+        result.ShouldHaveValidationErrorFor(x => x.Nickname)
             .WithErrorMessage("Username is required");
     }
 
@@ -46,7 +46,7 @@ public class RegisterFreelancerRequestValidatorTests
         var result = _validator.TestValidate(request);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.UserName)
+        result.ShouldHaveValidationErrorFor(x => x.Nickname)
             .WithErrorMessage("Username must be at most 200 characters long");
     }
 

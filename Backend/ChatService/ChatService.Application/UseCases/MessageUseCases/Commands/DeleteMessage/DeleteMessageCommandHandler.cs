@@ -24,10 +24,10 @@ public class DeleteMessageCommandHandler(
         
         var userId = userContext.GetUserId();
 
-        if (message.SenderId != userId)
+        if (message.SenderUserId != userId)
         {
             logger.LogWarning("User {UserId} tried to delete message {MessageId} of user {SenderId}", 
-                userId, request.MessageId, message.SenderId);
+                userId, request.MessageId, message.SenderUserId);
             
             throw new ForbiddenException($"You cannot delete message with ID '{request.MessageId}' which is not yours");
         }

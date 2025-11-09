@@ -27,20 +27,20 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
             .HasMaxLength(256);
 
         builder.HasOne(p => p.Category)
-            .WithMany(c => c.Projects)
+            .WithMany()
             .HasForeignKey(p => p.CategoryId)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasMany(p => p.FreelancerApplications)
             .WithOne(fa => fa.Project)
             .HasForeignKey(fa => fa.ProjectId)
             .IsRequired()
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(p => p.Lifecycle)
             .WithOne(l => l.Project)
             .HasForeignKey<Lifecycle>(l => l.ProjectId)
             .IsRequired()
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

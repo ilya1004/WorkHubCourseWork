@@ -37,8 +37,8 @@ public class GetProjectsByFilterQueryHandlerTests
 
         var projects = new List<Project>
         {
-            new() { Id = Guid.NewGuid(), Title = "Test Project 1", Budget = 2000, Lifecycle = new Lifecycle { Status = ProjectStatus.InProgress } },
-            new() { Id = Guid.NewGuid(), Title = "Test Project 2", Budget = 3000, Lifecycle = new Lifecycle { Status = ProjectStatus.InProgress } }
+            new() { Id = Guid.NewGuid(), Title = "Test Project 1", Budget = 2000, Lifecycle = new Lifecycle { ProjectStatus = ProjectStatus.InProgress } },
+            new() { Id = Guid.NewGuid(), Title = "Test Project 2", Budget = 3000, Lifecycle = new Lifecycle { ProjectStatus = ProjectStatus.InProgress } }
         };
         var totalCount = 25;
 

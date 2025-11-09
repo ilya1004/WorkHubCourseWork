@@ -37,8 +37,8 @@ public class GetProjectsByFreelancerFilterQueryHandlerTests
 
         var projects = new List<Project>
         {
-            new() { Id = Guid.NewGuid(), Title = "Project 1", Lifecycle = new Lifecycle { Status = ProjectStatus.InProgress } },
-            new() { Id = Guid.NewGuid(), Title = "Project 2", Lifecycle = new Lifecycle { Status = ProjectStatus.InProgress } }
+            new() { Id = Guid.NewGuid(), Title = "Project 1", Lifecycle = new Lifecycle { ProjectStatus = ProjectStatus.InProgress } },
+            new() { Id = Guid.NewGuid(), Title = "Project 2", Lifecycle = new Lifecycle { ProjectStatus = ProjectStatus.InProgress } }
         };
         var totalCount = 30;
 

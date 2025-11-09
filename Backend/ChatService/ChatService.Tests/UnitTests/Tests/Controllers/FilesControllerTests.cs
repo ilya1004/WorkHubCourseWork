@@ -56,8 +56,8 @@ public class FilesControllerTests
         {
             Id = Guid.NewGuid(),
             ChatId = request.ChatId,
-            ReceiverId = request.ReceiverId,
-            SenderId = Guid.NewGuid(),
+            ReceiverUserId = request.ReceiverId,
+            SenderUserId = Guid.NewGuid(),
             Type = MessageType.File
         };
 

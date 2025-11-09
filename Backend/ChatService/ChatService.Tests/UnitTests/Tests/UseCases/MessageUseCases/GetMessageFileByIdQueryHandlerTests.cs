@@ -32,7 +32,7 @@ public class GetMessageFileByIdQueryHandlerTests
         // Arrange
         var userId = Guid.NewGuid();
         var query = new GetMessageFileByIdQuery(ChatId: Guid.NewGuid(), FileId: Guid.NewGuid());
-        var chat = new Chat { Id = query.ChatId, EmployerId = userId };
+        var chat = new Chat { Id = query.ChatId, EmployerUserId = userId };
         var fileResponse = new FileResponse(new MemoryStream(new byte[] { 1, 2, 3 }), "application/pdf");
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
@@ -78,7 +78,7 @@ public class GetMessageFileByIdQueryHandlerTests
         // Arrange
         var userId = Guid.NewGuid();
         var query = new GetMessageFileByIdQuery(Guid.NewGuid(), Guid.NewGuid());
-        var chat = new Chat { Id = query.ChatId, EmployerId = Guid.NewGuid(), FreelancerId = Guid.NewGuid() };
+        var chat = new Chat { Id = query.ChatId, EmployerUserId = Guid.NewGuid(), FreelancerUserId = Guid.NewGuid() };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
         _chatRepositoryMock.Setup(r => r.GetByIdAsync(query.ChatId, It.IsAny<CancellationToken>())).ReturnsAsync(chat);

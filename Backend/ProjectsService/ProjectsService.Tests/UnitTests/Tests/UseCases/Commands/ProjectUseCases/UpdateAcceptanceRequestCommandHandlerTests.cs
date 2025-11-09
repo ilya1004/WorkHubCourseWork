@@ -36,7 +36,7 @@ public class UpdateAcceptanceRequestCommandHandlerTests
         {
             Id = projectId,
             FreelancerUserId = userId,
-            Lifecycle = new Lifecycle { Status = ProjectStatus.InProgress }
+            Lifecycle = new Lifecycle { ProjectStatus = ProjectStatus.InProgress }
         };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
@@ -51,7 +51,7 @@ public class UpdateAcceptanceRequestCommandHandlerTests
 
         // Assert
         project.Lifecycle.AcceptanceRequested.Should().BeTrue();
-        project.Lifecycle.Status.Should().Be(ProjectStatus.PendingForReview);
+        project.Lifecycle.ProjectStatus.Should().Be(ProjectStatus.PendingForReview);
         _unitOfWorkMock.Verify(u => u.ProjectCommandsRepository.UpdateAsync(project, It.IsAny<CancellationToken>()), Times.Once());
         _unitOfWorkMock.Verify(u => u.SaveAllAsync(It.IsAny<CancellationToken>()), Times.Once());
         _loggerMock.VerifyLog(LogLevel.Information, $"Updating acceptance request for project {projectId}", Times.Once());
@@ -90,7 +90,7 @@ public class UpdateAcceptanceRequestCommandHandlerTests
         {
             Id = projectId,
             FreelancerUserId = Guid.NewGuid(),
-            Lifecycle = new Lifecycle { Status = ProjectStatus.InProgress }
+            Lifecycle = new Lifecycle { ProjectStatus = ProjectStatus.InProgress }
         };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
@@ -118,7 +118,7 @@ public class UpdateAcceptanceRequestCommandHandlerTests
         {
             Id = projectId,
             FreelancerUserId = userId,
-            Lifecycle = new Lifecycle { Status = ProjectStatus.Published }
+            Lifecycle = new Lifecycle { ProjectStatus = ProjectStatus.Published }
         };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
@@ -132,6 +132,6 @@ public class UpdateAcceptanceRequestCommandHandlerTests
         await act.Should().ThrowAsync<BadRequestException>().WithMessage("Current project status do not allow you to send acceptance request");
         _unitOfWorkMock.Verify(u => u.ProjectCommandsRepository.UpdateAsync(It.IsAny<Project>(), It.IsAny<CancellationToken>()), Times.Never());
         _unitOfWorkMock.Verify(u => u.SaveAllAsync(It.IsAny<CancellationToken>()), Times.Never());
-        _loggerMock.VerifyLog(LogLevel.Warning, $"Invalid project status {project.Lifecycle.Status} for acceptance request", Times.Once());
+        _loggerMock.VerifyLog(LogLevel.Warning, $"Invalid project status {project.Lifecycle.ProjectStatus} for acceptance request", Times.Once());
     }
 }

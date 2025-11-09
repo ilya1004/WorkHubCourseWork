@@ -23,7 +23,7 @@ public class GetChatMessagesQueryHandler(
         
         var userId = userContext.GetUserId();
 
-        if (chat.EmployerId != userId && chat.FreelancerId != userId)
+        if (chat.EmployerUserId != userId && chat.FreelancerUserId != userId)
         {
             logger.LogWarning("User {UserId} has no access to chat {ChatId}", userId, request.ChatId);
             

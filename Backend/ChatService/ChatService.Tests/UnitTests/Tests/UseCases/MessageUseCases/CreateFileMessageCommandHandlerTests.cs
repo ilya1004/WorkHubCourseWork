@@ -40,8 +40,8 @@ public class CreateFileMessageCommandHandlerTests
             ReceiverId: Guid.NewGuid(),
             FileStream: new MemoryStream(new byte[] { 1, 2, 3 }),
             ContentType: "application/pdf");
-        var chat = new Chat { Id = command.ChatId, EmployerId = userId };
-        var message = new Message { Id = Guid.NewGuid(), ChatId = command.ChatId, ReceiverId = command.ReceiverId };
+        var chat = new Chat { Id = command.ChatId, EmployerUserId = userId };
+        var message = new Message { Id = Guid.NewGuid(), ChatId = command.ChatId, ReceiverUserId = command.ReceiverId };
         var fileId = Guid.NewGuid();
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
@@ -55,7 +55,7 @@ public class CreateFileMessageCommandHandlerTests
 
         // Assert
         result.Should().Be(message);
-        message.SenderId.Should().Be(userId);
+        message.SenderUserId.Should().Be(userId);
         message.FileId.Should().Be(fileId);
         _chatRepositoryMock.Verify(r => r.GetByIdAsync(command.ChatId, It.IsAny<CancellationToken>()), Times.Once());
         _mapperMock.Verify(m => m.Map<Message>(command), Times.Once());
@@ -95,7 +95,7 @@ public class CreateFileMessageCommandHandlerTests
         // Arrange
         var userId = Guid.NewGuid();
         var command = new CreateFileMessageCommand(Guid.NewGuid(), Guid.NewGuid(), new MemoryStream(), "application/pdf");
-        var chat = new Chat { Id = command.ChatId, EmployerId = Guid.NewGuid(), FreelancerId = Guid.NewGuid() };
+        var chat = new Chat { Id = command.ChatId, EmployerUserId = Guid.NewGuid(), FreelancerUserId = Guid.NewGuid() };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
         _chatRepositoryMock.Setup(r => r.GetByIdAsync(command.ChatId, It.IsAny<CancellationToken>())).ReturnsAsync(chat);

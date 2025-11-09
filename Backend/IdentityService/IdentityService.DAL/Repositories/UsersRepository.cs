@@ -86,4 +86,23 @@ public class UsersRepository(ApplicationDbContext context) : IUsersRepository
 
         return await query.CountAsync(cancellationToken);
     }
+
+    public async Task<bool> CreateAsync(User user, CancellationToken cancellationToken = default)
+    {
+        var rowsAffected = await context.Database.ExecuteSqlAsync(
+            $"""
+             INSERT INTO "Users" ("Id", "RegisteredAt", "Email", "PasswordHash", "RoleId")
+             VALUES ({user.Id}, {user.RegisteredAt}, {user.Email}, {user.PasswordHash}, {user.RoleId}
+             """,
+            cancellationToken);
+
+        return rowsAffected == 1;
+
+        // context.Database.SqlQuery<User>($"").ToListAsync();
+        //
+        // return await context.Users
+        //     .FromSql("")
+        //     .AsNoTracking()
+        //     .ToListAsync(cancellationToken);
+    }
 }

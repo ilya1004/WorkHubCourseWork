@@ -23,13 +23,17 @@ public class AppUnitOfWork(
         new(() => new CachedAppRepository<EmployerIndustry>(new AppRepository<EmployerIndustry>(context), distributedCache, options));
 
     private readonly Lazy<IUsersRepository> _usersRepository =
-        new(() => new CachedUsersRepository(new UsersRepository(context), distributedCache, options));
+        new(() => new UsersRepository(context));
+
+    private readonly Lazy<IRolesRepository> _rolesRepository =
+        new(() => new RolesRepository(context));
 
     public IRepository<EmployerProfile> EmployerProfilesRepository => _employerProfilesRepository.Value;
     public IRepository<FreelancerProfile> FreelancerProfilesRepository => _freelancerProfilesRepository.Value;
     public IRepository<CvSkill> FreelancerSkillsRepository => _freelancerSkillsRepository.Value;
     public IRepository<EmployerIndustry> EmployerIndustriesRepository => _employerIndustriesRepository.Value;
     public IUsersRepository UsersRepository => _usersRepository.Value;
+    public IRolesRepository RolesRepository =>
 
     public async Task SaveAllAsync(CancellationToken cancellationToken = default)
     {

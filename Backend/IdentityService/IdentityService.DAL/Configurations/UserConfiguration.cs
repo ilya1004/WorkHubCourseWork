@@ -2,15 +2,11 @@
 
 namespace IdentityService.DAL.Configurations;
 
-public class AppUserConfiguration : IEntityTypeConfiguration<User>
+public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
         builder.ToTable("Users");
-
-        builder.Property(u => u.UserName)
-            .IsRequired()
-            .HasMaxLength(256);
 
         builder.Property(u => u.RegisteredAt)
             .IsRequired();

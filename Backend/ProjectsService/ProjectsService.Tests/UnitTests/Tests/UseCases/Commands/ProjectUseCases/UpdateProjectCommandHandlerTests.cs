@@ -43,7 +43,7 @@ public class UpdateProjectCommandHandlerTests
             new LifecycleDto(DateTime.UtcNow, DateTime.UtcNow.AddDays(7), DateTime.UtcNow.AddDays(8), DateTime.UtcNow.AddDays(14))
         );
         var project = new Project { Id = projectId, EmployerUserId = userId, Title = "Original Title" };
-        var lifecycle = new Lifecycle { ProjectId = projectId, Status = ProjectStatus.Published };
+        var lifecycle = new Lifecycle { ProjectId = projectId, ProjectStatus = ProjectStatus.Published };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
         _unitOfWorkMock.Setup(u => u.ProjectQueriesRepository.GetByIdAsync(projectId, It.IsAny<CancellationToken>()))
@@ -174,7 +174,7 @@ public class UpdateProjectCommandHandlerTests
             new UpdateProjectDto("Updated Title", null, 100m, Guid.NewGuid()), 
             new LifecycleDto(DateTime.UtcNow, DateTime.UtcNow, DateTime.UtcNow, DateTime.UtcNow));
         var project = new Project { Id = projectId, EmployerUserId = userId };
-        var lifecycle = new Lifecycle { ProjectId = projectId, Status = ProjectStatus.InProgress };
+        var lifecycle = new Lifecycle { ProjectId = projectId, ProjectStatus = ProjectStatus.InProgress };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
         _unitOfWorkMock.Setup(u => u.ProjectQueriesRepository.GetByIdAsync(projectId, It.IsAny<CancellationToken>()))
@@ -191,7 +191,7 @@ public class UpdateProjectCommandHandlerTests
         _unitOfWorkMock.Verify(u => u.ProjectCommandsRepository.UpdateAsync(It.IsAny<Project>(), It.IsAny<CancellationToken>()), Times.Never());
         _unitOfWorkMock.Verify(u => u.LifecycleCommandsRepository.UpdateAsync(It.IsAny<Lifecycle>(), It.IsAny<CancellationToken>()), Times.Never());
         _unitOfWorkMock.Verify(u => u.SaveAllAsync(It.IsAny<CancellationToken>()), Times.Never());
-        _loggerMock.VerifyLog(LogLevel.Warning, $"Invalid project status {lifecycle.Status} for update", Times.Once());
+        _loggerMock.VerifyLog(LogLevel.Warning, $"Invalid project status {lifecycle.ProjectStatus} for update", Times.Once());
     }
 
     [Fact]
@@ -207,7 +207,7 @@ public class UpdateProjectCommandHandlerTests
             new LifecycleDto(DateTime.UtcNow, DateTime.UtcNow, DateTime.UtcNow, DateTime.UtcNow)
         );
         var project = new Project { Id = projectId, EmployerUserId = userId };
-        var lifecycle = new Lifecycle { ProjectId = projectId, Status = ProjectStatus.Published };
+        var lifecycle = new Lifecycle { ProjectId = projectId, ProjectStatus = ProjectStatus.Published };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
         _unitOfWorkMock.Setup(u => u.ProjectQueriesRepository.GetByIdAsync(projectId, It.IsAny<CancellationToken>()))

@@ -14,7 +14,7 @@ public class GetProjectsByEmployerFilterSpecification : Specification<Project>
             p.EmployerUserId == employerId &&
             (!updatedAtStartDate.HasValue || updatedAtStartDate.Value <= p.Lifecycle.UpdatedAt) && 
             (!updatedAtEndDate.HasValue || p.Lifecycle.UpdatedAt <= updatedAtEndDate.Value.AddDays(1)) &&
-            (!projectStatus.HasValue || p.Lifecycle.Status == projectStatus.Value) &&
+            (!projectStatus.HasValue || p.Lifecycle.ProjectStatus == projectStatus.Value) &&
             (!acceptanceRequestedAndNotConfirmed.HasValue || 
              p.Lifecycle.AcceptanceRequested == acceptanceRequestedAndNotConfirmed 
              && p.Lifecycle.AcceptanceConfirmed == !acceptanceRequestedAndNotConfirmed))

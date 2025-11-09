@@ -10,6 +10,8 @@ public class User : Entity
     public string PasswordHash { get; set; }
     public string? RefreshToken { get; set; }
     public DateTime? RefreshTokenExpiryTime { get; set; }
+    public bool IsEmailConfirmed { get; set; }
+    public bool IsActive { get; set; }
     public FreelancerProfile? FreelancerProfile { get; set; }
     public EmployerProfile? EmployerProfile { get; set; }
     public Guid RoleId { get; set; }

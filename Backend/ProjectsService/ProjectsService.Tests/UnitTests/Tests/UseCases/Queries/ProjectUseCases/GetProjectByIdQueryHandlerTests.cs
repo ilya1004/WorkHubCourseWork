@@ -38,7 +38,7 @@ public class GetProjectByIdQueryHandlerTests
             EmployerUserId = Guid.NewGuid(),
             Lifecycle = new Lifecycle
             {
-                Status = ProjectStatus.InProgress,
+                ProjectStatus = ProjectStatus.InProgress,
                 CreatedAt = DateTime.UtcNow
             },
             Category = new Category

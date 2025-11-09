@@ -33,10 +33,10 @@ public class UpdateAcceptanceRequestCommandHandler(
             throw new ForbiddenException($"You do not have access to project with ID '{request.ProjectId}'");
         }
         
-        if (project.Lifecycle.Status != ProjectStatus.InProgress && 
-            project.Lifecycle.Status != ProjectStatus.Expired)
+        if (project.Lifecycle.ProjectStatus != ProjectStatus.InProgress && 
+            project.Lifecycle.ProjectStatus != ProjectStatus.Expired)
         {
-            logger.LogWarning("Invalid project status {Status} for acceptance request", project.Lifecycle.Status);
+            logger.LogWarning("Invalid project status {Status} for acceptance request", project.Lifecycle.ProjectStatus);
             
             throw new BadRequestException("Current project status do not allow you to send acceptance request");
         }
@@ -44,7 +44,7 @@ public class UpdateAcceptanceRequestCommandHandler(
         logger.LogInformation("Setting acceptance requested for project {ProjectId}", request.ProjectId);
         
         project.Lifecycle.AcceptanceRequested = true;
-        project.Lifecycle.Status = ProjectStatus.PendingForReview;
+        project.Lifecycle.ProjectStatus = ProjectStatus.PendingForReview;
         
         await unitOfWork.ProjectCommandsRepository.UpdateAsync(project, cancellationToken);
         await unitOfWork.SaveAllAsync(cancellationToken);

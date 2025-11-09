@@ -25,7 +25,7 @@ public class RegisterFreelancerRequestToCommandTests
 
         // Assert
         command.Should().NotBeNull();
-        command.UserName.Should().Be(request.UserName);
+        command.Nickname.Should().Be(request.Nickname);
         command.FirstName.Should().Be(request.FirstName);
         command.LastName.Should().Be(request.LastName);
         command.Email.Should().Be(request.Email);

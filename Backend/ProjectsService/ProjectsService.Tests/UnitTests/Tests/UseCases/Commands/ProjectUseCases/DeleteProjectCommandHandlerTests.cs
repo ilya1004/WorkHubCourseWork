@@ -37,7 +37,7 @@ public class DeleteProjectCommandHandlerTests
         {
             Id = projectId,
             EmployerUserId = userId,
-            Lifecycle = new Lifecycle { Status = ProjectStatus.Cancelled }
+            Lifecycle = new Lifecycle { ProjectStatus = ProjectStatus.Cancelled }
         };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
@@ -69,7 +69,7 @@ public class DeleteProjectCommandHandlerTests
         {
             Id = projectId,
             EmployerUserId = Guid.NewGuid(),
-            Lifecycle = new Lifecycle { Status = ProjectStatus.Cancelled }
+            Lifecycle = new Lifecycle { ProjectStatus = ProjectStatus.Cancelled }
         };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
@@ -121,7 +121,7 @@ public class DeleteProjectCommandHandlerTests
         {
             Id = projectId,
             EmployerUserId = Guid.NewGuid(),
-            Lifecycle = new Lifecycle { Status = ProjectStatus.Cancelled }
+            Lifecycle = new Lifecycle { ProjectStatus = ProjectStatus.Cancelled }
         };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
@@ -150,7 +150,7 @@ public class DeleteProjectCommandHandlerTests
         {
             Id = projectId,
             EmployerUserId = userId,
-            Lifecycle = new Lifecycle { Status = ProjectStatus.InProgress }
+            Lifecycle = new Lifecycle { ProjectStatus = ProjectStatus.InProgress }
         };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);

@@ -38,7 +38,7 @@ public class LifecycleDtoToLifecycleTests
         lifecycle.UpdatedAt.Should().BeCloseTo(now, TimeSpan.FromSeconds(1));
         lifecycle.Id.Should().Be(Guid.Empty);
         lifecycle.CreatedAt.Should().Be(default);
-        lifecycle.Status.Should().Be(default);
+        lifecycle.ProjectStatus.Should().Be(default);
         lifecycle.ProjectId.Should().Be(Guid.Empty);
         lifecycle.Project.Should().BeNull();
         lifecycle.AcceptanceRequested.Should().BeFalse();

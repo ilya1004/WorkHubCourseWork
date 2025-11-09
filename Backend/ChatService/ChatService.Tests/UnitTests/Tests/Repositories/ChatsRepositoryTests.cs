@@ -27,8 +27,8 @@ public class ChatsRepositoryTests : MongoTestBase
         var chat = new Chat
         {
             Id = Guid.NewGuid(),
-            EmployerId = Guid.NewGuid(),
-            FreelancerId = Guid.NewGuid(),
+            EmployerUserId = Guid.NewGuid(),
+            FreelancerUserId = Guid.NewGuid(),
             ProjectId = Guid.NewGuid(),
             IsActive = true,
             CreatedAt = DateTime.UtcNow
@@ -41,8 +41,8 @@ public class ChatsRepositoryTests : MongoTestBase
         var result = await _collection.Find(c => c.Id == chat.Id).FirstOrDefaultAsync();
         result.Should().NotBeNull();
         result.Id.Should().Be(chat.Id);
-        result.EmployerId.Should().Be(chat.EmployerId);
-        result.FreelancerId.Should().Be(chat.FreelancerId);
+        result.EmployerUserId.Should().Be(chat.EmployerUserId);
+        result.FreelancerUserId.Should().Be(chat.FreelancerUserId);
         result.ProjectId.Should().Be(chat.ProjectId);
     }
 
@@ -53,8 +53,8 @@ public class ChatsRepositoryTests : MongoTestBase
         var chat = new Chat
         {
             Id = Guid.NewGuid(),
-            EmployerId = Guid.NewGuid(),
-            FreelancerId = Guid.NewGuid(),
+            EmployerUserId = Guid.NewGuid(),
+            FreelancerUserId = Guid.NewGuid(),
             ProjectId = Guid.NewGuid(),
             IsActive = true,
             CreatedAt = DateTime.UtcNow.TruncateToMilliseconds()
@@ -63,8 +63,8 @@ public class ChatsRepositoryTests : MongoTestBase
         var updatedChat = new Chat
         {
             Id = chat.Id,
-            EmployerId = chat.EmployerId,
-            FreelancerId = chat.FreelancerId,
+            EmployerUserId = chat.EmployerUserId,
+            FreelancerUserId = chat.FreelancerUserId,
             ProjectId = chat.ProjectId,
             IsActive = false,
             CreatedAt = chat.CreatedAt

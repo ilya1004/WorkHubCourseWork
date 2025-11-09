@@ -21,7 +21,7 @@ public class CreateTextMessageCommandHandler(
         
         var userId = userContext.GetUserId();
 
-        if (chat.EmployerId != userId && chat.FreelancerId != userId)
+        if (chat.EmployerUserId != userId && chat.FreelancerUserId != userId)
         {
             logger.LogWarning("User {UserId} has no access to chat {ChatId}", userId, request.ChatId);
             
@@ -29,7 +29,7 @@ public class CreateTextMessageCommandHandler(
         }
         
         var message = mapper.Map<Message>(request);
-        message.SenderId = userId;
+        message.SenderUserId = userId;
         
         await unitOfWork.MessagesRepository.InsertAsync(message, cancellationToken);
 

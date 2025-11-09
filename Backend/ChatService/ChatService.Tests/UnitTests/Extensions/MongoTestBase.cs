@@ -33,9 +33,9 @@ public abstract class MongoTestBase : IDisposable
                 cm.MapIdMember(c => c.Id)
                     .SetIdGenerator(GuidGenerator.Instance)
                     .SetSerializer(new GuidSerializer(GuidRepresentation.Standard));
-                cm.MapMember(c => c.EmployerId)
+                cm.MapMember(c => c.EmployerUserId)
                     .SetSerializer(new GuidSerializer(GuidRepresentation.Standard));
-                cm.MapMember(c => c.FreelancerId)
+                cm.MapMember(c => c.FreelancerUserId)
                     .SetSerializer(new GuidSerializer(GuidRepresentation.Standard));
                 cm.MapMember(c => c.ProjectId)
                     .SetSerializer(new GuidSerializer(GuidRepresentation.Standard));
@@ -56,9 +56,9 @@ public abstract class MongoTestBase : IDisposable
                     .SetSerializer(new GuidSerializer(GuidRepresentation.Standard));
                 cm.MapMember(m => m.ChatId)
                     .SetSerializer(new GuidSerializer(GuidRepresentation.Standard));
-                cm.MapMember(m => m.SenderId)
+                cm.MapMember(m => m.SenderUserId)
                     .SetSerializer(new GuidSerializer(GuidRepresentation.Standard));
-                cm.MapMember(m => m.ReceiverId)
+                cm.MapMember(m => m.ReceiverUserId)
                     .SetSerializer(new GuidSerializer(GuidRepresentation.Standard));
                 cm.MapMember(m => m.FileId)
                     .SetIgnoreIfNull(true);

@@ -12,7 +12,7 @@ public class Lifecycle : Entity
     public DateTime WorkStartDate { get; set; }
     public DateTime WorkDeadline { get; set; }
     public ProjectAcceptanceStatus  AcceptanceStatus { get; set; }
-    public ProjectStatus Status { get; set; }
+    public ProjectStatus ProjectStatus { get; set; }
     public Guid ProjectId { get; set; }
     public Project? Project { get; set; }
 }

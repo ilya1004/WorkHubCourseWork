@@ -10,7 +10,7 @@ public class GetProjectsByFreelancerFilterSpecification : Specification<Project>
         int limit)
         : base(p => 
             p.FreelancerUserId == freelancerId &&
-            (!projectStatus.HasValue || p.Lifecycle.Status == projectStatus.Value) &&
+            (!projectStatus.HasValue || p.Lifecycle.ProjectStatus == projectStatus.Value) &&
             (!employerId.HasValue || p.EmployerUserId == employerId))
     {
         AddInclude(p => p.Lifecycle);

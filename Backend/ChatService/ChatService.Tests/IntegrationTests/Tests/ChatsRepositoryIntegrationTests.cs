@@ -17,8 +17,8 @@ public class ChatsRepositoryIntegrationTests(
         var chat = new Chat
         {
             Id = Guid.NewGuid(),
-            EmployerId = Guid.NewGuid(),
-            FreelancerId = Guid.NewGuid(),
+            EmployerUserId = Guid.NewGuid(),
+            FreelancerUserId = Guid.NewGuid(),
             ProjectId = Guid.NewGuid(),
             IsActive = true,
             CreatedAt = DateTime.UtcNow.TruncateToMilliseconds()
@@ -42,8 +42,8 @@ public class ChatsRepositoryIntegrationTests(
         var chat = new Chat
         {
             Id = Guid.NewGuid(),
-            EmployerId = Guid.NewGuid(),
-            FreelancerId = Guid.NewGuid(),
+            EmployerUserId = Guid.NewGuid(),
+            FreelancerUserId = Guid.NewGuid(),
             ProjectId = Guid.NewGuid(),
             IsActive = true,
             CreatedAt = DateTime.UtcNow
@@ -53,8 +53,8 @@ public class ChatsRepositoryIntegrationTests(
         var updatedChat = new Chat
         {
             Id = chat.Id,
-            EmployerId = chat.EmployerId,
-            FreelancerId = chat.FreelancerId,
+            EmployerUserId = chat.EmployerUserId,
+            FreelancerUserId = chat.FreelancerUserId,
             ProjectId = chat.ProjectId,
             IsActive = false,
             CreatedAt = chat.CreatedAt
@@ -78,8 +78,8 @@ public class ChatsRepositoryIntegrationTests(
         var chat = new Chat
         {
             Id = Guid.NewGuid(),
-            EmployerId = Guid.NewGuid(),
-            FreelancerId = Guid.NewGuid(),
+            EmployerUserId = Guid.NewGuid(),
+            FreelancerUserId = Guid.NewGuid(),
             ProjectId = Guid.NewGuid(),
             IsActive = true,
             CreatedAt = DateTime.UtcNow
@@ -104,12 +104,12 @@ public class ChatsRepositoryIntegrationTests(
         {
             new Chat
             {
-                Id = Guid.NewGuid(), EmployerId = Guid.NewGuid(), FreelancerId = Guid.NewGuid(), ProjectId = Guid.NewGuid(), IsActive = true,
+                Id = Guid.NewGuid(), EmployerUserId = Guid.NewGuid(), FreelancerUserId = Guid.NewGuid(), ProjectId = Guid.NewGuid(), IsActive = true,
                 CreatedAt = DateTime.UtcNow
             },
             new Chat
             {
-                Id = Guid.NewGuid(), EmployerId = Guid.NewGuid(), FreelancerId = Guid.NewGuid(), ProjectId = Guid.NewGuid(), IsActive = true,
+                Id = Guid.NewGuid(), EmployerUserId = Guid.NewGuid(), FreelancerUserId = Guid.NewGuid(), ProjectId = Guid.NewGuid(), IsActive = true,
                 CreatedAt = DateTime.UtcNow
             }
         };
@@ -134,8 +134,8 @@ public class ChatsRepositoryIntegrationTests(
         var chat = new Chat
         {
             Id = Guid.NewGuid(),
-            EmployerId = Guid.NewGuid(),
-            FreelancerId = Guid.NewGuid(),
+            EmployerUserId = Guid.NewGuid(),
+            FreelancerUserId = Guid.NewGuid(),
             ProjectId = Guid.NewGuid(),
             IsActive = true,
             CreatedAt = DateTime.UtcNow.TruncateToMilliseconds()
@@ -174,8 +174,8 @@ public class ChatsRepositoryIntegrationTests(
         var chat = new Chat
         {
             Id = Guid.NewGuid(),
-            EmployerId = employerId,
-            FreelancerId = Guid.NewGuid(),
+            EmployerUserId = employerId,
+            FreelancerUserId = Guid.NewGuid(),
             ProjectId = Guid.NewGuid(),
             IsActive = true,
             CreatedAt = DateTime.UtcNow
@@ -183,11 +183,11 @@ public class ChatsRepositoryIntegrationTests(
         await unitOfWork.ChatRepository.InsertAsync(chat);
 
         // Act
-        var result = await unitOfWork.ChatRepository.FirstOrDefaultAsync(c => c.EmployerId == employerId);
+        var result = await unitOfWork.ChatRepository.FirstOrDefaultAsync(c => c.EmployerUserId == employerId);
 
         // Assert
         result.Should().NotBeNull();
-        result.EmployerId.Should().Be(employerId);
+        result.EmployerUserId.Should().Be(employerId);
     }
 
     [Fact]
@@ -198,7 +198,7 @@ public class ChatsRepositoryIntegrationTests(
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
         // Act
-        var result = await unitOfWork.ChatRepository.FirstOrDefaultAsync(c => c.EmployerId == Guid.NewGuid());
+        var result = await unitOfWork.ChatRepository.FirstOrDefaultAsync(c => c.EmployerUserId == Guid.NewGuid());
 
         // Assert
         result.Should().BeNull();
@@ -214,17 +214,17 @@ public class ChatsRepositoryIntegrationTests(
         {
             new Chat
             {
-                Id = Guid.NewGuid(), EmployerId = Guid.NewGuid(), FreelancerId = Guid.NewGuid(), ProjectId = Guid.NewGuid(), IsActive = true,
+                Id = Guid.NewGuid(), EmployerUserId = Guid.NewGuid(), FreelancerUserId = Guid.NewGuid(), ProjectId = Guid.NewGuid(), IsActive = true,
                 CreatedAt = DateTime.UtcNow
             },
             new Chat
             {
-                Id = Guid.NewGuid(), EmployerId = Guid.NewGuid(), FreelancerId = Guid.NewGuid(), ProjectId = Guid.NewGuid(), IsActive = true,
+                Id = Guid.NewGuid(), EmployerUserId = Guid.NewGuid(), FreelancerUserId = Guid.NewGuid(), ProjectId = Guid.NewGuid(), IsActive = true,
                 CreatedAt = DateTime.UtcNow
             },
             new Chat
             {
-                Id = Guid.NewGuid(), EmployerId = Guid.NewGuid(), FreelancerId = Guid.NewGuid(), ProjectId = Guid.NewGuid(), IsActive = true,
+                Id = Guid.NewGuid(), EmployerUserId = Guid.NewGuid(), FreelancerUserId = Guid.NewGuid(), ProjectId = Guid.NewGuid(), IsActive = true,
                 CreatedAt = DateTime.UtcNow
             }
         };

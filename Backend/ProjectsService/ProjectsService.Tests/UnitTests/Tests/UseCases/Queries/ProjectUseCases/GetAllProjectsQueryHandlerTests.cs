@@ -33,14 +33,14 @@ public class GetAllProjectsQueryHandlerTests
             {
                 Id = Guid.NewGuid(),
                 Title = "Project 1",
-                Lifecycle = new Lifecycle { Status = ProjectStatus.InProgress },
+                Lifecycle = new Lifecycle { ProjectStatus = ProjectStatus.InProgress },
                 Category = new Category { Name = "Development" }
             },
             new()
             {
                 Id = Guid.NewGuid(),
                 Title = "Project 2",
-                Lifecycle = new Lifecycle { Status = ProjectStatus.InProgress },
+                Lifecycle = new Lifecycle { ProjectStatus = ProjectStatus.InProgress },
                 Category = new Category { Name = "Design" }
             }
         };
