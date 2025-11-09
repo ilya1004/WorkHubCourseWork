@@ -40,9 +40,9 @@ public class UpdateAcceptanceStatusCommandHandler(
             throw new BadRequestException("Project acceptance is not requested yet");
         }
 
-        if (project.Lifecycle.Status != ProjectStatus.PendingForReview)
+        if (project.Lifecycle.ProjectStatus != ProjectStatus.PendingForReview)
         {
-            logger.LogWarning("Invalid project status {Status} for acceptance update", project.Lifecycle.Status);
+            logger.LogWarning("Invalid project status {Status} for acceptance update", project.Lifecycle.ProjectStatus);
             
             throw new BadRequestException("Current project status do not allow you to update acceptance status");
         }
@@ -52,7 +52,7 @@ public class UpdateAcceptanceStatusCommandHandler(
             logger.LogInformation("Confirming acceptance for project {ProjectId}", request.ProjectId);
             
             project.Lifecycle.AcceptanceConfirmed = true;
-            project.Lifecycle.Status = ProjectStatus.Completed;
+            project.Lifecycle.ProjectStatus = ProjectStatus.Completed;
         }
         else
         {

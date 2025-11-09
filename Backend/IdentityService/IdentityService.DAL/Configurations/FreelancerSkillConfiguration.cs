@@ -10,10 +10,6 @@ public class FreelancerSkillConfiguration : IEntityTypeConfiguration<CvSkill>
 
         builder.Property(s => s.Name)
             .IsRequired()
-            .HasMaxLength(200);
-
-        builder.Property(s => s.NormalizedName)
-            .IsRequired()
-            .HasMaxLength(200);
+            .HasMaxLength(256);
     }
 }

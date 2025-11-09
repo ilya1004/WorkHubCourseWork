@@ -35,10 +35,10 @@ public class CreateFileMessageCommandToMessageTests
         // Assert
         message.Should().NotBeNull();
         message.ChatId.Should().Be(command.ChatId);
-        message.ReceiverId.Should().Be(command.ReceiverId);
+        message.ReceiverUserId.Should().Be(command.ReceiverId);
         message.Text.Should().BeNull();
         message.FileId.Should().BeNull();
-        message.SenderId.Should().Be(Guid.Empty);
+        message.SenderUserId.Should().Be(Guid.Empty);
         message.Type.Should().Be(MessageType.File);
         message.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
     }

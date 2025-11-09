@@ -29,7 +29,7 @@ public class GetChatMessagesQueryHandlerTests
         // Arrange
         var userId = Guid.NewGuid();
         var query = new GetChatMessagesQuery(ChatId: Guid.NewGuid(), PageNo: 2, PageSize: 10);
-        var chat = new Chat { Id = query.ChatId, EmployerId = userId };
+        var chat = new Chat { Id = query.ChatId, EmployerUserId = userId };
         var messages = new List<Message>
         {
             new Message { Id = Guid.NewGuid(), ChatId = query.ChatId },
@@ -91,7 +91,7 @@ public class GetChatMessagesQueryHandlerTests
         // Arrange
         var userId = Guid.NewGuid();
         var query = new GetChatMessagesQuery(Guid.NewGuid(), 1, 10);
-        var chat = new Chat { Id = query.ChatId, EmployerId = Guid.NewGuid(), FreelancerId = Guid.NewGuid() };
+        var chat = new Chat { Id = query.ChatId, EmployerUserId = Guid.NewGuid(), FreelancerUserId = Guid.NewGuid() };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
         _chatRepositoryMock.Setup(r => r.GetByIdAsync(query.ChatId, It.IsAny<CancellationToken>())).ReturnsAsync(chat);

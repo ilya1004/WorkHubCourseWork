@@ -88,7 +88,7 @@ public class DbStartupService(
                     WorkDeadline = DateTime.UtcNow.AddDays(40),
                     AcceptanceRequested = false,
                     AcceptanceConfirmed = false,
-                    Status = ProjectStatus.AcceptingApplications
+                    ProjectStatus = ProjectStatus.AcceptingApplications
                 },
                 FreelancerApplications = new List<FreelancerApplication>
                 {
@@ -121,7 +121,7 @@ public class DbStartupService(
                     WorkDeadline = DateTime.UtcNow.AddDays(58),
                     AcceptanceRequested = false,
                     AcceptanceConfirmed = false,
-                    Status = ProjectStatus.InProgress
+                    ProjectStatus = ProjectStatus.InProgress
                 },
                 FreelancerApplications = new List<FreelancerApplication>(),
             }

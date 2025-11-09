@@ -45,7 +45,7 @@ public class CreateProjectCommandToLifecycleTests
         lifecycle.ApplicationsDeadline.Should().Be(command.Lifecycle.ApplicationsDeadline);
         lifecycle.WorkStartDate.Should().Be(command.Lifecycle.WorkStartDate);
         lifecycle.WorkDeadline.Should().Be(command.Lifecycle.WorkDeadline);
-        lifecycle.Status.Should().Be(ProjectStatus.Published);
+        lifecycle.ProjectStatus.Should().Be(ProjectStatus.Published);
         lifecycle.ProjectId.Should().Be(Guid.Empty);
         lifecycle.Project.Should().BeNull();
         lifecycle.AcceptanceRequested.Should().BeFalse();

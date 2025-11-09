@@ -14,7 +14,7 @@ public class CreateFileMessageCommandToMessage : Profile
                 opt.MapFrom(_ => MessageType.File))
             .ForMember(dest => dest.Id, opt => 
                 opt.MapFrom(_  => Guid.NewGuid()))
-            .ForMember(dest => dest.SenderId, opt => opt.Ignore())
+            .ForMember(dest => dest.SenderUserId, opt => opt.Ignore())
             .ForMember(dest => dest.Text, opt => opt.Ignore())
             .ForMember(dest => dest.FileId, opt => opt.Ignore());
     }

@@ -36,7 +36,7 @@ public class DeleteProjectCommandHandler(
             throw new ForbiddenException($"You do not have access to project with ID '{request.ProjectId}'");
         }
 
-        if (project.Lifecycle.Status != ProjectStatus.Cancelled)
+        if (project.Lifecycle.ProjectStatus != ProjectStatus.Cancelled)
         {
             logger.LogWarning("Project {ProjectId} must be cancelled before deletion", request.ProjectId);
             

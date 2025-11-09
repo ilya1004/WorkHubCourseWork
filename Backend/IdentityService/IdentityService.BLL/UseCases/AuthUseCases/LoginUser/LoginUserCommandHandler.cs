@@ -36,7 +36,7 @@ public class LoginUserCommandHandler(
             throw new UnauthorizedException("Invalid credentials.");
         }
 
-        if (!user.EmailConfirmed)
+        if (!user.IsEmailConfirmed)
         {
             logger.LogWarning("Login attempt for unconfirmed email {Email}", request.Email);
             

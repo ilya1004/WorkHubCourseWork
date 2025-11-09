@@ -19,4 +19,5 @@ public interface IUsersRepository
     Task UpdateAsync(User entity, CancellationToken cancellationToken = default);
     Task DeleteAsync(User entity, CancellationToken cancellationToken = default);
     Task<int> CountAsync(Expression<Func<User, bool>>? filter, CancellationToken cancellationToken = default);
+    Task<bool> CreateAsync(User user, CancellationToken cancellationToken = default);
 }

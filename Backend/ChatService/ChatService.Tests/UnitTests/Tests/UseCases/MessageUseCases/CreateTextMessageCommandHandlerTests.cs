@@ -33,8 +33,8 @@ public class CreateTextMessageCommandHandlerTests
         // Arrange
         var userId = Guid.NewGuid();
         var command = new CreateTextMessageCommand(ChatId: Guid.NewGuid(), ReceiverId: Guid.NewGuid(), Text: "Hello");
-        var chat = new Chat { Id = command.ChatId, EmployerId = userId };
-        var message = new Message { Id = Guid.NewGuid(), ChatId = command.ChatId, ReceiverId = command.ReceiverId, Text = command.Text };
+        var chat = new Chat { Id = command.ChatId, EmployerUserId = userId };
+        var message = new Message { Id = Guid.NewGuid(), ChatId = command.ChatId, ReceiverUserId = command.ReceiverId, Text = command.Text };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
         _chatRepositoryMock.Setup(r => r.GetByIdAsync(command.ChatId, It.IsAny<CancellationToken>())).ReturnsAsync(chat);
@@ -46,7 +46,7 @@ public class CreateTextMessageCommandHandlerTests
 
         // Assert
         result.Should().Be(message);
-        message.SenderId.Should().Be(userId);
+        message.SenderUserId.Should().Be(userId);
         _chatRepositoryMock.Verify(r => r.GetByIdAsync(command.ChatId, It.IsAny<CancellationToken>()), Times.Once());
         _mapperMock.Verify(m => m.Map<Message>(command), Times.Once());
         _messagesRepositoryMock.Verify(r => r.InsertAsync(message, It.IsAny<CancellationToken>()), Times.Once());
@@ -83,7 +83,7 @@ public class CreateTextMessageCommandHandlerTests
         // Arrange
         var userId = Guid.NewGuid();
         var command = new CreateTextMessageCommand(Guid.NewGuid(), Guid.NewGuid(), "Hello");
-        var chat = new Chat { Id = command.ChatId, EmployerId = Guid.NewGuid(), FreelancerId = Guid.NewGuid() };
+        var chat = new Chat { Id = command.ChatId, EmployerUserId = Guid.NewGuid(), FreelancerUserId = Guid.NewGuid() };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
         _chatRepositoryMock.Setup(r => r.GetByIdAsync(command.ChatId, It.IsAny<CancellationToken>())).ReturnsAsync(chat);

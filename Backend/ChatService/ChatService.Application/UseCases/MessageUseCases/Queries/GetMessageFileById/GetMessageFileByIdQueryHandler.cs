@@ -23,7 +23,7 @@ public class GetMessageFileByIdQueryHandler(
             throw new NotFoundException("Chat not found");
         }
 
-        if (chat.FreelancerId != userId && chat.EmployerId != userId)
+        if (chat.FreelancerUserId != userId && chat.EmployerUserId != userId)
         {
             logger.LogWarning("You do not have access to chat with ID '{ChatId}'", request.ChatId);
             

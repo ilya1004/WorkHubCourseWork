@@ -27,16 +27,8 @@ public class LifecycleConfiguration : IEntityTypeConfiguration<Lifecycle>
 
         builder.Property(l => l.WorkDeadline)
             .IsRequired();
-        
-        builder.Property(l => l.AcceptanceRequested)
-            .IsRequired()
-            .HasDefaultValue(false);
-        
-        builder.Property(l => l.AcceptanceConfirmed)
-            .IsRequired()
-            .HasDefaultValue(false);
 
-        builder.Property(l => l.Status)
+        builder.Property(l => l.ProjectStatus)
             .IsRequired();
 
         builder.Property(l => l.ProjectId)

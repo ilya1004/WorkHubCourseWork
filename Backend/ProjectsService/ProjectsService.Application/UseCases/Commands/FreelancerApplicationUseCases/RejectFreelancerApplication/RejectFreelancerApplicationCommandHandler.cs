@@ -33,9 +33,9 @@ public class RejectFreelancerApplicationCommandHandler(
             throw new ForbiddenException($"You do not have access to project with ID '{request.ProjectId}'");
         }
 
-        if (project.Lifecycle.Status != ProjectStatus.AcceptingApplications)
+        if (project.Lifecycle.ProjectStatus != ProjectStatus.AcceptingApplications)
         {
-            logger.LogWarning("Invalid project status {Status} for rejecting applications", project.Lifecycle.Status);
+            logger.LogWarning("Invalid project status {Status} for rejecting applications", project.Lifecycle.ProjectStatus);
             
             throw new BadRequestException("You can reject applications to this project only during accepting applications stage");
         }

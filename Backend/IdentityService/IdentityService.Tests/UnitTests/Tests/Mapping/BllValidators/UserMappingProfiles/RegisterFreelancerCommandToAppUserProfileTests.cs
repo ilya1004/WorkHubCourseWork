@@ -24,7 +24,7 @@ public class RegisterFreelancerCommandToAppUserProfileTests
 
         // Assert
         appUser.Should().NotBeNull();
-        appUser.UserName.Should().Be(command.UserName);
+        appUser.UserName.Should().Be(command.Nickname);
         appUser.Email.Should().Be(command.Email);
         appUser.EmailConfirmed.Should().BeFalse();
         appUser.RegisteredAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));

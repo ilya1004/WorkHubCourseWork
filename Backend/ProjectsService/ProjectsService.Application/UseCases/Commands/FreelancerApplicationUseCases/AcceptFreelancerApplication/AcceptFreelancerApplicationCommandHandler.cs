@@ -40,9 +40,9 @@ public class AcceptFreelancerApplicationCommandHandler(
             throw new BadRequestException("This project already has freelancer to work on it");
         }
 
-        if (project.Lifecycle.Status != ProjectStatus.AcceptingApplications)
+        if (project.Lifecycle.ProjectStatus != ProjectStatus.AcceptingApplications)
         {
-            logger.LogWarning("Invalid project status {Status} for accepting applications", project.Lifecycle.Status);
+            logger.LogWarning("Invalid project status {Status} for accepting applications", project.Lifecycle.ProjectStatus);
             
             throw new BadRequestException("You can accept applications to this project only during accepting applications stage");
         }

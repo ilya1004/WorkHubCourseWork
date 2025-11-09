@@ -6,6 +6,7 @@ public class FreelancerProfile : Entity
 {
     public string FirstName { get; set; }
     public string LastName { get; set; }
+    public string Nickname { get; set; }
     public string? About { get; set; }
     public string? StripeAccountId { get; set; }
     public ICollection<Cv> Cvs { get; set; }

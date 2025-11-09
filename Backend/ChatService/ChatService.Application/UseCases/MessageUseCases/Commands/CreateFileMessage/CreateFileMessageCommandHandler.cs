@@ -25,7 +25,7 @@ public class CreateFileMessageCommandHandler(
         
         var userId = userContext.GetUserId();
 
-        if (chat.EmployerId != userId && chat.FreelancerId != userId)
+        if (chat.EmployerUserId != userId && chat.FreelancerUserId != userId)
         {
             logger.LogWarning("User {UserId} has no access to chat {ChatId}", userId, request.ChatId);
             
@@ -33,7 +33,7 @@ public class CreateFileMessageCommandHandler(
         }
 
         var message = mapper.Map<Message>(request);
-        message.SenderId = userId;
+        message.SenderUserId = userId;
 
         var fileId = await blobService.UploadAsync(request.FileStream, request.ContentType, cancellationToken);
         

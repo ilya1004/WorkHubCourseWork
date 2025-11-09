@@ -25,7 +25,7 @@ public class FilesController(
         var message = await mediator.Send(mapper.Map<CreateFileMessageCommand>(request), cancellationToken);
         
         await hubContext.Clients.User(request.ReceiverId.ToString()).ReceiveFileMessage(message);
-        await hubContext.Clients.User(message.SenderId.ToString()).ReceiveFileMessage(message);
+        await hubContext.Clients.User(message.SenderUserId.ToString()).ReceiveFileMessage(message);
         
         logger.LogInformation("File uploaded for receiver with ID '{ReceiverId}'", request.ReceiverId);
 

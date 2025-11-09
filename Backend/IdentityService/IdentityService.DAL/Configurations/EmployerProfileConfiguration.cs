@@ -23,7 +23,7 @@ public class EmployerProfileConfiguration : IEntityTypeConfiguration<EmployerPro
             .HasMaxLength(256);
 
         builder.HasOne(e => e.Industry)
-            .WithMany(i => i.EmployerProfiles)
+            .WithMany()
             .HasForeignKey(e => e.IndustryId)
             .OnDelete(DeleteBehavior.SetNull);
     }

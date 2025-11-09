@@ -32,7 +32,7 @@ public class DeleteMessageCommandHandlerTests
         // Arrange
         var userId = Guid.NewGuid();
         var command = new DeleteMessageCommand(Guid.NewGuid());
-        var message = new Message { Id = command.MessageId, SenderId = userId, Type = MessageType.Text };
+        var message = new Message { Id = command.MessageId, SenderUserId = userId, Type = MessageType.Text };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
         _messagesRepositoryMock.Setup(r => r.GetByIdAsync(command.MessageId, It.IsAny<CancellationToken>())).ReturnsAsync(message);
@@ -56,7 +56,7 @@ public class DeleteMessageCommandHandlerTests
         var userId = Guid.NewGuid();
         var fileId = Guid.NewGuid();
         var command = new DeleteMessageCommand(Guid.NewGuid());
-        var message = new Message { Id = command.MessageId, SenderId = userId, Type = MessageType.File, FileId = fileId };
+        var message = new Message { Id = command.MessageId, SenderUserId = userId, Type = MessageType.File, FileId = fileId };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
         _messagesRepositoryMock.Setup(r => r.GetByIdAsync(command.MessageId, It.IsAny<CancellationToken>())).ReturnsAsync(message);
@@ -105,7 +105,7 @@ public class DeleteMessageCommandHandlerTests
         var userId = Guid.NewGuid();
         var senderId = Guid.NewGuid();
         var command = new DeleteMessageCommand(Guid.NewGuid());
-        var message = new Message { Id = command.MessageId, SenderId = senderId, Type = MessageType.Text };
+        var message = new Message { Id = command.MessageId, SenderUserId = senderId, Type = MessageType.Text };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
         _messagesRepositoryMock.Setup(r => r.GetByIdAsync(command.MessageId, It.IsAny<CancellationToken>())).ReturnsAsync(message);

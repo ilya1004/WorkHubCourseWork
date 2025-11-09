@@ -20,7 +20,7 @@ namespace IdentityService.API.Controllers;
 public class UsersController(IMediator mediator, IMapper mapper) : ControllerBase
 {
     [HttpPost]
-    [Route("register-freelancer")]
+    [Route("freelancer")]
     public async Task<IActionResult> RegisterFreelancer(RegisterFreelancerRequest request, CancellationToken cancellationToken)
     {
         await mediator.Send(mapper.Map<RegisterFreelancerCommand>(request), cancellationToken);
@@ -29,7 +29,7 @@ public class UsersController(IMediator mediator, IMapper mapper) : ControllerBas
     }
 
     [HttpPost]
-    [Route("register-employer")]
+    [Route("employer")]
     public async Task<IActionResult> RegisterEmployer(RegisterEmployerRequest request, CancellationToken cancellationToken)
     {
         await mediator.Send(mapper.Map<RegisterEmployerCommand>(request), cancellationToken);

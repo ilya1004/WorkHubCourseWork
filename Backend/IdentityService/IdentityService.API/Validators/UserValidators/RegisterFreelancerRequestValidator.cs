@@ -7,7 +7,7 @@ public class RegisterFreelancerRequestValidator : AbstractValidator<RegisterFree
 {
     public RegisterFreelancerRequestValidator()
     {
-        RuleFor(x => x.UserName)
+        RuleFor(x => x.Nickname)
             .NotEmpty().WithMessage("Username is required")
             .MaximumLength(200).WithMessage("Username must be at most 200 characters long");
 

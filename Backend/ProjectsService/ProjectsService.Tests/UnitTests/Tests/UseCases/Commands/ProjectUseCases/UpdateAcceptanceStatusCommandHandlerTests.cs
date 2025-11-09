@@ -36,7 +36,7 @@ public class UpdateAcceptanceStatusCommandHandlerTests
         {
             Id = projectId,
             EmployerUserId = userId,
-            Lifecycle = new Lifecycle { Status = ProjectStatus.PendingForReview, AcceptanceRequested = true }
+            Lifecycle = new Lifecycle { ProjectStatus = ProjectStatus.PendingForReview, AcceptanceRequested = true }
         };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
@@ -51,7 +51,7 @@ public class UpdateAcceptanceStatusCommandHandlerTests
 
         // Assert
         project.Lifecycle.AcceptanceConfirmed.Should().BeTrue();
-        project.Lifecycle.Status.Should().Be(ProjectStatus.Completed);
+        project.Lifecycle.ProjectStatus.Should().Be(ProjectStatus.Completed);
         _unitOfWorkMock.Verify(u => u.ProjectCommandsRepository.UpdateAsync(project, It.IsAny<CancellationToken>()), Times.Once());
         _unitOfWorkMock.Verify(u => u.SaveAllAsync(It.IsAny<CancellationToken>()), Times.Once());
         _loggerMock.VerifyLog(LogLevel.Information, $"Updating acceptance status for project {projectId}", Times.Once());
@@ -70,7 +70,7 @@ public class UpdateAcceptanceStatusCommandHandlerTests
         {
             Id = projectId,
             EmployerUserId = userId,
-            Lifecycle = new Lifecycle { Status = ProjectStatus.PendingForReview, AcceptanceRequested = true }
+            Lifecycle = new Lifecycle { ProjectStatus = ProjectStatus.PendingForReview, AcceptanceRequested = true }
         };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
@@ -124,7 +124,7 @@ public class UpdateAcceptanceStatusCommandHandlerTests
         {
             Id = projectId,
             EmployerUserId = Guid.NewGuid(),
-            Lifecycle = new Lifecycle { Status = ProjectStatus.PendingForReview, AcceptanceRequested = true }
+            Lifecycle = new Lifecycle { ProjectStatus = ProjectStatus.PendingForReview, AcceptanceRequested = true }
         };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
@@ -152,7 +152,7 @@ public class UpdateAcceptanceStatusCommandHandlerTests
         {
             Id = projectId,
             EmployerUserId = userId,
-            Lifecycle = new Lifecycle { Status = ProjectStatus.PendingForReview, AcceptanceRequested = false }
+            Lifecycle = new Lifecycle { ProjectStatus = ProjectStatus.PendingForReview, AcceptanceRequested = false }
         };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
@@ -180,7 +180,7 @@ public class UpdateAcceptanceStatusCommandHandlerTests
         {
             Id = projectId,
             EmployerUserId = userId,
-            Lifecycle = new Lifecycle { Status = ProjectStatus.InProgress, AcceptanceRequested = true }
+            Lifecycle = new Lifecycle { ProjectStatus = ProjectStatus.InProgress, AcceptanceRequested = true }
         };
 
         _userContextMock.Setup(u => u.GetUserId()).Returns(userId);
@@ -194,6 +194,6 @@ public class UpdateAcceptanceStatusCommandHandlerTests
         await act.Should().ThrowAsync<BadRequestException>().WithMessage("Current project status do not allow you to update acceptance status");
         _unitOfWorkMock.Verify(u => u.ProjectCommandsRepository.UpdateAsync(It.IsAny<Project>(), It.IsAny<CancellationToken>()), Times.Never());
         _unitOfWorkMock.Verify(u => u.SaveAllAsync(It.IsAny<CancellationToken>()), Times.Never());
-        _loggerMock.VerifyLog(LogLevel.Warning, $"Invalid project status {project.Lifecycle.Status} for acceptance update", Times.Once());
+        _loggerMock.VerifyLog(LogLevel.Warning, $"Invalid project status {project.Lifecycle.ProjectStatus} for acceptance update", Times.Once());
     }
 }

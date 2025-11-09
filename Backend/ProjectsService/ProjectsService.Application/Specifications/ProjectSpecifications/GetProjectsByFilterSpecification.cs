@@ -17,7 +17,7 @@ public class GetProjectsByFilterSpecification : Specification<Project>
             (!budgetTo.HasValue || p.Budget <= budgetTo.Value) &&
             (!categoryId.HasValue || p.CategoryId == categoryId.Value) &&
             (!employerId.HasValue || p.EmployerUserId == employerId.Value) &&
-            (!projectStatus.HasValue || p.Lifecycle.Status == projectStatus.Value))
+            (!projectStatus.HasValue || p.Lifecycle.ProjectStatus == projectStatus.Value))
     {
         AddInclude(p => p.Lifecycle);
         AddInclude(p => p.Category!);

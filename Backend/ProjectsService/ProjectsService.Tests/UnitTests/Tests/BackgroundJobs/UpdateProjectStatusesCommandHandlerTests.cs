@@ -75,7 +75,7 @@ public class UpdateProjectStatusesCommandHandlerTests
             Id = Guid.NewGuid(),
             Lifecycle = new Lifecycle
             {
-                Status = ProjectStatus.InProgress,
+                ProjectStatus = ProjectStatus.InProgress,
                 ApplicationsStartDate = DateTime.UtcNow.AddDays(-10),
                 ApplicationsDeadline = DateTime.UtcNow.AddDays(-5),
                 WorkStartDate = DateTime.UtcNow.AddDays(-2),
@@ -97,7 +97,7 @@ public class UpdateProjectStatusesCommandHandlerTests
         await _handler.Handle(new UpdateProjectStatusesCommand(), CancellationToken.None);
 
         // Assert
-        project.Lifecycle.Status.Should().Be(ProjectStatus.Completed);
+        project.Lifecycle.ProjectStatus.Should().Be(ProjectStatus.Completed);
         _lifecycleCommandsRepositoryMock.Verify(
             x => x.UpdateAsync(project.Lifecycle, It.IsAny<CancellationToken>()),
             Times.Once());
@@ -116,7 +116,7 @@ public class UpdateProjectStatusesCommandHandlerTests
             Id = Guid.NewGuid(),
             Lifecycle = new Lifecycle
             {
-                Status = ProjectStatus.Expired,
+                ProjectStatus = ProjectStatus.Expired,
                 ApplicationsStartDate = now.AddDays(-20),
                 ApplicationsDeadline = now.AddDays(-15),
                 WorkStartDate = now.AddDays(-10),
@@ -138,7 +138,7 @@ public class UpdateProjectStatusesCommandHandlerTests
         await _handler.Handle(new UpdateProjectStatusesCommand(), CancellationToken.None);
 
         // Assert
-        project.Lifecycle.Status.Should().Be(ProjectStatus.Cancelled);
+        project.Lifecycle.ProjectStatus.Should().Be(ProjectStatus.Cancelled);
         _lifecycleCommandsRepositoryMock.Verify(
             x => x.UpdateAsync(project.Lifecycle, It.IsAny<CancellationToken>()),
             Times.Once());
@@ -157,7 +157,7 @@ public class UpdateProjectStatusesCommandHandlerTests
             Id = Guid.NewGuid(),
             Lifecycle = new Lifecycle
             {
-                Status = ProjectStatus.InProgress,
+                ProjectStatus = ProjectStatus.InProgress,
                 ApplicationsStartDate = now.AddDays(-20),
                 ApplicationsDeadline = now.AddDays(-15),
                 WorkStartDate = now.AddDays(-10),
@@ -179,7 +179,7 @@ public class UpdateProjectStatusesCommandHandlerTests
         await _handler.Handle(new UpdateProjectStatusesCommand(), CancellationToken.None);
 
         // Assert
-        project.Lifecycle.Status.Should().Be(ProjectStatus.Expired);
+        project.Lifecycle.ProjectStatus.Should().Be(ProjectStatus.Expired);
         _lifecycleCommandsRepositoryMock.Verify(
             x => x.UpdateAsync(project.Lifecycle, It.IsAny<CancellationToken>()),
             Times.Once());
@@ -198,7 +198,7 @@ public class UpdateProjectStatusesCommandHandlerTests
             Id = Guid.NewGuid(),
             Lifecycle = new Lifecycle
             {
-                Status = ProjectStatus.WaitingForWorkStart,
+                ProjectStatus = ProjectStatus.WaitingForWorkStart,
                 ApplicationsStartDate = now.AddDays(-10),
                 ApplicationsDeadline = now.AddDays(-5),
                 WorkStartDate = now.AddDays(-1),
@@ -221,7 +221,7 @@ public class UpdateProjectStatusesCommandHandlerTests
         await _handler.Handle(new UpdateProjectStatusesCommand(), CancellationToken.None);
 
         // Assert
-        project.Lifecycle.Status.Should().Be(ProjectStatus.Cancelled);
+        project.Lifecycle.ProjectStatus.Should().Be(ProjectStatus.Cancelled);
         _lifecycleCommandsRepositoryMock.Verify(
             x => x.UpdateAsync(project.Lifecycle, It.IsAny<CancellationToken>()),
             Times.Once());
@@ -241,7 +241,7 @@ public class UpdateProjectStatusesCommandHandlerTests
             Id = Guid.NewGuid(),
             Lifecycle = new Lifecycle
             {
-                Status = ProjectStatus.WaitingForWorkStart,
+                ProjectStatus = ProjectStatus.WaitingForWorkStart,
                 ApplicationsStartDate = now.AddDays(-10),
                 ApplicationsDeadline = now.AddDays(-5),
                 WorkStartDate = now.AddDays(-1),
@@ -267,7 +267,7 @@ public class UpdateProjectStatusesCommandHandlerTests
         await _handler.Handle(new UpdateProjectStatusesCommand(), CancellationToken.None);
 
         // Assert
-        project.Lifecycle.Status.Should().Be(ProjectStatus.InProgress);
+        project.Lifecycle.ProjectStatus.Should().Be(ProjectStatus.InProgress);
         project.FreelancerUserId.Should().Be(freelancerId);
         project.FreelancerApplications.First(a => a.FreelancerUserId == freelancerId).Status.Should().Be(ApplicationStatus.Accepted);
         project.FreelancerApplications.First(a => a.FreelancerUserId != freelancerId).Status.Should().Be(ApplicationStatus.Rejected);
@@ -292,7 +292,7 @@ public class UpdateProjectStatusesCommandHandlerTests
             Id = Guid.NewGuid(),
             Lifecycle = new Lifecycle
             {
-                Status = ProjectStatus.AcceptingApplications,
+                ProjectStatus = ProjectStatus.AcceptingApplications,
                 ApplicationsStartDate = now.AddDays(-5),
                 ApplicationsDeadline = now.AddDays(-1),
                 WorkStartDate = now.AddDays(5),
@@ -314,7 +314,7 @@ public class UpdateProjectStatusesCommandHandlerTests
         await _handler.Handle(new UpdateProjectStatusesCommand(), CancellationToken.None);
 
         // Assert
-        project.Lifecycle.Status.Should().Be(ProjectStatus.WaitingForWorkStart);
+        project.Lifecycle.ProjectStatus.Should().Be(ProjectStatus.WaitingForWorkStart);
         _lifecycleCommandsRepositoryMock.Verify(
             x => x.UpdateAsync(project.Lifecycle, It.IsAny<CancellationToken>()),
             Times.Once());
@@ -333,7 +333,7 @@ public class UpdateProjectStatusesCommandHandlerTests
             Id = Guid.NewGuid(),
             Lifecycle = new Lifecycle
             {
-                Status = ProjectStatus.PendingForReview,
+                ProjectStatus = ProjectStatus.PendingForReview,
                 ApplicationsStartDate = now.AddDays(-1),
                 ApplicationsDeadline = now.AddDays(5),
                 WorkStartDate = now.AddDays(10),
@@ -355,7 +355,7 @@ public class UpdateProjectStatusesCommandHandlerTests
         await _handler.Handle(new UpdateProjectStatusesCommand(), CancellationToken.None);
 
         // Assert
-        project.Lifecycle.Status.Should().Be(ProjectStatus.AcceptingApplications);
+        project.Lifecycle.ProjectStatus.Should().Be(ProjectStatus.AcceptingApplications);
         _lifecycleCommandsRepositoryMock.Verify(
             x => x.UpdateAsync(project.Lifecycle, It.IsAny<CancellationToken>()),
             Times.Once());
@@ -374,7 +374,7 @@ public class UpdateProjectStatusesCommandHandlerTests
             Id = Guid.NewGuid(),
             Lifecycle = new Lifecycle
             {
-                Status = ProjectStatus.AcceptingApplications,
+                ProjectStatus = ProjectStatus.AcceptingApplications,
                 ApplicationsStartDate = now.AddDays(-1),
                 ApplicationsDeadline = now.AddDays(5),
                 WorkStartDate = now.AddDays(10),

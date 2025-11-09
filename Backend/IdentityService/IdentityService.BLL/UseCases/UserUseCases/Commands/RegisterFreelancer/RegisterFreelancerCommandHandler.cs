@@ -7,9 +7,7 @@ namespace IdentityService.BLL.UseCases.UserUseCases.Commands.RegisterFreelancer;
 
 public class RegisterFreelancerCommandHandler(
     UserManager<User> userManager,
-    RoleManager<IdentityRole<Guid>> roleManager,
     IUnitOfWork unitOfWork,
-    IMapper mapper,
     IEmailSender emailSender,
     ICachedService cachedService,
     IConfiguration configuration,
@@ -17,51 +15,55 @@ public class RegisterFreelancerCommandHandler(
 {
     public async Task Handle(RegisterFreelancerCommand request, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Registering new freelancer with email: {Email}", request.Email);
-
         var userByEmail = await userManager.FindByEmailAsync(request.Email);
 
         if (userByEmail is not null)
         {
-            logger.LogWarning("User with email {Email} already exists", request.Email);
-            
+            logger.LogError("User with email {Email} already exists", request.Email);
             throw new AlreadyExistsException($"A user with the email '{request.Email}' already exists.");
         }
 
-        var user = mapper.Map<User>(request);
-
-        var role = await roleManager.FindByNameAsync(AppRoles.FreelancerRole);
+        var role = await unitOfWork.RolesRepository.GetByNameAsync(AppRoles.FreelancerRole, cancellationToken);
 
         if (role is null)
         {
-            logger.LogError("Freelancer role not found");
-            
-            throw new BadRequestException($"User is not successfully registered. User Role is not successfully find");
+            logger.LogError("Role is not found");
+            throw new NotFoundException("Role is not found");
         }
 
-        user.RoleId = role.Id;
+        var passwordHash = request.Password; // TODO
 
-        var result = await userManager.CreateAsync(user, request.Password);
-
-        if (!result.Succeeded)
+        var user = new User
         {
-            var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-            
-            logger.LogError("Failed to create freelancer: {Errors}", errors);
-            
-            throw new BadRequestException($"User is not successfully registered. Errors: {errors}");
+            Id = Guid.NewGuid(),
+            RegisteredAt = DateTime.UtcNow,
+            Email = request.Email,
+            PasswordHash = passwordHash,
+            IsEmailConfirmed = false,
+            IsActive = true,
+            RoleId = role.Id,
+        };
+
+        var isSucceed = await unitOfWork.UsersRepository.CreateAsync(user, cancellationToken);
+
+        if (isSucceed)
+        {
+            logger.LogError("User is not successfully created");
+            throw new BadRequestException("User is not successfully created");
         }
 
-        logger.LogInformation("Creating freelancer profile for user {UserId}", user.Id);
-        
-        var freelancerProfile = mapper.Map<FreelancerProfile>(request);
-        freelancerProfile.UserId = user.Id;
+        var freelancerProfile = new FreelancerProfile
+        {
+            Id = Guid.Empty,
+            FirstName = request.FirstName,
+            LastName = request.LastName,
+            Nickname = request.Nickname,
+            UserId = user.Id,
+        };
 
         await unitOfWork.FreelancerProfilesRepository.AddAsync(freelancerProfile, cancellationToken);
         await unitOfWork.SaveAllAsync(cancellationToken);
 
-        logger.LogInformation("Generating email confirmation token for user {UserId}", user.Id);
-        
         var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
 
         string code;
@@ -72,15 +74,13 @@ public class RegisterFreelancerCommandHandler(
         } 
         while (await cachedService.ExistsAsync(code, cancellationToken));
 
-        logger.LogInformation("Storing confirmation code {Code} in cache", code);
-        
-        await cachedService.SetAsync(code, token, TimeSpan.FromHours(
-            int.Parse(configuration.GetRequiredSection("IdentityTokenExpirationTimeInHours").Value!)), cancellationToken);
+        await cachedService.SetAsync(
+            code,
+            token,
+            TimeSpan.FromHours(int.Parse(
+                configuration.GetRequiredSection("IdentityTokenExpirationTimeInHours").Value!)),
+            cancellationToken);
 
-        logger.LogInformation("Sending confirmation email to {Email}", user.Email);
-        
-        await emailSender.SendEmailConfirmation(user.Email!, code, cancellationToken);
-
-        logger.LogInformation("Successfully registered freelancer with ID: {UserId}", user.Id);
+        await emailSender.SendEmailConfirmation(user.Email, code, cancellationToken);
     }
 }
