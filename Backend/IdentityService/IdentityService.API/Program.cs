@@ -2,7 +2,6 @@ using IdentityService.API;
 using IdentityService.API.Middlewares;
 using IdentityService.BLL;
 using IdentityService.DAL;
-using System.Text.Json.Serialization;
 using HealthChecks.UI.Client;
 using IdentityService.API.GrpcServices;
 using IdentityService.BLL.Abstractions.AzuriteStartupService;
@@ -11,9 +10,6 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
-
-services.AddControllers()
-    .AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 services.AddHttpContextAccessor();
 
@@ -38,7 +34,6 @@ using (var scope = app.Services.CreateScope())
     await azuriteStartupService.CreateContainerIfNotExistAsync();
     
     var dbStartupService = scope.ServiceProvider.GetRequiredService<IDbStartupService>();
-    await dbStartupService.MakeMigrationsAsync();
     await dbStartupService.InitializeDb();
 }
 

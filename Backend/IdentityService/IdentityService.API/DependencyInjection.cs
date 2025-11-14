@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using System.Reflection;
 using System.Text;
+using System.Text.Json.Serialization;
 using IdentityService.API.Interceptors;
 using IdentityService.API.Middlewares;
 using IdentityService.API.Services;
@@ -21,18 +22,13 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddAPI(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddControllers()
+            .AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
         services.AddTransient<GlobalLoggingMiddleware>();
         services.AddTransient<GlobalExceptionHandlingMiddleware>();
         
-        services.AddIdentity<User, IdentityRole<Guid>>(options =>
-            {
-                options.Password.RequiredLength = 8;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequireDigit = true;
-                options.Password.RequireNonAlphanumeric = true;
-            })
-            .AddEntityFrameworkStores<ApplicationDbContext>()
+        services.AddIdentity<User, IdentityRole<Guid>>()
             .AddDefaultTokenProviders();
         
         services.Configure<DataProtectionTokenProviderOptions>(options =>
@@ -71,16 +67,16 @@ public static class DependencyInjection
             });
 
         services.AddAuthorizationBuilder()
-            .AddPolicy(AuthPolicies.AdminPolicy, 
+            .AddPolicy(AuthPolicies.AdminPolicy,
                 policy => policy.RequireRole(AppRoles.AdminRole))
-            .AddPolicy(AuthPolicies.FreelancerPolicy, 
+            .AddPolicy(AuthPolicies.ModeratorPolicy,
+                policy => policy.RequireRole(AppRoles.ModeratorRole))
+            .AddPolicy(AuthPolicies.FreelancerPolicy,
                 policy => policy.RequireRole(AppRoles.FreelancerRole))
-            .AddPolicy(AuthPolicies.EmployerPolicy, 
+            .AddPolicy(AuthPolicies.EmployerPolicy,
                 policy => policy.RequireRole(AppRoles.EmployerRole))
             .AddPolicy(AuthPolicies.FreelancerOrEmployerPolicy,
-                policy => policy.RequireRole(AppRoles.FreelancerRole, AppRoles.EmployerRole))
-            .AddPolicy(AuthPolicies.AdminOrSelfPolicy, 
-                policy => policy.Requirements.Add(new AdminOrSelfRequirement()));
+                policy => policy.RequireRole(AppRoles.FreelancerRole, AppRoles.EmployerRole));
 
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         services.AddFluentValidationAutoValidation(config =>
@@ -90,7 +86,8 @@ public static class DependencyInjection
             config.EnableQueryBindingSourceAutomaticValidation = true;
         });
 
-        services.AddAutoMapper(Assembly.GetExecutingAssembly());
+        services.AddAutoMapper(config =>
+            config.AddMaps(Assembly.GetExecutingAssembly()));
 
         services.AddScoped<IUserContext, UserContext>();
 
