@@ -152,7 +152,7 @@ CREATE TABLE "FreelancerApplications" (
     "Status" VARCHAR(256) NOT NULL DEFAULT 'Pending',
     "ProjectId" UUID NOT NULL,
     "FreelancerUserId" UUID NOT NULL,
-    "CvId" UUID REFERENCES "Projects" ("Id") ON DELETE RESTRICT
+    "ProjectId" UUID REFERENCES "Projects" ("Id") ON DELETE RESTRICT
 );
 
 -- Table: Reports
