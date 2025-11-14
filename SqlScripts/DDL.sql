@@ -150,7 +150,7 @@ CREATE TABLE "FreelancerApplications" (
     "Id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "CreatedAt" TIMESTAMP WITH TIME ZONE NOT NULL,
     "Status" VARCHAR(256) NOT NULL DEFAULT 'Pending',
-    "ProjectId" UUID NOT NULL,
+    "CvId" UUID NOT NULL,
     "FreelancerUserId" UUID NOT NULL,
     "ProjectId" UUID REFERENCES "Projects" ("Id") ON DELETE RESTRICT
 );
