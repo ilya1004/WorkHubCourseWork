@@ -1,212 +1,154 @@
 using IdentityService.DAL.Abstractions.DbStartupService;
-using IdentityService.DAL.Abstractions.Repositories;
+using IdentityService.DAL.Abstractions.PasswordHasher;
 using IdentityService.DAL.Constants;
-using IdentityService.DAL.Data;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace IdentityService.DAL.Services.DbStartupService;
 
-public class DbStartupService(
-    IServiceProvider serviceProvider,
-    RoleManager<IdentityRole<Guid>> roleManager,
-    IUnitOfWork unitOfWork,
-    UserManager<User> userManager,
-    ILogger<DbStartupService> logger) : IDbStartupService
+public class DbStartupService : IDbStartupService
 {
-    private const string EmployerId = "e13341b4-6532-41f6-9595-202525c7ff34";
-    private const string FreelancerId = "52d78d21-8f4d-469d-a911-b094d6f9994b";
-    
-    public async Task MakeMigrationsAsync()
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<DbStartupService> _logger;
+    private readonly IPasswordHasher _passwordHasher;
+
+    public DbStartupService(
+        IUnitOfWork unitOfWork,
+        ILogger<DbStartupService> logger,
+        IPasswordHasher passwordHasher)
     {
-        logger.LogInformation("Starting database migrations...");
-        
-        using var scope = serviceProvider.CreateScope();
-        await using var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-        try
-        {
-            await dbContext.Database.MigrateAsync();
-            
-            logger.LogInformation("Database migrations applied successfully");
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error applying database migrations");
-
-            throw new Exception("Error applying database migrations", ex);
-        }
+        _unitOfWork = unitOfWork;
+        _logger = logger;
+        _passwordHasher = passwordHasher;
     }
 
     public async Task InitializeDb()
     {
-        logger.LogInformation("Starting database initialization...");
+        _logger.LogInformation("Starting database initialization...");
 
-        var adminRole = await roleManager.FindByNameAsync(AppRoles.AdminRole);
+        var existingAdminRole = await _unitOfWork.RolesRepository.GetByNameAsync(AppRoles.AdminRole);
 
-        if (adminRole is null)
+        if (existingAdminRole is not null)
         {
-            logger.LogInformation("Creating application roles...");
-            
-            await roleManager.CreateAsync(new IdentityRole<Guid>(AppRoles.AdminRole));
-            await roleManager.CreateAsync(new IdentityRole<Guid>(AppRoles.EmployerRole));
-            await roleManager.CreateAsync(new IdentityRole<Guid>(AppRoles.FreelancerRole));
-            
-            await unitOfWork.SaveAllAsync();
-            
-            logger.LogInformation("Application roles created successfully");
-        }
-        else
-        {
-            logger.LogInformation("Roles already exist, skipping creation");
-            
             return;
         }
-        
-        logger.LogInformation("Creating default admin user...");
-        
-        adminRole = await roleManager.FindByNameAsync(AppRoles.AdminRole);
+
+        var adminRole = new Role
+        {
+            Id = Guid.CreateVersion7(),
+            Name = AppRoles.AdminRole
+        };
+
+        var moderatorRole = new Role
+        {
+            Id = Guid.CreateVersion7(),
+            Name = AppRoles.ModeratorRole
+        };
+
+        var employerRole = new Role
+        {
+            Id = Guid.CreateVersion7(),
+            Name = AppRoles.EmployerRole
+        };
+
+        var freelancerRole = new Role
+        {
+            Id = Guid.CreateVersion7(),
+            Name = AppRoles.FreelancerRole
+        };
+
+        await _unitOfWork.RolesRepository.CreateAsync(adminRole);
+        await _unitOfWork.RolesRepository.CreateAsync(moderatorRole);
+        await _unitOfWork.RolesRepository.CreateAsync(employerRole);
+        await _unitOfWork.RolesRepository.CreateAsync(freelancerRole);
+
 
         var admin = new User
         {
-            Id = Guid.NewGuid(),
+            Id = Guid.CreateVersion7(),
             RegisteredAt = DateTime.UtcNow,
-            UserName = "Admin",
-            NormalizedUserName = "ADMIN",
             Email = "admin@gmail.com",
-            NormalizedEmail = "ADMIN@GMAIL.COM",
-            EmailConfirmed = true,
-            RoleId = adminRole!.Id
+            PasswordHash = _passwordHasher.HashPassword("Admin_123"),
+            IsEmailConfirmed = true,
+            RoleId = adminRole.Id
         };
 
-        var createResultAdmin = await userManager.CreateAsync(admin, "Admin_123");
-        
-        if (!createResultAdmin.Succeeded)
+        await _unitOfWork.UsersRepository.CreateAsync(admin);
+
+
+        var moderator = new User
         {
-            logger.LogError("Failed to create admin user.");
-            
-            throw new Exception("Failed to create admin user.");
-        }
-        
-        logger.LogInformation("Seeding freelancer skills...");
-        
-        var freelancerSkills = new List<CvSkill>
-        {
-            new() { Id = Guid.NewGuid(), Name = "Web Development", NormalizedName = "WEB_DEVELOPMENT" },
-            new() { Id = Guid.NewGuid(), Name = "Mobile Development", NormalizedName = "MOBILE_DEVELOPMENT" },
-            new() { Id = Guid.NewGuid(), Name = "Graphic Design", NormalizedName = "GRAPHIC_DESIGN" },
-            new() { Id = Guid.NewGuid(), Name = "Copywriting", NormalizedName = "COPYWRITING" },
-            new() { Id = Guid.NewGuid(), Name = "SEO Optimization", NormalizedName = "SEO_OPTIMIZATION" },
-            new() { Id = Guid.NewGuid(), Name = "Project Management", NormalizedName = "PROJECT_MANAGEMENT" },
-            new() { Id = Guid.NewGuid(), Name = "Data Analysis", NormalizedName = "DATA_ANALYSIS" }
+            Id = Guid.CreateVersion7(),
+            RegisteredAt = DateTime.UtcNow,
+            Email = "moderator@gmail.com",
+            PasswordHash = _passwordHasher.HashPassword("Moderator_123"),
+            IsEmailConfirmed = true,
+            RoleId = moderatorRole.Id
         };
 
-        foreach (var item in freelancerSkills) 
-        {
-            await unitOfWork.FreelancerSkillsRepository.AddAsync(item);
-        }
-        
-        logger.LogInformation("Seeding employer industries...");
-        
-        var employerIndustries = new List<EmployerIndustry>
-        {
-            new() { Id = Guid.NewGuid(), Name = "IT & Software", NormalizedName = "IT_SOFTWARE" },
-            new() { Id = Guid.NewGuid(), Name = "Marketing & Advertising", NormalizedName = "MARKETING_ADVERTISING" },
-            new() { Id = Guid.NewGuid(), Name = "Finance & Accounting", NormalizedName = "FINANCE_ACCOUNTING" },
-            new() { Id = Guid.NewGuid(), Name = "Healthcare & Medicine", NormalizedName = "HEALTHCARE_MEDICINE" },
-            new() { Id = Guid.NewGuid(), Name = "Education & Training", NormalizedName = "EDUCATION_TRAINING" },
-            new() { Id = Guid.NewGuid(), Name = "Construction & Engineering", NormalizedName = "CONSTRUCTION_ENGINEERING" },
-            new() { Id = Guid.NewGuid(), Name = "E-commerce & Retail", NormalizedName = "ECOMMERCE_RETAIL" }
-        };
-        
-        foreach (var item in employerIndustries) 
-        {
-            await unitOfWork.EmployerIndustriesRepository.AddAsync(item);
-        }
-        
-        await unitOfWork.SaveAllAsync();
-        
-        var freelancerRole = await roleManager.FindByNameAsync(AppRoles.FreelancerRole);
-        
-        logger.LogInformation("Creating freelancer user...");
+        await _unitOfWork.UsersRepository.CreateAsync(moderator);
 
-        var freelancerId = Guid.Parse(FreelancerId);
-        
+
         var freelancer = new User
         {
-            Id = freelancerId,
+            Id = Guid.CreateVersion7(),
             RegisteredAt = DateTime.UtcNow,
-            UserName = "Moonlight",
-            NormalizedUserName = "MOONLIGHT",
             Email = "ilya@gmail.com",
-            NormalizedEmail = "ILYA@GMAIL.COM",
-            EmailConfirmed = true,
-            RoleId = freelancerRole!.Id
+            PasswordHash = _passwordHasher.HashPassword("Ilya_123"),
+            IsEmailConfirmed = true,
+            RoleId = freelancerRole.Id
         };
-        
-        var createResultFreelancer = await userManager.CreateAsync(freelancer, "Ilya_123");
-        
-        if (!createResultFreelancer.Succeeded)
-        {
-            logger.LogError("Failed to create freelancer user.");
-            
-            throw new Exception($"Failed to create freelancer user.");
-        }
-        
+
+        await _unitOfWork.UsersRepository.CreateAsync(freelancer);
+
         var freelancerProfile = new FreelancerProfile
         {
+            Id = Guid.CreateVersion7(),
             FirstName = "Ilya",
             LastName = "Rabets",
-            About = "I'm Ilya Rabets!",
-            Skills = freelancerSkills.Take(4).ToList(),
+            Nickname = "Moonlight",
             UserId = freelancer.Id
         };
-        
-        await unitOfWork.FreelancerProfilesRepository.AddAsync(freelancerProfile);
-        
-        logger.LogInformation("Freelancer user created successfully with ID: {FreelancerId}", freelancer.Id);
-        
-        var employerRole = await roleManager.FindByNameAsync(AppRoles.EmployerRole);
-        
-        logger.LogInformation("Creating employer user...");
-        
-        var employerId = Guid.Parse(EmployerId);
-        
+
+        await _unitOfWork.FreelancerProfilesRepository.CreateAsync(freelancerProfile);
+
+
         var employer = new User
         {
-            Id = employerId,
+            Id = Guid.CreateVersion7(),
             RegisteredAt = DateTime.UtcNow,
-            UserName = "Pavlusha",
-            NormalizedUserName = "PAVLUSHA",
             Email = "pavlusha@gmail.com",
-            NormalizedEmail = "PAVLUSHA@GMAIL.COM",
-            EmailConfirmed = true,
-            RoleId = employerRole!.Id
+            PasswordHash = _passwordHasher.HashPassword("Pavlusha_123"),
+            IsEmailConfirmed = true,
+            RoleId = employerRole.Id
         };
-        
-        var createResultEmployer = await userManager.CreateAsync(employer, "Pavlusha_123");
-        
-        if (!createResultEmployer.Succeeded)
-        {
-            logger.LogError("Failed to create employer user.");
-            
-            throw new Exception("Failed to create employer user.");
-        }
-        
+
+        await _unitOfWork.UsersRepository.CreateAsync(employer);
+
         var employerProfile = new EmployerProfile
         {
+            Id = Guid.CreateVersion7(),
             CompanyName = "Sunrise Company",
-            About = "We are Sunrise Company!",
-            Industry = employerIndustries.First(),
             UserId = employer.Id
         };
-        
-        await unitOfWork.EmployerProfilesRepository.AddAsync(employerProfile);
-        
-        logger.LogInformation("Employer user created successfully with ID: {AdminId}", admin.Id);
-        
-        await unitOfWork.SaveAllAsync();
-        
-        logger.LogInformation("Database initialization completed successfully");
+
+        await _unitOfWork.EmployerProfilesRepository.CreateAsync(employerProfile);
+
+
+        var employerIndustries = new List<EmployerIndustry>
+        {
+            new() { Id = Guid.CreateVersion7(), Name = "IT & Software" },
+            new() { Id = Guid.CreateVersion7(), Name = "Marketing & Advertising" },
+            new() { Id = Guid.CreateVersion7(), Name = "Finance & Accounting" },
+            new() { Id = Guid.CreateVersion7(), Name = "Healthcare & Medicine" },
+            new() { Id = Guid.CreateVersion7(), Name = "Education & Training" },
+            new() { Id = Guid.CreateVersion7(), Name = "Construction & Engineering" },
+            new() { Id = Guid.CreateVersion7(), Name = "E-commerce & Retail" }
+        };
+
+        foreach (var item in employerIndustries)
+        {
+            await _unitOfWork.EmployerIndustriesRepository.CreateAsync(item);
+        }
+
+        _logger.LogInformation("Database initialization completed successfully");
     }
 }

@@ -18,7 +18,7 @@ public class DeleteFreelancerSkillCommandHandlerTests
         _loggerMock = new Mock<ILogger<DeleteFreelancerSkillCommandHandler>>();
         _skillsRepositoryMock = new Mock<IRepository<CvSkill>>();
 
-        _unitOfWorkMock.Setup(u => u.FreelancerSkillsRepository).Returns(_skillsRepositoryMock.Object);
+        _unitOfWorkMock.Setup(u => u.CvSkillsRepository).Returns(_skillsRepositoryMock.Object);
 
         _handler = new DeleteFreelancerSkillCommandHandler(_unitOfWorkMock.Object, _loggerMock.Object);
     }

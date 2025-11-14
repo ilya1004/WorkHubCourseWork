@@ -17,7 +17,7 @@ public class GetFreelancerSkillByIdQueryHandlerTests
         _loggerMock = new Mock<ILogger<GetFreelancerSkillByIdQueryHandler>>();
         _skillsRepositoryMock = new Mock<IRepository<CvSkill>>();
 
-        unitOfWorkMock.Setup(u => u.FreelancerSkillsRepository).Returns(_skillsRepositoryMock.Object);
+        unitOfWorkMock.Setup(u => u.CvSkillsRepository).Returns(_skillsRepositoryMock.Object);
 
         _handler = new GetFreelancerSkillByIdQueryHandler(unitOfWorkMock.Object, _loggerMock.Object);
     }

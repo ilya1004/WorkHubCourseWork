@@ -21,7 +21,7 @@ public class CreateFreelancerSkillCommandHandlerTests
         _loggerMock = new Mock<ILogger<CreateFreelancerSkillCommandHandler>>();
         _skillsRepositoryMock = new Mock<IRepository<CvSkill>>();
 
-        _unitOfWorkMock.Setup(u => u.FreelancerSkillsRepository).Returns(_skillsRepositoryMock.Object);
+        _unitOfWorkMock.Setup(u => u.CvSkillsRepository).Returns(_skillsRepositoryMock.Object);
 
         _handler = new CreateFreelancerSkillCommandHandler(_unitOfWorkMock.Object, _mapperMock.Object, _loggerMock.Object);
     }

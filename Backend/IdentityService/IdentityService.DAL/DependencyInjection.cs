@@ -5,6 +5,7 @@ using IdentityService.DAL.Data;
 using IdentityService.DAL.Repositories;
 using IdentityService.DAL.Services.DbStartupService;
 using IdentityService.DAL.Services.RedisService;
+using IdentityService.DAL.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 

@@ -1,19 +1,41 @@
 using IdentityService.DAL.Abstractions.Repositories;
 using IdentityService.DAL.Data;
+using Microsoft.Extensions.Logging;
 
 namespace IdentityService.DAL.Repositories;
 
-public class FreelancerProfilesRepository(ApplicationDbContext context) : IFreelancerProfilesRepository
+public class FreelancerProfilesRepository : IFreelancerProfilesRepository
 {
-    public async Task<bool> CreateAsync(FreelancerProfile profile, CancellationToken cancellationToken = default)
-    {
-        var rowsAffected = await context.Database.ExecuteSqlAsync(
-            $"""
-             INSERT INTO "FreelancerProfiles" (Id, RegisteredAt, Email, PasswordHash, RoleId)
-             VALUES ({user.Id}, {user.RegisteredAt}, {user.Email}, {user.PasswordHash}, {user.RoleId}
-             """,
-            cancellationToken);
+    private readonly ApplicationDbContext _context;
+    private readonly ILogger<FreelancerProfilesRepository> _logger;
 
-        return rowsAffected == 1;
+    public FreelancerProfilesRepository(ApplicationDbContext context, ILogger<FreelancerProfilesRepository> logger)
+    {
+        _context = context;
+        _logger = logger;
+    }
+
+    public async Task CreateAsync(FreelancerProfile profile, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+                $"""
+                 INSERT INTO "FreelancerProfiles" ("Id", "FirstName", "LastName", "Nickname", "UserId")
+                 VALUES ({profile.Id}, {profile.FirstName}, {profile.LastName}, {profile.Nickname}, {profile.UserId})
+                 """,
+                cancellationToken);
+
+            if (rowsAffected != 1)
+            {
+                _logger.LogError("Failed to create freelancer profile. Affected [{rowsAffected}] rows", rowsAffected);
+                throw new InvalidOperationException($"Failed to create freelancer profile. Affected [{rowsAffected}] rows");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to create freelancer profile. Error: {Message}", ex.Message);
+            throw new InvalidOperationException($"Failed to create freelancer profile. Error: {ex.Message}");
+        }
     }
 }

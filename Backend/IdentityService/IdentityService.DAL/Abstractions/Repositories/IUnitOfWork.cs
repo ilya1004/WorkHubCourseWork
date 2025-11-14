@@ -2,10 +2,10 @@
 
 public interface IUnitOfWork
 {
-    public IRepository<EmployerProfile> EmployerProfilesRepository { get; }
+    public IEmployerProfilesRepository EmployerProfilesRepository { get; }
     public IFreelancerProfilesRepository FreelancerProfilesRepository { get; }
-    public IRepository<CvSkill> FreelancerSkillsRepository { get; }
-    public IRepository<EmployerIndustry> EmployerIndustriesRepository { get; }
+    public ICvSkillsRepository CvSkillsRepository { get; }
+    public IEmployerIndustriesRepository EmployerIndustriesRepository { get; }
     public IUsersRepository UsersRepository { get; }
     public IRolesRepository RolesRepository { get; }
     public Task SaveAllAsync(CancellationToken cancellationToken = default);
