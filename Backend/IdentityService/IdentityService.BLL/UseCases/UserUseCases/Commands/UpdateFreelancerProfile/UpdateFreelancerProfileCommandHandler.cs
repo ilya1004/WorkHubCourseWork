@@ -41,7 +41,7 @@ public class UpdateFreelancerProfileCommandHandler(
                 user.FreelancerProfile.Skills.Remove(skill);
             }
 
-            var allPotentialSkills = await unitOfWork.FreelancerSkillsRepository.ListAsync(
+            var allPotentialSkills = await unitOfWork.CvSkillsRepository.ListAsync(
                 s => newSkillIds.Contains(s.Id), cancellationToken);
 
             var skillsToAdd = allPotentialSkills.Where(s =>

@@ -1,33 +1,39 @@
 ﻿namespace IdentityService.BLL.UseCases.UserUseCases.Commands.ChangePassword;
 
-public class ChangePasswordCommandHandler(
-    UserManager<User> userManager,
-    ILogger<ChangePasswordCommandHandler> logger) : IRequestHandler<ChangePasswordCommand>
+public class ChangePasswordCommandHandler : IRequestHandler<ChangePasswordCommand>
 {
+    private readonly ILogger<ChangePasswordCommandHandler> _logger;
+
+    public ChangePasswordCommandHandler(UserManager<User> userManager,
+        ILogger<ChangePasswordCommandHandler> logger)
+    {
+        _logger = logger;
+    }
+
     public async Task Handle(ChangePasswordCommand request, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Changing password for user with email: {Email}", request.Email);
+        _logger.LogInformation("Changing password for user with email: {Email}", request.Email);
 
-        var user = await userManager.FindByEmailAsync(request.Email);
+        var user = await _userManager.FindByEmailAsync(request.Email);
 
         if (user is null)
         {
-            logger.LogWarning("User with email {Email} not found", request.Email);
+            _logger.LogWarning("User with email {Email} not found", request.Email);
             
             throw new NotFoundException($"User with email '{request.Email}' not found");
         }
 
-        var result = await userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
+        var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
 
         if (!result.Succeeded)
         {
             var errors = string.Join("; ", result.Errors.Select(e => e.Description));
             
-            logger.LogWarning("Failed to change password for user {UserId}: {Errors}", user.Id, errors);
+            _logger.LogWarning("Failed to change password for user {UserId}: {Errors}", user.Id, errors);
             
             throw new BadRequestException($"Password is not successfully changed. Errors: {errors}");
         }
 
-        logger.LogInformation("Successfully changed password for user {UserId}", user.Id);
+        _logger.LogInformation("Successfully changed password for user {UserId}", user.Id);
     }
 }

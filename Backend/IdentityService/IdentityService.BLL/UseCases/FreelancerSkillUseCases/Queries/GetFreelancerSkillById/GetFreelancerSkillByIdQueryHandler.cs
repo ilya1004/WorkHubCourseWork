@@ -10,7 +10,7 @@ public class GetFreelancerSkillByIdQueryHandler(
     {
         logger.LogInformation("Getting freelancer skill by ID: {SkillId}", request.Id);
 
-        var freelancerSkill = await unitOfWork.FreelancerSkillsRepository.GetByIdAsync(request.Id, cancellationToken);
+        var freelancerSkill = await unitOfWork.CvSkillsRepository.GetByIdAsync(request.Id, cancellationToken);
 
         if (freelancerSkill is null)
         {

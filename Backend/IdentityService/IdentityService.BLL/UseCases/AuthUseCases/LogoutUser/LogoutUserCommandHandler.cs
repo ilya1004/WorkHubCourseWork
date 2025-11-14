@@ -2,38 +2,40 @@
 
 namespace IdentityService.BLL.UseCases.AuthUseCases.LogoutUser;
 
-public class LogoutUserCommandHandler(
-    UserManager<User> userManager,
-    IUserContext userContext,
-    ILogger<LogoutUserCommandHandler> logger) : IRequestHandler<LogoutUserCommand>
+public class LogoutUserCommandHandler : IRequestHandler<LogoutUserCommand>
 {
+    private readonly IUserContext _userContext;
+    private readonly ILogger<LogoutUserCommandHandler> _logger;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public LogoutUserCommandHandler(
+        IUserContext userContext,
+        ILogger<LogoutUserCommandHandler> logger,
+        IUnitOfWork unitOfWork)
+    {
+        _userContext = userContext;
+        _logger = logger;
+        _unitOfWork = unitOfWork;
+    }
+
     public async Task Handle(LogoutUserCommand request, CancellationToken cancellationToken)
     {
-        var userId = userContext.GetUserId();
-        
-        logger.LogInformation("Logout requested for user with ID '{UserId}'", userId);
+        var userId = _userContext.GetUserId();
 
-        var user = await userManager.FindByIdAsync(userId.ToString());
+        var user = await _unitOfWork.UsersRepository.GetByIdAsync(userId, cancellationToken);
 
         if (user is null)
         {
-            logger.LogWarning("User with ID '{UserId}' not found during logout", userId);
-            
+            _logger.LogError("User with ID '{UserId}' not found during logout", userId);
             throw new NotFoundException($"User with ID '{userId}' not found");
         }
 
         if (user.RefreshToken is null && user.RefreshTokenExpiryTime is null)
         {
-            logger.LogInformation("User with ID '{UserId}' has already logout", userId);
-            
+            _logger.LogWarning("User with ID '{UserId}' has already logout", userId);
             return;
         }
 
-        user.RefreshToken = null;
-        user.RefreshTokenExpiryTime = null;
-
-        await userManager.UpdateAsync(user);
-        
-        logger.LogInformation("User with ID '{UserId}' logged out successfully", userId);
+        await _unitOfWork.UsersRepository.UpdateRefreshTokenInfoAsync(user.Id, null, null, cancellationToken);
     }
 }

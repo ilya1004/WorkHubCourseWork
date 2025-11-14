@@ -1,62 +1,64 @@
 ﻿using IdentityService.BLL.Abstractions.TokenProvider;
 using IdentityService.BLL.DTOs;
 using IdentityService.BLL.Settings;
+using IdentityService.DAL.Abstractions.PasswordHasher;
 
 namespace IdentityService.BLL.UseCases.AuthUseCases.LoginUser;
 
-public class LoginUserCommandHandler(
-    SignInManager<User> signInManager,
-    IUnitOfWork unitOfWork,
-    ITokenProvider tokenService,
-    IOptions<JwtSettings> options,
-    ILogger<LoginUserCommandHandler> logger) : IRequestHandler<LoginUserCommand, AuthTokensDto>
+public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, AuthTokensDto>
 {
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ITokenProvider _tokenService;
+    private readonly IOptions<JwtSettings> _options;
+    private readonly ILogger<LoginUserCommandHandler> _logger;
+    private readonly IPasswordHasher _passwordHasher;
+
+    public LoginUserCommandHandler(
+        IUnitOfWork unitOfWork,
+        ITokenProvider tokenService,
+        IOptions<JwtSettings> options,
+        ILogger<LoginUserCommandHandler> logger,
+        IPasswordHasher passwordHasher)
+    {
+        _unitOfWork = unitOfWork;
+        _tokenService = tokenService;
+        _options = options;
+        _logger = logger;
+        _passwordHasher = passwordHasher;
+    }
+
     public async Task<AuthTokensDto> Handle(LoginUserCommand request, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Login attempt for email {Email}", request.Email);
-
-        var user = await unitOfWork.UsersRepository.FirstOrDefaultAsync(
-            u => u.Email == request.Email, 
-            cancellationToken, 
-            u => u.Role);
+        var user = await _unitOfWork.UsersRepository.GetByEmailAsync(request.Email, cancellationToken);
 
         if (user is null)
         {
-            logger.LogWarning("Invalid login attempt for email {Email}", request.Email);
-            
+            _logger.LogError("Invalid login attempt for email {Email}", request.Email);
             throw new UnauthorizedException("Invalid credentials.");
         }
 
-        var result = await signInManager.CheckPasswordSignInAsync(user, request.Password, false);
+        var isPasswordCorrect = _passwordHasher.VerifyPassword(request.Password, user.PasswordHash);
 
-        if (!result.Succeeded)
+        if (!isPasswordCorrect)
         {
-            logger.LogWarning("Invalid password for user {UserId}", user.Id);
-            
+            _logger.LogError("Invalid password for user {UserId}", user.Id);
             throw new UnauthorizedException("Invalid credentials.");
         }
 
         if (!user.IsEmailConfirmed)
         {
-            logger.LogWarning("Login attempt for unconfirmed email {Email}", request.Email);
-            
+            _logger.LogError("Login attempt for unconfirmed email {Email}", request.Email);
             throw new UnauthorizedException("You need to confirm your email.");
         }
 
-        logger.LogInformation("Generating tokens for user {UserId}", user.Id);
-        
-        var accessToken = tokenService.GenerateAccessToken(user);
-        var refreshToken = tokenService.GenerateRefreshToken();
+        var accessToken = _tokenService.GenerateAccessToken(user);
+        var refreshToken = _tokenService.GenerateRefreshToken();
 
-        user.RefreshToken = refreshToken;
-        var expiryDays = options.Value.RefreshTokenExpiryDays;
-        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(expiryDays);
+        var expiryDays = _options.Value.RefreshTokenExpiryDays;
+        var refreshTokenExpiryTime = DateTime.UtcNow.AddDays(expiryDays);
 
-        await unitOfWork.UsersRepository.UpdateAsync(user, cancellationToken);
-        await unitOfWork.SaveAllAsync(cancellationToken);
+        await _unitOfWork.UsersRepository.UpdateRefreshTokenInfoAsync(user.Id, refreshToken, refreshTokenExpiryTime, cancellationToken);
 
-        logger.LogInformation("Successful login for user {UserId}", user.Id);
-        
         return new AuthTokensDto(accessToken, refreshToken);
     }
 }

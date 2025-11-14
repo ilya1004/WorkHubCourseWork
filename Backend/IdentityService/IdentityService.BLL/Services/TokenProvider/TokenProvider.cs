@@ -19,8 +19,8 @@ public class TokenProvider(
         var claims = new[]
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Email, user.Email!),
-            new Claim(ClaimTypes.Role, user.Role.Name!)
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, user.Role.Name)
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.Value.SecretKey));
@@ -79,5 +79,21 @@ public class TokenProvider(
         logger.LogInformation("Token validated successfully");
         
         return principal;
+    }
+
+    public string GeneratePasswordResetToken(User user)
+    {
+        var idString = Convert.ToBase64String(Encoding.UTF8.GetBytes(user.Id.ToString()));
+        var emailString = Convert.ToBase64String(Encoding.UTF8.GetBytes(user.Email));
+        var roleString = Convert.ToBase64String(Encoding.UTF8.GetBytes(user.RoleId.ToString()));
+        return string.Concat(idString, emailString, roleString);
+    }
+
+    public bool VerifyPasswordResetToken(User user, string token)
+    {
+        var idString = Convert.ToBase64String(Encoding.UTF8.GetBytes(user.Id.ToString()));
+        var emailString = Convert.ToBase64String(Encoding.UTF8.GetBytes(user.Email));
+        var roleString = Convert.ToBase64String(Encoding.UTF8.GetBytes(user.RoleId.ToString()));
+        return token == string.Concat(idString, emailString, roleString);
     }
 }

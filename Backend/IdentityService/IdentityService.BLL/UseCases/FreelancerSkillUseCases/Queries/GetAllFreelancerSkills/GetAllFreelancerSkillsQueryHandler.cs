@@ -15,10 +15,10 @@ public class GetAllFreelancerSkillsQueryHandler(
 
         var offset = (request.PageNo - 1) * request.PageSize;
 
-        var skills = await unitOfWork.FreelancerSkillsRepository.PaginatedListAllAsync(
+        var skills = await unitOfWork.CvSkillsRepository.PaginatedListAllAsync(
             offset, request.PageSize, cancellationToken);
 
-        var skillsCount = await unitOfWork.FreelancerSkillsRepository.CountAllAsync(cancellationToken);
+        var skillsCount = await unitOfWork.CvSkillsRepository.CountAllAsync(cancellationToken);
 
         logger.LogInformation("Retrieved {Count} skills out of {TotalCount}", skills.Count, skillsCount);
 

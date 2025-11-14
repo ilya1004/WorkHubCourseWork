@@ -1,51 +1,61 @@
-﻿using IdentityService.DAL.Abstractions.RedisService;
+﻿using IdentityService.BLL.Abstractions.TokenProvider;
+using IdentityService.DAL.Abstractions.PasswordHasher;
+using IdentityService.DAL.Abstractions.RedisService;
 
 namespace IdentityService.BLL.UseCases.AuthUseCases.ResetPassword;
 
-public class ResetPasswordCommandHandler(
-    UserManager<User> userManager,
-    ICachedService cachedService,
-    ILogger<ResetPasswordCommandHandler> logger) : IRequestHandler<ResetPasswordCommand>
+public class ResetPasswordCommandHandler : IRequestHandler<ResetPasswordCommand>
 {
+    private readonly ICachedService _cachedService;
+    private readonly ILogger<ResetPasswordCommandHandler> _logger;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ITokenProvider _tokenProvider;
+    private readonly IPasswordHasher _passwordHasher;
+
+    public ResetPasswordCommandHandler(
+        ICachedService cachedService,
+        ILogger<ResetPasswordCommandHandler> logger,
+        IUnitOfWork unitOfWork,
+        ITokenProvider tokenProvider,
+        IPasswordHasher passwordHasher)
+    {
+        _cachedService = cachedService;
+        _logger = logger;
+        _unitOfWork = unitOfWork;
+        _tokenProvider = tokenProvider;
+        _passwordHasher = passwordHasher;
+    }
+
     public async Task Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Processing password reset for {Email}", request.Email);
-
-        var user = await userManager.FindByEmailAsync(request.Email);
+        var user = await _unitOfWork.UsersRepository.GetByEmailAsync(request.Email, cancellationToken);
 
         if (user is null)
         {
-            logger.LogWarning("User with email {Email} not found", request.Email);
-            
+            _logger.LogError("User with email {Email} not found", request.Email);
             throw new NotFoundException("User with this email does not exist.");
         }
 
-        logger.LogInformation("Retrieving reset code {Code} from cache", request.Code);
-        
-        var token = await cachedService.GetAsync(request.Code, cancellationToken);
+        var token = await _cachedService.GetAsync(request.Code, cancellationToken);
         
         if (string.IsNullOrEmpty(token))
         {
-            logger.LogWarning("Invalid reset code {Code}", request.Code);
-            
+            _logger.LogError("Invalid reset code {Code}", request.Code);
             throw new BadRequestException("Invalid resetting password code.");
         }
-        
-        logger.LogInformation("Resetting password for user {UserId}", user.Id);
-        
-        var result = await userManager.ResetPasswordAsync(user, token, request.NewPassword);
 
-        if (!result.Succeeded)
+        var isTokenValid = _tokenProvider.VerifyPasswordResetToken(user, token);
+
+        if (!isTokenValid)
         {
-            var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-            
-            logger.LogWarning("Password reset failed for user {UserId}: {Errors}", user.Id, errors);
-            
-            throw new BadRequestException($"Password is not successfully changed. Errors: {errors}");
+            _logger.LogError("Invalid password reset token.");
+            throw new BadRequestException("Invalid password reset token.");
         }
-        
-        await cachedService.DeleteAsync(request.Code, cancellationToken);
-        
-        logger.LogInformation("Password reset successfully for user {UserId}", user.Id);
+
+        var passwordHash = _passwordHasher.HashPassword(request.NewPassword);
+
+        await _unitOfWork.UsersRepository.UpdatePasswordHashAsync(user.Id, passwordHash, cancellationToken);
+
+        await _cachedService.DeleteAsync(request.Code, cancellationToken);
     }
 }

@@ -8,7 +8,7 @@ public class DeleteFreelancerSkillCommandHandler(
     {
         logger.LogInformation("Deleting freelancer skill with ID: {SkillId}", request.Id);
 
-        var freelancerSkill = await unitOfWork.FreelancerSkillsRepository.GetByIdAsync(request.Id, cancellationToken);
+        var freelancerSkill = await unitOfWork.CvSkillsRepository.GetByIdAsync(request.Id, cancellationToken);
 
         if (freelancerSkill is null)
         {
@@ -17,7 +17,7 @@ public class DeleteFreelancerSkillCommandHandler(
             throw new NotFoundException($"Freelancer skill with ID '{request.Id}' not found");
         }
 
-        await unitOfWork.FreelancerSkillsRepository.DeleteAsync(freelancerSkill, cancellationToken);
+        await unitOfWork.CvSkillsRepository.DeleteAsync(freelancerSkill, cancellationToken);
         await unitOfWork.SaveAllAsync(cancellationToken);
         
         logger.LogInformation("Successfully deleted freelancer skill with ID: {SkillId}", request.Id);

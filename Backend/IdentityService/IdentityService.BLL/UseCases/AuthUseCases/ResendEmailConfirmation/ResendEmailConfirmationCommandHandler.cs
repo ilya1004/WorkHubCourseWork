@@ -13,26 +13,20 @@ public class ResendEmailConfirmationCommandHandler(
 {
     public async Task Handle(ResendEmailConfirmationCommand request, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Resending email confirmation to {Email}", request.Email);
-
         var user = await userManager.FindByEmailAsync(request.Email);
 
         if (user is null)
         {
-            logger.LogWarning("User with email {Email} not found", request.Email);
-            
+            logger.LogError("User with email {Email} not found", request.Email);
             throw new BadRequestException($"A user with the email '{request.Email}' not exist.");
         }
 
-        if (user.EmailConfirmed)
+        if (user.IsEmailConfirmed)
         {
-            logger.LogInformation("Email {Email} already confirmed", request.Email);
-            
+            logger.LogError("Email {Email} already confirmed", request.Email);
             throw new BadRequestException("Your email is already confirmed.");
         }
 
-        logger.LogInformation("Generating new confirmation token for user {UserId}", user.Id);
-        
         var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
 
         string code;
@@ -43,15 +37,9 @@ public class ResendEmailConfirmationCommandHandler(
         }
         while (await cachedService.ExistsAsync(code, cancellationToken));
 
-        logger.LogInformation("Storing confirmation code {Code} in cache", code);
-        
         await cachedService.SetAsync(code, token, TimeSpan.FromHours(
             int.Parse(configuration.GetRequiredSection("IdentityTokenExpirationTimeInHours").Value!)), cancellationToken);
 
-        logger.LogInformation("Sending confirmation email to {Email}", user.Email);
-        
         await emailSender.SendEmailConfirmation(user.Email!, code, cancellationToken);
-        
-        logger.LogInformation("Confirmation email sent to {Email}", user.Email);
     }
 }

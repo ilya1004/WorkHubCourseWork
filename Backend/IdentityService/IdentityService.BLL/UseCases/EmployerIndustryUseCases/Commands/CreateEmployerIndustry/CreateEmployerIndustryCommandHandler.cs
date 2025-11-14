@@ -1,32 +1,36 @@
 ﻿namespace IdentityService.BLL.UseCases.EmployerIndustryUseCases.Commands.CreateEmployerIndustry;
 
-public class CreateEmployerIndustryCommandHandler(
-    IUnitOfWork unitOfWork,
-    IMapper mapper,
-    ILogger<CreateEmployerIndustryCommandHandler> logger) : IRequestHandler<CreateEmployerIndustryCommand>
+public class CreateEmployerIndustryCommandHandler : IRequestHandler<CreateEmployerIndustryCommand>
 {
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
+    private readonly ILogger<CreateEmployerIndustryCommandHandler> _logger;
+
+    public CreateEmployerIndustryCommandHandler(IUnitOfWork unitOfWork,
+        IMapper mapper,
+        ILogger<CreateEmployerIndustryCommandHandler> logger)
+    {
+        _unitOfWork = unitOfWork;
+        _mapper = mapper;
+        _logger = logger;
+    }
+
     public async Task Handle(CreateEmployerIndustryCommand request, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Creating new employer industry with name: {IndustryName}", request.Name);
-
-        var industry = await unitOfWork.EmployerIndustriesRepository.FirstOrDefaultAsync(
-            ei => ei.Name == request.Name,
-            cancellationToken);
+        var industry = await _unitOfWork.EmployerIndustriesRepository.GetByNameAsync(request.Name, cancellationToken);
 
         if (industry != null)
         {
-            logger.LogWarning("Industry with name {IndustryName} already exists", request.Name);
-            
+            _logger.LogError("Industry with name {IndustryName} already exists", request.Name);
             throw new BadRequestException($"Industry with the name '{request.Name}' already exists.");
         }
 
-        logger.LogInformation("Mapping and creating new industry");
-        
-        var newIndustry = mapper.Map<EmployerIndustry>(request);
+        var newIndustry = new EmployerIndustry
+        {
+            Id = Guid.CreateVersion7(),
+            Name = request.Name,
+        };
 
-            await unitOfWork.EmployerIndustriesRepository.AddAsync(newIndustry, cancellationToken);
-        await unitOfWork.SaveAllAsync(cancellationToken);
-
-        logger.LogInformation("Successfully created new industry with ID: {IndustryId}", newIndustry.Id);
+        await _unitOfWork.EmployerIndustriesRepository.CreateAsync(newIndustry, cancellationToken);
     }
 }

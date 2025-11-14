@@ -9,7 +9,7 @@ public class UpdateFreelancerSkillCommandHandler(
     {
         logger.LogInformation("Updating freelancer skill with ID: {SkillId}", request.Id);
 
-        var freelancerSkill = await unitOfWork.FreelancerSkillsRepository.GetByIdAsync(request.Id, cancellationToken);
+        var freelancerSkill = await unitOfWork.CvSkillsRepository.GetByIdAsync(request.Id, cancellationToken);
 
         if (freelancerSkill is null)
         {
@@ -22,7 +22,7 @@ public class UpdateFreelancerSkillCommandHandler(
         
         mapper.Map(request, freelancerSkill);
 
-        await unitOfWork.FreelancerSkillsRepository.UpdateAsync(freelancerSkill, cancellationToken);
+        await unitOfWork.CvSkillsRepository.UpdateAsync(freelancerSkill, cancellationToken);
         await unitOfWork.SaveAllAsync(cancellationToken);
         
         logger.LogInformation("Successfully updated freelancer skill with ID: {SkillId}", request.Id);

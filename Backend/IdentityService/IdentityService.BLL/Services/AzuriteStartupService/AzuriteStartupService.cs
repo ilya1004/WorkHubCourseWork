@@ -14,14 +14,12 @@ public class AzuriteStartupService(
     {
         var containerName = options.Value.ImagesContainerName;
         
-        logger.LogInformation("Checking container '{ContainerName}' existence", containerName);
+        logger.LogInformation("Checking container '{ContainerName}' existence...", containerName);
         
         var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
 
         if (!await containerClient.ExistsAsync())
         {
-            logger.LogInformation("Creating container '{ContainerName}'", containerName);
-            
             await containerClient.CreateIfNotExistsAsync(PublicAccessType.Blob, metadata: null);
             
             logger.LogInformation("Container '{ContainerName}' created successfully", containerName);

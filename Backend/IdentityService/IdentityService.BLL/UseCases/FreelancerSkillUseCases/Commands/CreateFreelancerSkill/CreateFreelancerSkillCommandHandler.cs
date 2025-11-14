@@ -10,7 +10,7 @@ public class CreateFreelancerSkillCommandHandler(
         logger.LogInformation("Creating new freelancer skill with name: {SkillName}", request.Name);
 
         var freelancerSkill =
-            await unitOfWork.FreelancerSkillsRepository.FirstOrDefaultAsync(fs => fs.Name == request.Name, cancellationToken);
+            await unitOfWork.CvSkillsRepository.FirstOrDefaultAsync(fs => fs.Name == request.Name, cancellationToken);
 
         if (freelancerSkill != null)
         {
@@ -23,7 +23,7 @@ public class CreateFreelancerSkillCommandHandler(
         
         var newFreelancerSkill = mapper.Map<CvSkill>(request);
 
-        await unitOfWork.FreelancerSkillsRepository.AddAsync(newFreelancerSkill, cancellationToken);
+        await unitOfWork.CvSkillsRepository.AddAsync(newFreelancerSkill, cancellationToken);
         await unitOfWork.SaveAllAsync(cancellationToken);
         
         logger.LogInformation("Successfully created freelancer skill with ID: {SkillId}", newFreelancerSkill.Id);

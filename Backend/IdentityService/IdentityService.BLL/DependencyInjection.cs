@@ -14,7 +14,9 @@ using IdentityService.BLL.HealthChecks;
 using IdentityService.BLL.Services.AzuriteStartupService;
 using IdentityService.BLL.Services.KafkaConsumerServices;
 using IdentityService.BLL.Services.LogstashHelpers;
+using IdentityService.BLL.Services.PasswordHasher;
 using IdentityService.BLL.Settings;
+using IdentityService.DAL.Abstractions.PasswordHasher;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Serilog;
 
@@ -29,7 +31,8 @@ public static class DependencyInjection
             config.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
         });
 
-        services.AddAutoMapper(Assembly.GetExecutingAssembly());
+        services.AddAutoMapper(config =>
+            config.AddMaps(Assembly.GetExecutingAssembly()));
         
         services.AddOptionsWithValidateOnStart<AzuriteSettings>()
             .BindConfiguration("AzuriteSettings");
@@ -43,6 +46,7 @@ public static class DependencyInjection
         services.AddScoped<ITokenProvider, TokenProvider>();
         services.AddScoped<IEmailSender, EmailSender>();
         services.AddScoped<IAzuriteStartupService, AzuriteStartupService>();
+        services.AddScoped<IPasswordHasher, PasswordHasher>();
 
         services.AddSingleton<IBlobService, BlobService>();
         services.AddSingleton(_ => new BlobServiceClient(azuriteSettings.ConnectionString));

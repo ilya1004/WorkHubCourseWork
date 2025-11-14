@@ -2,55 +2,48 @@
 
 namespace IdentityService.BLL.UseCases.AuthUseCases.ConfirmEmail;
 
-public class ConfirmEmailCommandHandler(
-    UserManager<User> userManager,
-    ICachedService cachedService,
-    ILogger<ConfirmEmailCommandHandler> logger) : IRequestHandler<ConfirmEmailCommand>
+public class ConfirmEmailCommandHandler : IRequestHandler<ConfirmEmailCommand>
 {
+    private readonly ICachedService _cachedService;
+    private readonly ILogger<ConfirmEmailCommandHandler> _logger;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public ConfirmEmailCommandHandler(
+        ICachedService cachedService,
+        ILogger<ConfirmEmailCommandHandler> logger,
+        IUnitOfWork unitOfWork)
+    {
+        _cachedService = cachedService;
+        _logger = logger;
+        _unitOfWork = unitOfWork;
+    }
+
     public async Task Handle(ConfirmEmailCommand request, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Starting email confirmation for {Email}", request.Email);
-
-        var user = await userManager.FindByEmailAsync(request.Email);
+        var user = await _unitOfWork.UsersRepository.GetByEmailAsync(request.Email, cancellationToken);
 
         if (user is null)
         {
-            logger.LogWarning("User with email {Email} not found", request.Email);
-            
+            _logger.LogError("User with email {Email} not found", request.Email);
             throw new BadRequestException($"A user with the email '{request.Email}' not exist.");
         }
 
-        if (user.EmailConfirmed)
+        if (user.IsEmailConfirmed)
         {
-            logger.LogInformation("Email {Email} already confirmed", request.Email);
-            
+            _logger.LogError("Email {Email} already confirmed", request.Email);
             throw new BadRequestException("Your email is already confirmed.");
         }
         
-        logger.LogInformation("Retrieving verification code {Code} from cache", request.Code);
-        
-        var token = await cachedService.GetAsync(request.Code);
+        var token = await _cachedService.GetAsync(request.Code, cancellationToken);
 
         if (string.IsNullOrEmpty(token))
         {
-            logger.LogWarning("Invalid verification code {Code}", request.Code);
-            
+            _logger.LogError("Invalid verification code {Code}", request.Code);
             throw new BadRequestException("Invalid verification code.");
         }
 
-        logger.LogInformation("Confirming email for user {UserId}", user.Id);
-        
-        var result = await userManager.ConfirmEmailAsync(user, token);
+        await _unitOfWork.UsersRepository.UpdateIsEmailConfirmedAsync(user.Id, cancellationToken);
 
-        if (!result.Succeeded)
-        {
-            logger.LogWarning("Invalid email confirmation token for user {UserId}", user.Id);
-            
-            throw new BadRequestException("Email confirmation token is invalid");
-        }
-
-        await cachedService.DeleteAsync(request.Code);
-        
-        logger.LogInformation("Email confirmed successfully for user {UserId}", user.Id);
+        await _cachedService.DeleteAsync(request.Code, cancellationToken);
     }
 }
