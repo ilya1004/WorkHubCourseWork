@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IdentityService", "IdentityService", "{C92C2A6C-C7DF-3B17-8CE7-85FC08468CCF}"
+	ProjectSection(SolutionItems) = preProject
+		IdentityService\Dockerfile = IdentityService\Dockerfile
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityService.API", "IdentityService\IdentityService.API\IdentityService.API.csproj", "{DC1F234B-52A8-4F6A-95D1-0E7F03338990}"
 EndProject

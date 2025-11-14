@@ -31,7 +31,7 @@ public class UpdateProjectStatusesCommandHandler(
             logger.LogInformation("Processing project {ProjectId}, current status: {CurrentStatus}", 
                 project.Id, previousStatus);
 
-            if (lifecycle.AcceptanceConfirmed)
+            if (lifecycle.AcceptanceStatus == ProjectAcceptanceStatus.Accepted)
             {
                 lifecycle.ProjectStatus = ProjectStatus.Completed;
                 
