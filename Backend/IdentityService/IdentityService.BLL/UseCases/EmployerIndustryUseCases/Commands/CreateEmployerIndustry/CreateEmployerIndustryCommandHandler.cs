@@ -3,15 +3,13 @@
 public class CreateEmployerIndustryCommandHandler : IRequestHandler<CreateEmployerIndustryCommand>
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
     private readonly ILogger<CreateEmployerIndustryCommandHandler> _logger;
 
-    public CreateEmployerIndustryCommandHandler(IUnitOfWork unitOfWork,
-        IMapper mapper,
+    public CreateEmployerIndustryCommandHandler(
+        IUnitOfWork unitOfWork,
         ILogger<CreateEmployerIndustryCommandHandler> logger)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
         _logger = logger;
     }
 
@@ -19,7 +17,7 @@ public class CreateEmployerIndustryCommandHandler : IRequestHandler<CreateEmploy
     {
         var industry = await _unitOfWork.EmployerIndustriesRepository.GetByNameAsync(request.Name, cancellationToken);
 
-        if (industry != null)
+        if (industry is not null)
         {
             _logger.LogError("Industry with name {IndustryName} already exists", request.Name);
             throw new BadRequestException($"Industry with the name '{request.Name}' already exists.");

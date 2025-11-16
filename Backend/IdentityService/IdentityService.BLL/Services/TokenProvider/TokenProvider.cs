@@ -8,13 +8,21 @@ using IdentityService.BLL.Abstractions.TokenProvider;
 
 namespace IdentityService.BLL.Services.TokenProvider;
 
-public class TokenProvider(
-    IOptions<JwtSettings> options,
-    ILogger<TokenProvider> logger) : ITokenProvider
+public class TokenProvider : ITokenProvider
 {
+    private readonly IOptions<JwtSettings> _options;
+    private readonly ILogger<TokenProvider> _logger;
+
+    public TokenProvider(IOptions<JwtSettings> options,
+        ILogger<TokenProvider> logger)
+    {
+        _options = options;
+        _logger = logger;
+    }
+
     public string GenerateAccessToken(User user)
     {
-        logger.LogInformation("Generating access token for user {UserId}", user.Id);
+        _logger.LogInformation("Generating access token for user {UserId}", user.Id);
         
         var claims = new[]
         {
@@ -23,24 +31,24 @@ public class TokenProvider(
             new Claim(ClaimTypes.Role, user.Role.Name)
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.Value.SecretKey));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Value.SecretKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
-            options.Value.Issuer,
-            options.Value.Audience,
+            _options.Value.Issuer,
+            _options.Value.Audience,
             claims,
-            expires: DateTime.UtcNow.AddMinutes(options.Value.AccessTokenExpiryMinutes),
+            expires: DateTime.UtcNow.AddMinutes(_options.Value.AccessTokenExpiryMinutes),
             signingCredentials: credentials);
 
-        logger.LogInformation("Access token generated successfully for user {UserId}", user.Id);
+        _logger.LogInformation("Access token generated successfully for user {UserId}", user.Id);
         
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
     public string GenerateRefreshToken()
     {
-        logger.LogInformation("Generating refresh token");
+        _logger.LogInformation("Generating refresh token");
         
         var randomNumber = new byte[64];
         using var rng = RandomNumberGenerator.Create();
@@ -51,16 +59,16 @@ public class TokenProvider(
 
     public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
     {
-        logger.LogInformation("Validating expired token");
+        _logger.LogInformation("Validating expired token");
         
         var tokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = options.Value.Issuer,
-            ValidAudience = options.Value.Audience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.Value.SecretKey)),
+            ValidIssuer = _options.Value.Issuer,
+            ValidAudience = _options.Value.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Value.SecretKey)),
             ValidateLifetime = false
         };
 
@@ -71,12 +79,12 @@ public class TokenProvider(
         if (jwtSecurityToken is null ||
             !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
         {
-            logger.LogWarning("Invalid token received");
+            _logger.LogWarning("Invalid token received");
             
             throw new UnauthorizedException("Invalid token");
         }
 
-        logger.LogInformation("Token validated successfully");
+        _logger.LogInformation("Token validated successfully");
         
         return principal;
     }
@@ -90,6 +98,22 @@ public class TokenProvider(
     }
 
     public bool VerifyPasswordResetToken(User user, string token)
+    {
+        var idString = Convert.ToBase64String(Encoding.UTF8.GetBytes(user.Id.ToString()));
+        var emailString = Convert.ToBase64String(Encoding.UTF8.GetBytes(user.Email));
+        var roleString = Convert.ToBase64String(Encoding.UTF8.GetBytes(user.RoleId.ToString()));
+        return token == string.Concat(idString, emailString, roleString);
+    }
+
+    public string GenerateEmailResetToken(User user)
+    {
+        var idString = Convert.ToBase64String(Encoding.UTF8.GetBytes(user.Id.ToString()));
+        var emailString = Convert.ToBase64String(Encoding.UTF8.GetBytes(user.Email));
+        var roleString = Convert.ToBase64String(Encoding.UTF8.GetBytes(user.RoleId.ToString()));
+        return string.Concat(idString, emailString, roleString);
+    }
+
+    public bool VerifyEmailResetToken(User user, string token)
     {
         var idString = Convert.ToBase64String(Encoding.UTF8.GetBytes(user.Id.ToString()));
         var emailString = Convert.ToBase64String(Encoding.UTF8.GetBytes(user.Email));

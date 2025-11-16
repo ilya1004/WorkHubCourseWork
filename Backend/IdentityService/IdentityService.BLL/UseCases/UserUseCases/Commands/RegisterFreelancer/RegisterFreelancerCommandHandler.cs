@@ -1,86 +1,96 @@
 ﻿using IdentityService.BLL.Abstractions.EmailSender;
+using IdentityService.BLL.Abstractions.TokenProvider;
+using IdentityService.DAL.Abstractions.PasswordHasher;
 using IdentityService.DAL.Abstractions.RedisService;
 using IdentityService.DAL.Constants;
 using Microsoft.Extensions.Configuration;
 
 namespace IdentityService.BLL.UseCases.UserUseCases.Commands.RegisterFreelancer;
 
-public class RegisterFreelancerCommandHandler(
-    UserManager<User> userManager,
-    IUnitOfWork unitOfWork,
-    IEmailSender emailSender,
-    ICachedService cachedService,
-    IConfiguration configuration,
-    ILogger<RegisterFreelancerCommandHandler> logger) : IRequestHandler<RegisterFreelancerCommand>
+public class RegisterFreelancerCommandHandler : IRequestHandler<RegisterFreelancerCommand>
 {
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IEmailSender _emailSender;
+    private readonly ICachedService _cachedService;
+    private readonly IConfiguration _configuration;
+    private readonly ILogger<RegisterFreelancerCommandHandler> _logger;
+    private readonly IPasswordHasher _passwordHasher;
+    private readonly ITokenProvider _tokenProvider;
+
+    public RegisterFreelancerCommandHandler(
+        IUnitOfWork unitOfWork,
+        IEmailSender emailSender,
+        ICachedService cachedService,
+        IConfiguration configuration,
+        ILogger<RegisterFreelancerCommandHandler> logger,
+        IPasswordHasher passwordHasher,
+        ITokenProvider tokenProvider)
+    {
+        _unitOfWork = unitOfWork;
+        _emailSender = emailSender;
+        _cachedService = cachedService;
+        _configuration = configuration;
+        _logger = logger;
+        _passwordHasher = passwordHasher;
+        _tokenProvider = tokenProvider;
+    }
+
     public async Task Handle(RegisterFreelancerCommand request, CancellationToken cancellationToken)
     {
-        var userByEmail = await userManager.FindByEmailAsync(request.Email);
+        var userByEmail = await _unitOfWork.UsersRepository.GetByEmailAsync(request.Email, cancellationToken);
 
         if (userByEmail is not null)
         {
-            logger.LogError("User with email {Email} already exists", request.Email);
+            _logger.LogError("User with email {Email} already exists", request.Email);
             throw new AlreadyExistsException($"A user with the email '{request.Email}' already exists.");
         }
 
-        var role = await unitOfWork.RolesRepository.GetByNameAsync(AppRoles.FreelancerRole, cancellationToken);
+        var passwordHash = _passwordHasher.HashPassword(request.Password);
+
+        var role = await _unitOfWork.RolesRepository.GetByNameAsync(AppRoles.FreelancerRole, cancellationToken);
 
         if (role is null)
         {
-            logger.LogError("Role is not found");
-            throw new NotFoundException("Role is not found");
+            _logger.LogError("Freelancer role not found");
+            throw new BadRequestException("User is not successfully registered. User Role is not successfully find");
         }
-
-        var passwordHash = request.Password; // TODO
 
         var user = new User
         {
-            Id = Guid.NewGuid(),
+            Id = Guid.CreateVersion7(),
             RegisteredAt = DateTime.UtcNow,
             Email = request.Email,
             PasswordHash = passwordHash,
             IsEmailConfirmed = false,
-            IsActive = true,
             RoleId = role.Id,
         };
 
-        var isSucceed = await unitOfWork.UsersRepository.CreateAsync(user, cancellationToken);
-
-        if (isSucceed)
-        {
-            logger.LogError("User is not successfully created");
-            throw new BadRequestException("User is not successfully created");
-        }
+        await _unitOfWork.UsersRepository.CreateAsync(user, cancellationToken);
 
         var freelancerProfile = new FreelancerProfile
         {
-            Id = Guid.Empty,
+            Id = Guid.CreateVersion7(),
             FirstName = request.FirstName,
             LastName = request.LastName,
             Nickname = request.Nickname,
             UserId = user.Id,
         };
 
-        await unitOfWork.FreelancerProfilesRepository.AddAsync(freelancerProfile, cancellationToken);
-        await unitOfWork.SaveAllAsync(cancellationToken);
+        await _unitOfWork.FreelancerProfilesRepository.CreateAsync(freelancerProfile, cancellationToken);
 
-        var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+        var token = _tokenProvider.GeneratePasswordResetToken(user);
 
         string code;
         var random = new Random();
         do
         {
             code = random.Next(100000, 999999).ToString();
-        } 
-        while (await cachedService.ExistsAsync(code, cancellationToken));
+        }
+        while (await _cachedService.ExistsAsync(code, cancellationToken));
 
-        await cachedService.SetAsync(
-            code,
-            token,
-            TimeSpan.FromHours(int.Parse(
-                configuration.GetRequiredSection("IdentityTokenExpirationTimeInHours").Value!)),
-            cancellationToken);
+        await _cachedService.SetAsync(code, token, TimeSpan.FromHours(
+            int.Parse(_configuration.GetRequiredSection("IdentityTokenExpirationTimeInHours").Value!)), cancellationToken);
 
-        await emailSender.SendEmailConfirmation(user.Email, code, cancellationToken);
+        await _emailSender.SendEmailConfirmation(user.Email, code, cancellationToken);
     }
 }

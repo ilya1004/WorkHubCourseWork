@@ -1,25 +1,27 @@
 ﻿namespace IdentityService.BLL.UseCases.EmployerIndustryUseCases.Commands.DeleteEmployerIndustry;
 
-public class DeleteEmployerIndustryCommandHandler(
-    IUnitOfWork unitOfWork,
-    ILogger<DeleteEmployerIndustryCommandHandler> logger) : IRequestHandler<DeleteEmployerIndustryCommand>
+public class DeleteEmployerIndustryCommandHandler : IRequestHandler<DeleteEmployerIndustryCommand>
 {
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<DeleteEmployerIndustryCommandHandler> _logger;
+
+    public DeleteEmployerIndustryCommandHandler(IUnitOfWork unitOfWork,
+        ILogger<DeleteEmployerIndustryCommandHandler> logger)
+    {
+        _unitOfWork = unitOfWork;
+        _logger = logger;
+    }
+
     public async Task Handle(DeleteEmployerIndustryCommand request, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Deleting employer industry with ID: {IndustryId}", request.Id);
-
-        var industry = await unitOfWork.EmployerIndustriesRepository.GetByIdAsync(request.Id, cancellationToken);
+        var industry = await _unitOfWork.EmployerIndustriesRepository.GetByIdAsync(request.Id, cancellationToken);
 
         if (industry is null)
         {
-            logger.LogWarning("Employer industry with ID {IndustryId} not found", request.Id);
-            
+            _logger.LogError("Employer industry with ID {IndustryId} not found", request.Id);
             throw new NotFoundException($"Employer Industry with ID '{request.Id}' not found");
         }
 
-        await unitOfWork.EmployerIndustriesRepository.DeleteAsync(industry, cancellationToken);
-        await unitOfWork.SaveAllAsync(cancellationToken);
-
-        logger.LogInformation("Successfully deleted industry with ID: {IndustryId}", request.Id);
+        await _unitOfWork.EmployerIndustriesRepository.DeleteAsync(industry.Id, cancellationToken);
     }
 }

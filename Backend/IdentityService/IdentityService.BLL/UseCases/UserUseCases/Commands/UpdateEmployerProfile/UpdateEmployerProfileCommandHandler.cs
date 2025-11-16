@@ -3,20 +3,30 @@ using IdentityService.BLL.Abstractions.UserContext;
 
 namespace IdentityService.BLL.UseCases.UserUseCases.Commands.UpdateEmployerProfile;
 
-public class UpdateEmployerProfileCommandHandler(
-    IUnitOfWork unitOfWork,
-    IMapper mapper,
-    IBlobService blobService,
-    IUserContext userContext,
-    ILogger<UpdateEmployerProfileCommandHandler> logger) : IRequestHandler<UpdateEmployerProfileCommand>
+public class UpdateEmployerProfileCommandHandler : IRequestHandler<UpdateEmployerProfileCommand>
 {
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IBlobService _blobService;
+    private readonly IUserContext _userContext;
+    private readonly ILogger<UpdateEmployerProfileCommandHandler> _logger;
+
+    public UpdateEmployerProfileCommandHandler(
+        IUnitOfWork unitOfWork,
+        IBlobService blobService,
+        IUserContext userContext,
+        ILogger<UpdateEmployerProfileCommandHandler> logger)
+    {
+        _unitOfWork = unitOfWork;
+        _blobService = blobService;
+        _userContext = userContext;
+        _logger = logger;
+    }
+
     public async Task Handle(UpdateEmployerProfileCommand request, CancellationToken cancellationToken)
     {
-        var userId = userContext.GetUserId();
-        
-        logger.LogInformation("Updating employer profile for user ID: {UserId}", userId);
+        var userId = _userContext.GetUserId();
 
-        var user = await unitOfWork.UsersRepository.GetByIdAsync(
+        var user = await _unitOfWork.UsersRepository.GetByIdAsync(
             userId,
             true,
             cancellationToken,
@@ -25,24 +35,20 @@ public class UpdateEmployerProfileCommandHandler(
 
         if (user is null)
         {
-            logger.LogWarning("User with ID {UserId} not found", userId);
-        
+            _logger.LogError("User with ID {UserId} not found", userId);
             throw new NotFoundException($"User with ID '{userId}' not found");
         }
-        
-        mapper.Map(request.EmployerProfile, user.EmployerProfile);
 
         if (request.EmployerProfile.IndustryId.HasValue)
         {
             if (request.EmployerProfile.IndustryId.Value != user.EmployerProfile!.Industry?.Id)
             {
-                var industry = await unitOfWork.EmployerIndustriesRepository.GetByIdAsync(
+                var industry = await _unitOfWork.EmployerIndustriesRepository.GetByIdAsync(
                     request.EmployerProfile.IndustryId.Value, cancellationToken);
 
                 if (industry is null)
                 {
-                    logger.LogWarning("Industry with ID {IndustryId} not found", request.EmployerProfile.IndustryId);
-                    
+                    _logger.LogError("Industry with ID {IndustryId} not found", request.EmployerProfile.IndustryId);
                     throw new NotFoundException($"Industry with ID '{request.EmployerProfile.IndustryId}' not found");
                 }
 
@@ -63,30 +69,21 @@ public class UpdateEmployerProfileCommandHandler(
         {
             if (!request.ContentType.StartsWith("image/"))
             {
-                logger.LogWarning("Invalid file type: {ContentType}", request.ContentType);
-            
+                _logger.LogError("Invalid file type: {ContentType}", request.ContentType);
                 throw new BadRequestException("Only image files are allowed.");
             }
             
             if (!string.IsNullOrEmpty(user.ImageUrl) && Guid.TryParse(user.ImageUrl, out var imageId))
             {
-                logger.LogInformation("Deleting old image with ID: {ImageId}", imageId);
-                
-                await blobService.DeleteAsync(imageId, cancellationToken);
+                await _blobService.DeleteAsync(imageId, cancellationToken);
             }
 
-            logger.LogInformation("Uploading new image");
-            
-            var imageFileId = await blobService.UploadAsync(
+            var imageFileId = await _blobService.UploadAsync(
                 request.FileStream,
                 request.ContentType!,
                 cancellationToken);
 
             user.ImageUrl = imageFileId.ToString();
         }
-
-        await unitOfWork.SaveAllAsync(cancellationToken);
-
-        logger.LogInformation("Successfully updated employer profile for user ID: {UserId}", userId);
     }
 }

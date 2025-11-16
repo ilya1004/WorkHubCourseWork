@@ -131,10 +131,10 @@ public class UsersRepository : IUsersRepository
     {
         try
         {
-            var user = await _context.Users
-                .FromSql($"""
-                          SELECT * FROM "Users" WHERE "Id" = {id.ToString()}
-                          """)
+            var user = await _context.Database
+                .SqlQuery<User>($"""
+                                 SELECT * FROM "Users" WHERE "Id" = {id.ToString()}
+                                 """)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -308,13 +308,29 @@ public class UsersRepository : IUsersRepository
             _logger.LogError("Failed to create user. Error: {Message}", ex.Message);
             throw new InvalidOperationException($"Failed to create user. Error: {ex.Message}");
         }
+    }
 
+    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+                $"""
+                 DELETE FROM "Users"
+                 WHERE "Id" = {id}
+                 """,
+                cancellationToken);
 
-        // context.Database.SqlQuery<User>($"").ToListAsync();
-        //
-        // return await context.Users
-        //     .FromSql("")
-        //     .AsNoTracking()
-        //     .ToListAsync(cancellationToken);
+            if (rowsAffected != 1)
+            {
+                _logger.LogError("Failed to delete user. Affected [{rowsAffected}] rows", rowsAffected);
+                throw new InvalidOperationException($"Failed to delete user. Affected [{rowsAffected}] rows");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to delete user. Error: {Message}", ex.Message);
+            throw new InvalidOperationException($"Failed to delete user. Error: {ex.Message}");
+        }
     }
 }

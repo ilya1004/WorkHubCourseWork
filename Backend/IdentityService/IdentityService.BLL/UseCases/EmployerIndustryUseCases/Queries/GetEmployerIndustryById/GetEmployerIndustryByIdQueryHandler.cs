@@ -1,24 +1,27 @@
 ﻿namespace IdentityService.BLL.UseCases.EmployerIndustryUseCases.Queries.GetEmployerIndustryById;
 
-public class GetEmployerIndustryByIdQueryHandler(
-    IUnitOfWork unitOfWork,
-    ILogger<GetEmployerIndustryByIdQueryHandler> logger) : IRequestHandler<GetEmployerIndustryByIdQuery, EmployerIndustry>
+public class GetEmployerIndustryByIdQueryHandler : IRequestHandler<GetEmployerIndustryByIdQuery, EmployerIndustry>
 {
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<GetEmployerIndustryByIdQueryHandler> _logger;
+
+    public GetEmployerIndustryByIdQueryHandler(IUnitOfWork unitOfWork,
+        ILogger<GetEmployerIndustryByIdQueryHandler> logger)
+    {
+        _unitOfWork = unitOfWork;
+        _logger = logger;
+    }
+
     public async Task<EmployerIndustry> Handle(GetEmployerIndustryByIdQuery request, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Getting employer industry by ID: {IndustryId}", request.Id);
-
-        var industry = await unitOfWork.EmployerIndustriesRepository.GetByIdAsync(request.Id, cancellationToken);
+        var industry = await _unitOfWork.EmployerIndustriesRepository.GetByIdAsync(request.Id, cancellationToken);
 
         if (industry is null)
         {
-            logger.LogWarning("Employer industry with ID {IndustryId} not found", request.Id);
-            
+            _logger.LogError("Employer industry with ID {IndustryId} not found", request.Id);
             throw new NotFoundException($"Employer Industry with ID '{request.Id}' not found");
         }
 
-        logger.LogInformation("Successfully retrieved industry with ID: {IndustryId}", request.Id);
-        
         return industry;
     }
 }

@@ -1,86 +1,94 @@
 ﻿using IdentityService.BLL.Abstractions.EmailSender;
+using IdentityService.BLL.Abstractions.TokenProvider;
+using IdentityService.DAL.Abstractions.PasswordHasher;
 using IdentityService.DAL.Abstractions.RedisService;
 using IdentityService.DAL.Constants;
 using Microsoft.Extensions.Configuration;
 
 namespace IdentityService.BLL.UseCases.UserUseCases.Commands.RegisterEmployer;
 
-public class RegisterEmployerCommandHandler(
-    UserManager<User> userManager,
-    RoleManager<IdentityRole<Guid>> roleManager,
-    IUnitOfWork unitOfWork,
-    IMapper mapper,
-    IEmailSender emailSender,
-    ICachedService cachedService,
-    IConfiguration configuration,
-    ILogger<RegisterEmployerCommandHandler> logger) : IRequestHandler<RegisterEmployerCommand>
+public class RegisterEmployerCommandHandler : IRequestHandler<RegisterEmployerCommand>
 {
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IEmailSender _emailSender;
+    private readonly ICachedService _cachedService;
+    private readonly IConfiguration _configuration;
+    private readonly ILogger<RegisterEmployerCommandHandler> _logger;
+    private readonly IPasswordHasher _passwordHasher;
+    private readonly ITokenProvider _tokenProvider;
+
+    public RegisterEmployerCommandHandler(
+        IUnitOfWork unitOfWork,
+        IEmailSender emailSender,
+        ICachedService cachedService,
+        IConfiguration configuration,
+        ILogger<RegisterEmployerCommandHandler> logger,
+        IPasswordHasher passwordHasher,
+        ITokenProvider tokenProvider)
+    {
+        _unitOfWork = unitOfWork;
+        _emailSender = emailSender;
+        _cachedService = cachedService;
+        _configuration = configuration;
+        _logger = logger;
+        _passwordHasher = passwordHasher;
+        _tokenProvider = tokenProvider;
+    }
+
     public async Task Handle(RegisterEmployerCommand request, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Registering new employer with email: {Email}", request.Email);
-
-        var userByEmail = await userManager.FindByEmailAsync(request.Email);
+        var userByEmail = await _unitOfWork.UsersRepository.GetByEmailAsync(request.Email, cancellationToken);
 
         if (userByEmail is not null)
         {
-            logger.LogWarning("User with email {Email} already exists", request.Email);
-            
+            _logger.LogError("User with email {Email} already exists", request.Email);
             throw new AlreadyExistsException($"A user with the email '{request.Email}' already exists.");
         }
 
-        var user = mapper.Map<User>(request);
+        var passwordHash = _passwordHasher.HashPassword(request.Password);
 
-        var role = await roleManager.FindByNameAsync(AppRoles.EmployerRole);
+        var role = await _unitOfWork.RolesRepository.GetByNameAsync(AppRoles.EmployerRole, cancellationToken);
 
         if (role is null)
         {
-            logger.LogError("Employer role not found");
-            
+            _logger.LogError("Employer role not found");
             throw new BadRequestException("User is not successfully registered. User Role is not successfully find");
         }
 
-        user.RoleId = role.Id;
-
-        var result = await userManager.CreateAsync(user, request.Password);
-
-        if (!result.Succeeded)
+        var user = new User
         {
-            var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-            
-            logger.LogError("Failed to create employer: {Errors}", errors);
-            
-            throw new BadRequestException($"User is not successfully registered. Errors: {errors}");
-        }
+            Id = Guid.CreateVersion7(),
+            RegisteredAt = DateTime.UtcNow,
+            Email = request.Email,
+            PasswordHash = passwordHash,
+            IsEmailConfirmed = false,
+            RoleId = role.Id,
+        };
 
-        logger.LogInformation("Creating employer profile for user {UserId}", user.Id);
-        
-        var employerProfile = mapper.Map<EmployerProfile>(request);
-        employerProfile.UserId = user.Id;
+        await _unitOfWork.UsersRepository.CreateAsync(user, cancellationToken);
 
-        await unitOfWork.EmployerProfilesRepository.AddAsync(employerProfile, cancellationToken);
-        await unitOfWork.SaveAllAsync(cancellationToken);
+        var employerProfile = new EmployerProfile
+        {
+            Id = Guid.CreateVersion7(),
+            CompanyName = request.CompanyName,
+            UserId = user.Id,
+        };
 
-        logger.LogInformation("Generating email confirmation token for user {UserId}", user.Id);
-        
-        var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+        await _unitOfWork.EmployerProfilesRepository.CreateAsync(employerProfile, cancellationToken);
+
+        var token = _tokenProvider.GeneratePasswordResetToken(user);
 
         string code;
         var random = new Random();
         do
         {
             code = random.Next(100000, 999999).ToString();
-        } 
-        while (await cachedService.ExistsAsync(code, cancellationToken));
+        }
+        while (await _cachedService.ExistsAsync(code, cancellationToken));
 
-        logger.LogInformation("Storing confirmation code {Code} in cache", code);
-        
-        await cachedService.SetAsync(code, token, TimeSpan.FromHours(
-            int.Parse(configuration.GetRequiredSection("IdentityTokenExpirationTimeInHours").Value!)), cancellationToken);
+        await _cachedService.SetAsync(code, token, TimeSpan.FromHours(
+            int.Parse(_configuration.GetRequiredSection("IdentityTokenExpirationTimeInHours").Value!)), cancellationToken);
 
-        logger.LogInformation("Sending confirmation email to {Email}", user.Email);
-        
-        await emailSender.SendEmailConfirmation(user.Email!, code, cancellationToken);
-
-        logger.LogInformation("Successfully registered employer with ID: {UserId}", user.Id);
+        await _emailSender.SendEmailConfirmation(user.Email, code, cancellationToken);
     }
 }

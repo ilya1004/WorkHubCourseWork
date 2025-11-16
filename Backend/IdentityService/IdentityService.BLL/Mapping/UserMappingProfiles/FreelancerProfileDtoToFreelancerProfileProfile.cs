@@ -8,7 +8,6 @@ public class FreelancerProfileDtoToFreelancerProfileProfile : Profile
     {
         CreateMap<FreelancerProfileDto, FreelancerProfile>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.UserId, opt => opt.Ignore())
-            .ForMember(dest => dest.Skills, opt => opt.Ignore());
+            .ForMember(dest => dest.UserId, opt => opt.Ignore());
     }
 }

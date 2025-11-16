@@ -45,7 +45,7 @@ CREATE TABLE "EmployerProfiles" (
     "Id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "CompanyName" VARCHAR(256) NOT NULL,
     "About" TEXT,
-    "IndustryId" UUID REFERENCES "EmployerIndustries" ("Id") ON DELETE RESTRICT,
+    "IndustryId" UUID REFERENCES "EmployerIndustries" ("Id") ON DELETE SET NULL,
     "StripeCustomerId" VARCHAR(256),
     "UserId" UUID NOT NULL REFERENCES "Users" ("Id") ON DELETE RESTRICT
 );
@@ -128,7 +128,7 @@ CREATE TABLE "Projects" (
     "PaymentIntentId" VARCHAR(256),
     "EmployerUserId" UUID NOT NULL,
     "FreelancerUserId" UUID,
-    "CategoryId" UUID REFERENCES "Categories" ("Id") ON DELETE RESTRICT
+    "CategoryId" UUID REFERENCES "Categories" ("Id") ON DELETE SET NULL
 );
 
 -- Table: Lifecycles

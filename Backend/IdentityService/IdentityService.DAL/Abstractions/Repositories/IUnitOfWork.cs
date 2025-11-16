@@ -8,5 +8,5 @@ public interface IUnitOfWork
     public IEmployerIndustriesRepository EmployerIndustriesRepository { get; }
     public IUsersRepository UsersRepository { get; }
     public IRolesRepository RolesRepository { get; }
-    public Task SaveAllAsync(CancellationToken cancellationToken = default);
+    // public Task SaveAllAsync(CancellationToken cancellationToken = default);
 }

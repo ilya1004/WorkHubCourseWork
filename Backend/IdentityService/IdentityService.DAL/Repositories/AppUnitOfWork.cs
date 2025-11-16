@@ -28,9 +28,4 @@ public class AppUnitOfWork : IUnitOfWork
         UsersRepository = usersRepository;
         RolesRepository = rolesRepository;
     }
-
-    public async Task SaveAllAsync(CancellationToken cancellationToken = default)
-    {
-        await _context.SaveChangesAsync(cancellationToken);
-    }
 }

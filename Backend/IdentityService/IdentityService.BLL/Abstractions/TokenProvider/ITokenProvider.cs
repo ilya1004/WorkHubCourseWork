@@ -9,4 +9,6 @@ public interface ITokenProvider
     ClaimsPrincipal GetPrincipalFromExpiredToken(string token);
     string GeneratePasswordResetToken(User user);
     bool VerifyPasswordResetToken(User user, string token);
+    string GenerateEmailResetToken(User user);
+    bool VerifyEmailResetToken(User user, string token);
 }
