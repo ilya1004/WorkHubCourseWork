@@ -1,3 +1,3 @@
 namespace ChatService.API.Contracts.ChatContracts;
 
-public sealed record GetChatMessagesRequest(Guid ChatId, int PageNo, int PageSize);
+public sealed record GetChatMessagesRequest(string ChatId, int PageNo, int PageSize);

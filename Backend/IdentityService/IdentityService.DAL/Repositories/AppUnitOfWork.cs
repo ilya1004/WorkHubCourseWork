@@ -6,7 +6,10 @@ public class AppUnitOfWork : IUnitOfWork
 
     public IEmployerProfilesRepository EmployerProfilesRepository { get; }
     public IFreelancerProfilesRepository FreelancerProfilesRepository { get; }
+    public ICvsRepository CvsRepository { get; }
     public ICvSkillsRepository CvSkillsRepository { get; }
+    public ICvLanguagesRepository CvLanguagesRepository { get; }
+    public ICvWorkExperiencesRepository CvWorkExperiencesRepository { get; }
     public IEmployerIndustriesRepository EmployerIndustriesRepository { get; }
     public IUsersRepository UsersRepository { get; }
     public IRolesRepository RolesRepository { get; }
@@ -18,7 +21,10 @@ public class AppUnitOfWork : IUnitOfWork
         ICvSkillsRepository cvSkillsRepository,
         IEmployerIndustriesRepository employerIndustriesRepository,
         IUsersRepository usersRepository,
-        IRolesRepository rolesRepository)
+        IRolesRepository rolesRepository,
+        ICvsRepository cvsRepository,
+        ICvLanguagesRepository cvLanguagesRepository,
+        ICvWorkExperiencesRepository cvWorkExperiencesRepository)
     {
         _context = context;
         EmployerProfilesRepository = employerProfilesRepository;
@@ -27,5 +33,8 @@ public class AppUnitOfWork : IUnitOfWork
         EmployerIndustriesRepository = employerIndustriesRepository;
         UsersRepository = usersRepository;
         RolesRepository = rolesRepository;
+        CvsRepository = cvsRepository;
+        CvLanguagesRepository = cvLanguagesRepository;
+        CvWorkExperiencesRepository = cvWorkExperiencesRepository;
     }
 }

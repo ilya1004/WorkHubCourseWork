@@ -11,6 +11,31 @@ public class FreelancerProfilesRepository : IFreelancerProfilesRepository
         _logger = logger;
     }
 
+    public async Task UpdateStripeAccountIdAsync(Guid userId, string stripeAccountId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+                $"""
+                 UPDATE "FreelancerProfiles"
+                 SET "StripeAccountId" = {stripeAccountId}
+                 WHERE "UserId" = {userId.ToString()}
+                 """,
+                cancellationToken);
+
+            if (rowsAffected != 1)
+            {
+                _logger.LogError("Failed to update freelancer stripe account id. Affected [{rowsAffected}] rows", rowsAffected);
+                throw new InvalidOperationException($"Failed to update freelancer stripe account id. Affected [{rowsAffected}] rows");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to update freelancer stripe account id. Error: {Message}", ex.Message);
+            throw new InvalidOperationException($"Failed to update freelancer stripe account id. Error: {ex.Message}");
+        }
+    }
+
     public async Task UpdateAsync(
         Guid id,
         FreelancerProfile profile,

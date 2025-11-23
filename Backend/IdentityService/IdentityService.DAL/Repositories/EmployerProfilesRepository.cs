@@ -1,8 +1,4 @@
-﻿using IdentityService.DAL.Abstractions.Repositories;
-using IdentityService.DAL.Data;
-using Microsoft.Extensions.Logging;
-
-namespace IdentityService.DAL.Repositories;
+﻿namespace IdentityService.DAL.Repositories;
 
 public class EmployerProfilesRepository : IEmployerProfilesRepository
 {
@@ -29,6 +25,31 @@ public class EmployerProfilesRepository : IEmployerProfilesRepository
         {
             _logger.LogError("Failed to get user by email. Error: {Message}", ex.Message);
             throw new InvalidOperationException($"Failed to get user by email. Error: {ex.Message}");
+        }
+    }
+
+    public async Task UpdateStripeCustomerIdAsync(Guid userId, string stripeCustomerId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+                $"""
+                 UPDATE "EmployerProfiles"
+                 SET "StripeCustomerId" = {stripeCustomerId}
+                 WHERE "UserId" = {userId.ToString()}
+                 """,
+                cancellationToken);
+
+            if (rowsAffected != 1)
+            {
+                _logger.LogError("Failed to update employer stripe account id. Affected [{rowsAffected}] rows", rowsAffected);
+                throw new InvalidOperationException($"Failed to update employer stripe account id. Affected [{rowsAffected}] rows");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to update employer stripe account id. Error: {Message}", ex.Message);
+            throw new InvalidOperationException($"Failed to update employer stripe account id. Error: {ex.Message}");
         }
     }
 

@@ -4,4 +4,5 @@ namespace IdentityService.API.Contracts.UserContracts;
 
 public sealed record UpdateEmployerProfileRequest(
     EmployerProfileDto EmployerProfile,
+    bool ResetImage,
     IFormFile? ImageFile);

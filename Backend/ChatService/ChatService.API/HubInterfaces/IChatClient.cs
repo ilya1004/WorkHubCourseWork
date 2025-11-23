@@ -9,5 +9,5 @@ public interface IChatClient
     Task ReceiveTextMessage(Message message);
     Task ReceiveFileMessage(Message message);
     Task ReceiveChatMessages(PaginatedResultModel<Message> messages);
-    Task MessageIsDeleted(Guid messageId);
+    Task MessageIsDeleted(string messageId);
 }

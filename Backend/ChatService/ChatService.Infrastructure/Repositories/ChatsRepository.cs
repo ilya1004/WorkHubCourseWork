@@ -19,7 +19,7 @@ public class ChatsRepository(IMongoDatabase database) : IChatsRepository
         await _collection.ReplaceOneAsync(e => e.Id == entity.Id, entity, cancellationToken: cancellationToken);
     }
     
-    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(string id, CancellationToken cancellationToken = default)
     {
         await _collection.DeleteOneAsync(e => e.Id == id, cancellationToken);
     }
@@ -29,7 +29,7 @@ public class ChatsRepository(IMongoDatabase database) : IChatsRepository
         return (int)await _collection.CountDocumentsAsync(FilterDefinition<Chat>.Empty, cancellationToken: cancellationToken);
     }
 
-    public async Task<Chat?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Chat?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
     {
         return await _collection.Find(e => e.Id == id).FirstOrDefaultAsync(cancellationToken);
     }

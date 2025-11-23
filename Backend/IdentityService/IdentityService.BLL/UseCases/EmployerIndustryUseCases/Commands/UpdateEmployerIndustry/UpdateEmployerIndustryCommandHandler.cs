@@ -23,6 +23,8 @@ public class UpdateEmployerIndustryCommandHandler : IRequestHandler<UpdateEmploy
             throw new NotFoundException($"Employer industry with ID '{request.Id}' not found");
         }
 
+        industry.Name = request.Name;
+
         await _unitOfWork.EmployerIndustriesRepository.UpdateAsync(industry, cancellationToken);
     }
 }

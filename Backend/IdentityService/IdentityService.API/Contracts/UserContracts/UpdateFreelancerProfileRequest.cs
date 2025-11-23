@@ -4,4 +4,5 @@ namespace IdentityService.API.Contracts.UserContracts;
 
 public sealed record UpdateFreelancerProfileRequest(
     FreelancerProfileDto FreelancerProfile,
+    bool ResetImage,
     IFormFile? ImageFile);

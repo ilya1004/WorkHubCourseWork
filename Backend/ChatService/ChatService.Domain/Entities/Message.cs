@@ -9,7 +9,7 @@ public class Message
     public Guid? FileId { get; set; }
     public Guid SenderUserId { get; set; }
     public Guid ReceiverUserId { get; set; }
-    public Guid ChatId { get; set; }
+    public string ChatId { get; set; }
     public MessageType Type { get; set; }
     public DateTime CreatedAt { get; set; }
 }

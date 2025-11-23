@@ -23,10 +23,7 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, User>
     {
         var userRoleName = _userContext.GetRoleName();
 
-        User user = null!;
-
-
-        user = userRoleName switch
+        User? user = userRoleName switch
         {
             AppRoles.FreelancerRole => await _unitOfWork.UsersRepository.GetByIdAsync(
                 request.Id, cancellationToken, true),

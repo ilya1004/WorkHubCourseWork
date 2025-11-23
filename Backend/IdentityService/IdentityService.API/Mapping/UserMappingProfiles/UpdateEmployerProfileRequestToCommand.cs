@@ -11,6 +11,7 @@ public class UpdateEmployerProfileRequestToCommand : Profile
             .ConstructUsing(src =>
                 new UpdateEmployerProfileCommand(
                     src.EmployerProfile,
+                    src.ResetImage,
                     src.ImageFile == null ? null : src.ImageFile.OpenReadStream(), 
                     src.ImageFile == null ? null : src.ImageFile.ContentType));
     }

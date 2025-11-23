@@ -295,31 +295,6 @@ public class UsersRepository : IUsersRepository
         }
     }
 
-    public async Task UpdateUserAsync(User user, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
-                $"""
-                 UPDATE "Users"
-                 SET "" = {}
-                 WHERE "Id" = {id.ToString()}
-                 """,
-                cancellationToken);
-
-            if (rowsAffected != 1)
-            {
-                _logger.LogError("Failed to update password hash. Affected [{rowsAffected}] rows", rowsAffected);
-                throw new InvalidOperationException($"Failed to update password hash. Affected [{rowsAffected}] rows");
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError("Failed to update password hash. Error: {Message}", ex.Message);
-            throw new InvalidOperationException($"Failed to update password hash. Error: {ex.Message}");
-        }
-    }
-
     public async Task UpdateUserImageAsync(Guid id, string? imageUrl, CancellationToken cancellationToken = default)
     {
         try

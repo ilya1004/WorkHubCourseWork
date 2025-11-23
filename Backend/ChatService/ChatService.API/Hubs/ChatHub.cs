@@ -12,24 +12,34 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace ChatService.API.Hubs;
 
-public class ChatHub(
-    IMediator mediator, 
-    IMapper mapper,
-    ILogger<ChatHub> logger) : Hub<IChatClient>
+public class ChatHub : Hub<IChatClient>
 {
+    private readonly IMediator _mediator;
+    private readonly IMapper _mapper;
+    private readonly ILogger<ChatHub> _logger;
+
+    public ChatHub(IMediator mediator,
+        IMapper mapper,
+        ILogger<ChatHub> logger)
+    {
+        _mediator = mediator;
+        _mapper = mapper;
+        _logger = logger;
+    }
+
     public override async Task OnConnectedAsync()
     {
-        logger.LogInformation("User {UserId} connected with connection ID {ConnectionId}", Context.UserIdentifier, Context.ConnectionId);
+        _logger.LogInformation("User {UserId} connected with connection ID {ConnectionId}", Context.UserIdentifier, Context.ConnectionId);
         await base.OnConnectedAsync();
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        logger.LogInformation("User {UserId} disconnected (Connection ID: {ConnectionId})", Context.UserIdentifier, Context.ConnectionId);
+        _logger.LogInformation("User {UserId} disconnected (Connection ID: {ConnectionId})", Context.UserIdentifier, Context.ConnectionId);
         
         if (exception is not null)
         {
-            logger.LogError(exception, "Disconnection error for user {UserId}", Context.UserIdentifier);
+            _logger.LogError(exception, "Disconnection error for user {UserId}", Context.UserIdentifier);
         }
         
         await base.OnDisconnectedAsync(exception);
@@ -38,68 +48,54 @@ public class ChatHub(
     [Authorize]
     public async Task CreateChat(CreateChatRequest request)
     {
-        await mediator.Send(mapper.Map<CreateChatCommand>(request));
-        
-        logger.LogInformation("Chat created successfully");
+        await _mediator.Send(_mapper.Map<CreateChatCommand>(request));
     }
     
     [Authorize]
     public async Task GetChatById(Guid chatId)
     {
-        var result = await mediator.Send(mapper.Map<GetChatByIdQuery>(chatId));
+        var result = await _mediator.Send(_mapper.Map<GetChatByIdQuery>(chatId));
 
         await Clients.Caller.ReceiveChat(result);
-        
-        logger.LogInformation("Chat retrieved successfully");
     }
     
     [Authorize]
     public async Task GetChatByProjectId(Guid chatId)
     {
-        var result = await mediator.Send(mapper.Map<GetChatByProjectIdQuery>(chatId));
+        var result = await _mediator.Send(_mapper.Map<GetChatByProjectIdQuery>(chatId));
         
         await Clients.Caller.ReceiveChat(result);
-        
-        logger.LogInformation("Chat retrieved successfully");
     }
 
     [Authorize]
     public async Task SetChatInactive(SetChatInactiveRequest request)
     {
-        await mediator.Send(mapper.Map<SetChatInactiveCommand>(request));
-        
-        logger.LogInformation("Chat by project with ID '{ProjectId}' set inactive", request.ProjectId);
+        await _mediator.Send(_mapper.Map<SetChatInactiveCommand>(request));
     }
     
     [Authorize]
     public async Task SendTextMessage(CreateTextMessageRequest request)
     {
-        var message = await mediator.Send(mapper.Map<CreateTextMessageCommand>(request));
+        var message = await _mediator.Send(_mapper.Map<CreateTextMessageCommand>(request));
 
         await Clients.Caller.ReceiveTextMessage(message);
         await Clients.User(request.ReceiverId.ToString()).ReceiveTextMessage(message);
-        
-        logger.LogInformation("Text message sent successfully");
     }
     
     [Authorize]
     public async Task GetChatMessages(GetChatMessagesRequest request)
     {
-        var result = await mediator.Send(mapper.Map<GetChatMessagesQuery>(request));
+        var result = await _mediator.Send(_mapper.Map<GetChatMessagesQuery>(request));
 
         await Clients.Caller.ReceiveChatMessages(result);
-        
-        logger.LogInformation("Retrieved {MessageCount} messages", result.TotalCount);
     }
     
     [Authorize]
     public async Task DeleteMessage(DeleteMessageRequest request)
     {
-        await mediator.Send(new DeleteMessageCommand(request.MessageId));
+        await _mediator.Send(new DeleteMessageCommand(request.MessageId));
 
         await Clients.Caller.MessageIsDeleted(request.MessageId);
         await Clients.User(request.ReceiverId.ToString()).MessageIsDeleted(request.MessageId);
-        
-        logger.LogInformation("Message with ID '{MessageId}' deleted successfully", request.MessageId);
     }
 }

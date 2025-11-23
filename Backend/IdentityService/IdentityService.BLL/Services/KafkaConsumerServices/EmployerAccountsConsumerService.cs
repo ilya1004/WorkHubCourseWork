@@ -44,27 +44,23 @@ public class EmployerAccountsConsumerService : BackgroundService
     {
         try
         {
-            _logger.LogInformation("Starting to consume messages");
-            
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
                     var result = _consumer.Consume(stoppingToken);
+
                     _logger.LogInformation("Received message: {Message}", result.Message.Value);
                     
                     var dto = JsonSerializer.Deserialize<SaveEmployerAccountIdDto>(result.Message.Value);
                     
                     if (dto is null)
                     {
-                        _logger.LogWarning("Failed to deserialize message: {Message}", result.Message.Value);
-                        
+                        _logger.LogError("Failed to deserialize message: {Message}", result.Message.Value);
                         throw new BadRequestException("Error occurred during message deserialization");
                     }
 
                     await ProcessMessageAsync(dto, stoppingToken);
-                    
-                    _logger.LogInformation("Successfully processed message for user {UserId}", dto.UserId);
                 }
                 catch (ConsumeException ex)
                 {
@@ -90,26 +86,18 @@ public class EmployerAccountsConsumerService : BackgroundService
 
     private async Task ProcessMessageAsync(SaveEmployerAccountIdDto dto, CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Processing employer account ID for user {UserId}", dto.UserId);
-        
         using var scope = _serviceScopeFactory.CreateScope();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-        var employerProfile = await unitOfWork.EmployerProfilesRepository.FirstOrDefaultAsync(
-            ep => ep.UserId == Guid.Parse(dto.UserId), stoppingToken);
+        var user = await unitOfWork.UsersRepository.GetEmployerByIdAsync(
+            Guid.Parse(dto.UserId), stoppingToken);
 
-        if (employerProfile is null)
+        if (user is null)
         {
-            _logger.LogWarning("Employer profile not found for user {UserId}", dto.UserId);
-            
-            throw new BadRequestException($"Employer profile with user ID '{dto.UserId}' not found");
+            _logger.LogError("Employer user not found for user {UserId}", dto.UserId);
+            throw new BadRequestException($"Employer user with user ID '{dto.UserId}' not found");
         }
 
-        employerProfile.StripeCustomerId = dto.EmployerAccountId;
-
-        await unitOfWork.EmployerProfilesRepository.UpdateAsync(employerProfile, stoppingToken);
-        await unitOfWork.SaveAllAsync(stoppingToken);
-        
-        _logger.LogInformation("Successfully updated employer profile for user {UserId}", dto.UserId);
+        await unitOfWork.EmployerProfilesRepository.UpdateStripeCustomerIdAsync(user.Id, dto.EmployerAccountId, stoppingToken);
     }
 }

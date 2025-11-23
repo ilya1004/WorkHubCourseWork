@@ -131,7 +131,7 @@ public class UsersController(IMediator mediator, IMapper mapper) : ControllerBas
 
     [HttpDelete]
     [Route("{userId:guid}")]
-    [Authorize(Policy = AuthPolicies.AdminOrSelfPolicy)]
+    [Authorize]
     public async Task<IActionResult> DeleteUser([FromRoute] Guid userId, CancellationToken cancellationToken)
     {
         await mediator.Send(new DeleteUserCommand(userId), cancellationToken);

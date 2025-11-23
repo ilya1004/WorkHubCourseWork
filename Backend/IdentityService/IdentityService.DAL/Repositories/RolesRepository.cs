@@ -1,7 +1,3 @@
-using IdentityService.DAL.Abstractions.Repositories;
-using IdentityService.DAL.Data;
-using Microsoft.Extensions.Logging;
-
 namespace IdentityService.DAL.Repositories;
 
 public class RolesRepository : IRolesRepository

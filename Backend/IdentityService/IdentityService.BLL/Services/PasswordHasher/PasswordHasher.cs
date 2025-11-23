@@ -6,7 +6,7 @@ using Konscious.Security.Cryptography;
 
 namespace IdentityService.BLL.Services.PasswordHasher;
 
-public partial class PasswordHasher : IPasswordHasher
+public class PasswordHasher : IPasswordHasher
 {
     private const int SaltSize = 16; // 128 bit
     private const int HashSize = 32;  // 256 bit

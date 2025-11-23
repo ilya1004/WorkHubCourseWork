@@ -14,17 +14,17 @@ public class MessagesRepository(IMongoDatabase database) : IMessagesRepository
         await _collection.InsertOneAsync(entity, cancellationToken: cancellationToken); 
     }
 
-    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(string id, CancellationToken cancellationToken = default)
     {
         await _collection.DeleteOneAsync(e => e.Id == id, cancellationToken);
     }
 
-    public async Task<Message?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Message?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
     {
         return await _collection.Find(e => e.Id == id).FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyList<Message>> GetMessagesByChatIdAsync(Guid chatId, int offset, int limit, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<Message>> GetMessagesByChatIdAsync(string chatId, int offset, int limit, CancellationToken cancellationToken = default)
     {
         return await _collection.Find(m => m.ChatId == chatId)
             .SortByDescending(m => m.CreatedAt)

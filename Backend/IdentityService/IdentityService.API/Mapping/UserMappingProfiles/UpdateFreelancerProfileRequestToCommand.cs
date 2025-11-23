@@ -11,6 +11,7 @@ public class UpdateFreelancerProfileRequestToCommand : Profile
             .ConstructUsing(src =>
                 new UpdateFreelancerProfileCommand(
                     src.FreelancerProfile,
+                    src.ResetImage,
                     src.ImageFile == null ? null : src.ImageFile.OpenReadStream(), 
                     src.ImageFile == null ? null : src.ImageFile.ContentType));
     }

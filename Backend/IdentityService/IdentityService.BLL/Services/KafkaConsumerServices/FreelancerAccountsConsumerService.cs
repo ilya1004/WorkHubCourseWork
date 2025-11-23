@@ -7,27 +7,37 @@ using Microsoft.Extensions.Hosting;
 
 namespace IdentityService.BLL.Services.KafkaConsumerServices;
 
-public class FreelancerAccountsConsumerService(
-    IOptions<KafkaSettings> options,
-    IServiceScopeFactory serviceScopeFactory,
-    ILogger<FreelancerAccountsConsumerService> logger) : BackgroundService
+public class FreelancerAccountsConsumerService : BackgroundService
 {
     private IConsumer<Ignore, string> _consumer = null!;
+    private readonly IOptions<KafkaSettings> _options;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly ILogger<FreelancerAccountsConsumerService> _logger;
+
+    public FreelancerAccountsConsumerService(IOptions<KafkaSettings> options,
+        IServiceScopeFactory serviceScopeFactory,
+        ILogger<FreelancerAccountsConsumerService> logger)
+    {
+        _options = options;
+        _serviceScopeFactory = serviceScopeFactory;
+        _logger = logger;
+    }
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("Starting FreelancerAccounts consumer service");
+        _logger.LogInformation("Starting FreelancerAccounts consumer service");
         
         var config = new ConsumerConfig
         {
-            BootstrapServers = options.Value.BootstrapServers,
+            BootstrapServers = _options.Value.BootstrapServers,
             GroupId = "accounts_group",
             AutoOffsetReset = AutoOffsetReset.Earliest
         };
 
         _consumer = new ConsumerBuilder<Ignore, string>(config).Build();
-        _consumer.Subscribe(options.Value.FreelancerAccountIdSavingTopic);
+        _consumer.Subscribe(_options.Value.FreelancerAccountIdSavingTopic);
 
-        logger.LogInformation("Subscribed to topic: {Topic}", options.Value.FreelancerAccountIdSavingTopic);
+        _logger.LogInformation("Subscribed to topic: {Topic}", _options.Value.FreelancerAccountIdSavingTopic);
         
         await Task.Run(() => ConsumeMessagesAsync(stoppingToken), stoppingToken);
     }
@@ -36,73 +46,60 @@ public class FreelancerAccountsConsumerService(
     {
         try
         {
-            logger.LogInformation("Starting to consume messages");
-            
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
                     var result = _consumer.Consume(stoppingToken);
                     
-                    logger.LogInformation("Received message: {Message}", result.Message.Value);
+                    _logger.LogInformation("Received message: {Message}", result.Message.Value);
                     
                     var dto = JsonSerializer.Deserialize<SaveFreelancerAccountIdDto>(result.Message.Value);
                     
                     if (dto is null)
                     {
-                        logger.LogWarning("Failed to deserialize message: {Message}", result.Message.Value);
-                        
+                        _logger.LogError("Failed to deserialize message: {Message}", result.Message.Value);
                         throw new BadRequestException("Error occurred during message deserialization");
                     }
 
                     await ProcessMessageAsync(dto, stoppingToken);
-                    
-                    logger.LogInformation("Successfully processed message for user {UserId}", dto.UserId);
                 }
                 catch (ConsumeException ex)
                 {
-                    logger.LogError(ex, "Kafka consume error");
+                    _logger.LogError(ex, "Kafka consume error");
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Error processing message");
+                    _logger.LogError(ex, "Error processing message");
                 }
             }
         }
         catch (OperationCanceledException)
         {
-            logger.LogInformation("Consumer service stopping");
+            _logger.LogInformation("Consumer service stopping");
         }
         finally
         {
             _consumer.Close();
             
-            logger.LogInformation("Consumer closed");
+            _logger.LogInformation("Consumer closed");
         }
     }
 
     private async Task ProcessMessageAsync(SaveFreelancerAccountIdDto dto, CancellationToken stoppingToken)
     {
-        logger.LogInformation("Processing freelancer account ID '{AccountId}' for user {UserId}", dto.FreelancerAccountId, dto.UserId);
-        
-        using var scope = serviceScopeFactory.CreateScope();
+        using var scope = _serviceScopeFactory.CreateScope();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-        var freelancerProfile = await unitOfWork.FreelancerProfilesRepository.FirstOrDefaultAsync(
-            fp => fp.UserId == Guid.Parse(dto.UserId), stoppingToken);
+        var user = await unitOfWork.UsersRepository.GetFreelancerByIdAsync(
+            Guid.Parse(dto.UserId), stoppingToken);
 
-        if (freelancerProfile is null)
+        if (user is null)
         {
-            logger.LogWarning("Freelancer profile not found for user {UserId}", dto.UserId);
-            
-            throw new BadRequestException($"Freelancer profile with user ID '{dto.UserId}' not found");
+            _logger.LogError("Freelancer user not found for user {UserId}", dto.UserId);
+            throw new BadRequestException($"Freelancer user with user ID '{dto.UserId}' not found");
         }
 
-        freelancerProfile.StripeAccountId = dto.FreelancerAccountId;
-
-        await unitOfWork.FreelancerProfilesRepository.UpdateAsync(freelancerProfile, stoppingToken);
-        await unitOfWork.SaveAllAsync(stoppingToken);
-        
-        logger.LogInformation("Successfully updated freelancer profile for user {UserId}", dto.UserId);
+        await unitOfWork.FreelancerProfilesRepository.UpdateStripeAccountIdAsync(user.Id, dto.FreelancerAccountId, stoppingToken);
     }
 }
