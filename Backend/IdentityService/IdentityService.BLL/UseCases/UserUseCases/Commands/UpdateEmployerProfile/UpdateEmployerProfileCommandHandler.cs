@@ -28,20 +28,21 @@ public class UpdateEmployerProfileCommandHandler : IRequestHandler<UpdateEmploye
 
         var user = await _unitOfWork.UsersRepository.GetByIdAsync(
             userId,
-            true,
             cancellationToken,
-            u => u.EmployerProfile!,
-            u => u.EmployerProfile!.Industry!);  
+            true);
 
-        if (user is null)
+        if (user?.EmployerProfile is null)
         {
-            _logger.LogError("User with ID {UserId} not found", userId);
+            _logger.LogError("User with ID '{UserId}' not found", userId);
             throw new NotFoundException($"User with ID '{userId}' not found");
         }
 
+        user.EmployerProfile.CompanyName = request.EmployerProfile.CompanyName;
+        user.EmployerProfile.About = request.EmployerProfile.About;
+
         if (request.EmployerProfile.IndustryId.HasValue)
         {
-            if (request.EmployerProfile.IndustryId.Value != user.EmployerProfile!.Industry?.Id)
+            if (request.EmployerProfile.IndustryId.Value != user.EmployerProfile.IndustryId)
             {
                 var industry = await _unitOfWork.EmployerIndustriesRepository.GetByIdAsync(
                     request.EmployerProfile.IndustryId.Value, cancellationToken);
@@ -52,15 +53,15 @@ public class UpdateEmployerProfileCommandHandler : IRequestHandler<UpdateEmploye
                     throw new NotFoundException($"Industry with ID '{request.EmployerProfile.IndustryId}' not found");
                 }
 
-                user.EmployerProfile!.Industry = industry;
+                user.EmployerProfile.IndustryId = industry.Id;
             }
         }
-        else if (user.EmployerProfile!.Industry is not null)
+        else if (user.EmployerProfile.IndustryId is not null)
         {
-            user.EmployerProfile!.Industry = null;
+            user.EmployerProfile.IndustryId = null;
         }
         
-        if (request.EmployerProfile.ResetImage)
+        if (request.ResetImage)
         {
             user.ImageUrl = null;
         }
@@ -85,5 +86,11 @@ public class UpdateEmployerProfileCommandHandler : IRequestHandler<UpdateEmploye
 
             user.ImageUrl = imageFileId.ToString();
         }
+
+        await _unitOfWork.UsersRepository.UpdateUserImageAsync(user.Id, user.ImageUrl, cancellationToken);
+        await _unitOfWork.EmployerProfilesRepository.UpdateAsync(
+            user.EmployerProfile.Id,
+            user.EmployerProfile,
+            cancellationToken);
     }
 }

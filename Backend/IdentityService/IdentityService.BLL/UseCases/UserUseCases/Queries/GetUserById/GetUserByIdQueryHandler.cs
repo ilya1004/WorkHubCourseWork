@@ -1,31 +1,47 @@
-﻿namespace IdentityService.BLL.UseCases.UserUseCases.Queries.GetUserById;
+﻿using IdentityService.BLL.Abstractions.UserContext;
+using IdentityService.DAL.Constants;
 
-public class GetUserByIdQueryHandler(
-    IUnitOfWork unitOfWork,
-    ILogger<GetUserByIdQueryHandler> logger) : IRequestHandler<GetUserByIdQuery, User>
+namespace IdentityService.BLL.UseCases.UserUseCases.Queries.GetUserById;
+
+public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, User>
 {
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<GetUserByIdQueryHandler> _logger;
+    private readonly IUserContext _userContext;
+
+    public GetUserByIdQueryHandler(
+        IUnitOfWork unitOfWork,
+        ILogger<GetUserByIdQueryHandler> logger,
+        IUserContext userContext)
+    {
+        _unitOfWork = unitOfWork;
+        _logger = logger;
+        _userContext = userContext;
+    }
+
     public async Task<User> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Getting user by ID: {UserId}", request.Id);
+        var userRoleName = _userContext.GetRoleName();
 
-        var user = await unitOfWork.UsersRepository.GetByIdAsync(
-            request.Id,
-            false,
-            cancellationToken,
-            u => u.FreelancerProfile!,
-            u => u.EmployerProfile!,
-            u => u.Role,
-            u => u.FreelancerProfile == null ? null! : u.FreelancerProfile.Skills,
-            u => u.EmployerProfile == null ? null! : u.EmployerProfile.Industry!);
+        User user = null!;
+
+
+        user = userRoleName switch
+        {
+            AppRoles.FreelancerRole => await _unitOfWork.UsersRepository.GetByIdAsync(
+                request.Id, cancellationToken, true),
+            AppRoles.EmployerRole => await _unitOfWork.UsersRepository.GetByIdAsync(
+                request.Id, cancellationToken, true),
+            AppRoles.AdminRole => await _unitOfWork.UsersRepository.GetByIdAsync(
+                request.Id, cancellationToken),
+            _ => null!
+        };
 
         if (user is null)
         {
-            logger.LogWarning("User with ID '{UserId}' not found", request.Id);
-            
+            _logger.LogError("User with ID '{UserId}' not found", request.Id);
             throw new NotFoundException($"User with ID '{request.Id}' not found");
         }
-
-        logger.LogInformation("Successfully retrieved user with ID: {UserId}", request.Id);
         
         return user;
     }

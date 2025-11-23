@@ -4,5 +4,6 @@ namespace IdentityService.BLL.UseCases.UserUseCases.Commands.UpdateEmployerProfi
 
 public sealed record UpdateEmployerProfileCommand(
     EmployerProfileDto EmployerProfile,
+    bool ResetImage,
     Stream? FileStream,
     string? ContentType) : IRequest;

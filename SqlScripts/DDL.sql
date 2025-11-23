@@ -110,6 +110,45 @@ CREATE INDEX IX_CvSkills_CvId ON "CvSkills" ("CvId");
 CREATE INDEX IX_CvLanguages_CvId ON "CvLanguages" ("CvId");
 
 
+-- Views
+CREATE OR REPLACE VIEW "EmployerUser" AS
+SELECT 
+    u."Id",
+    u."Email",
+    u."RegisteredAt",
+    u."ImageUrl",
+    r."Name" AS "RoleName",
+    
+    ep."CompanyName",
+    ep."About" AS "CompanyAbout",
+    ep."StripeCustomerId",
+    ei."Id" AS "IndustryId",
+    ei."Name" AS "IndustryName"
+FROM "Users" u
+INNER JOIN "EmployerProfiles" ep ON ep."UserId" = u."Id"
+INNER JOIN "Roles" r ON r."Id" = u."RoleId"
+LEFT JOIN "EmployerIndustries" ei ON ei."Id" = ep."IndustryId";
+
+CREATE OR REPLACE VIEW "FreelancerUser" AS
+SELECT 
+    u."Id",
+    u."Email",
+    u."RegisteredAt",
+    u."ImageUrl",
+    r."Name" AS "RoleName",
+    
+    fp."FirstName",
+    fp."LastName",
+    fp."Nickname",
+    fp."About" AS "FreelancerAbout",
+    fp."StripeAccountId"
+FROM "Users" u
+INNER JOIN "FreelancerProfiles" fp ON fp."UserId" = u."Id"
+INNER JOIN "Roles" r ON r."Id" = u."RoleId";
+
+
+
+
 
 -- Projects Service
 

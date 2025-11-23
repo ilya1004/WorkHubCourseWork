@@ -4,37 +4,51 @@ using IdentityService.BLL.UseCases.UserUseCases.Queries.GetCurrentFreelancerUser
 
 namespace IdentityService.BLL.UseCases.UserUseCases.Queries.GetCurrentEmployerUser;
 
-public class GetCurrentEmployerUserQueryHandler(
-    IUnitOfWork unitOfWork,
-    IUserContext userContext,
-    IMapper mapper,
-    ILogger<GetCurrentFreelancerUserQueryHandler> logger) : IRequestHandler<GetCurrentEmployerUserQuery, EmployerUserDto>
+public class GetCurrentEmployerUserQueryHandler : IRequestHandler<GetCurrentEmployerUserQuery, EmployerUserDto>
 {
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IUserContext _userContext;
+    private readonly ILogger<GetCurrentFreelancerUserQueryHandler> _logger;
+
+    public GetCurrentEmployerUserQueryHandler(
+        IUnitOfWork unitOfWork,
+        IUserContext userContext,
+        ILogger<GetCurrentFreelancerUserQueryHandler> logger)
+    {
+        _unitOfWork = unitOfWork;
+        _userContext = userContext;
+        _logger = logger;
+    }
+
     public async Task<EmployerUserDto> Handle(GetCurrentEmployerUserQuery request, CancellationToken cancellationToken)
     {
-        var userId = userContext.GetUserId();
-        
-        logger.LogInformation("Getting current user info for user ID: {UserId}", userId);
+        var userId = _userContext.GetUserId();
 
-        var user = await unitOfWork.UsersRepository.GetByIdAsync(
-            userId,
-            false,
-            cancellationToken,
-            u => u.EmployerProfile!,
-            u => u.Role,
-            u => u.EmployerProfile == null ? null! : u.EmployerProfile.Industry!);
+        var user = await _unitOfWork.UsersRepository.GetEmployerByIdAsync(userId, cancellationToken);
 
         if (user is null)
         {
-            logger.LogWarning("User with ID '{UserId}' not found", userId);
-            
+            _logger.LogError("User with ID '{UserId}' not found", userId);
             throw new NotFoundException($"User with ID '{userId}' not found");
         }
 
-        logger.LogInformation("Successfully retrieved current user info for user ID: {UserId}", userId);
+        var result = new EmployerUserDto
+        {
+            Id = user.Id,
+            CompanyName = user.CompanyName,
+            About = user.About,
+            Email = user.Email,
+            RegisteredAt = user.RegisteredAt,
+            StripeCustomerId = user.StripeCustomerId,
+            Industry = user.IndustryId is null
+                ? null
+                : new EmployerIndustryDto(
+                    user.IndustryId.Value,
+                    user.IndustryName!),
+            ImageUrl = user.ImageUrl,
+            RoleName = user.RoleName,
+        };
 
-        var result = mapper.Map<EmployerUserDto>(user);
-        
         return result;
     }
 }

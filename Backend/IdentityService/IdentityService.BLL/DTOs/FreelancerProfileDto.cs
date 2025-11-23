@@ -3,6 +3,5 @@
 public record FreelancerProfileDto(
     string FirstName,
     string LastName,
-    string? About,
-    IEnumerable<Guid>? SkillIds,
-    bool ResetImage);
+    string Nickname,
+    string? About);

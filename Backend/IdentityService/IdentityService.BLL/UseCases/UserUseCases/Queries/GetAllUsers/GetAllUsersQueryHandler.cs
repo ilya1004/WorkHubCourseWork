@@ -2,29 +2,25 @@
 
 namespace IdentityService.BLL.UseCases.UserUseCases.Queries.GetAllUsers;
 
-public class GetAllUsersQueryHandler(IUnitOfWork unitOfWork, ILogger<GetAllUsersQueryHandler> logger) : IRequestHandler<GetAllUsersQuery, PaginatedResultModel<User>>
+public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, PaginatedResultModel<User>>
 {
+    private readonly IUnitOfWork _unitOfWork;
+
+    public GetAllUsersQueryHandler(IUnitOfWork unitOfWork)
+    {
+        _unitOfWork = unitOfWork;
+    }
+
     public async Task<PaginatedResultModel<User>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Getting all users with pagination - PageNo: {PageNo}, PageSize: {PageSize}", request.PageNo, request.PageSize);
-
         var offset = (request.PageNo - 1) * request.PageSize;
 
-        var users = await unitOfWork.UsersRepository.PaginatedListAllAsync(
-            offset, 
-            request.PageSize, 
-            cancellationToken,
-            u => u.FreelancerProfile!,
-            u => u.EmployerProfile!,
-            u => u.Role,
-            u => u.FreelancerProfile == null ? null! : u.FreelancerProfile.Skills,
-            u => u.EmployerProfile == null ? null! : u.EmployerProfile.Industry!);
+        var users = await _unitOfWork.UsersRepository.GetAllPaginatedAsync(
+            offset,
+            request.PageSize,
+            cancellationToken);
         
-        logger.LogInformation("Retrieved {Count} users from repository", users.Count);
-
-        var usersCount = await unitOfWork.UsersRepository.CountAsync(null, cancellationToken);
-        
-        logger.LogInformation("Total users count: {TotalCount}", usersCount);
+        var usersCount = await _unitOfWork.UsersRepository.CountAllAsync(cancellationToken);
 
         return new PaginatedResultModel<User>
         {

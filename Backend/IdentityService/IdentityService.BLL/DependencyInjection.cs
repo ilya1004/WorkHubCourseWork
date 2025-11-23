@@ -24,7 +24,7 @@ namespace IdentityService.BLL;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddBLL(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddBll(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddMediatR(config =>
         {

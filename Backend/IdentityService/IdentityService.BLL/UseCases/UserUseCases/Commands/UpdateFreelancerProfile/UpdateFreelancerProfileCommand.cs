@@ -4,5 +4,6 @@ namespace IdentityService.BLL.UseCases.UserUseCases.Commands.UpdateFreelancerPro
 
 public sealed record UpdateFreelancerProfileCommand(
     FreelancerProfileDto FreelancerProfile,
+    bool ResetImage,
     Stream? FileStream,
     string? ContentType) : IRequest;

@@ -10,8 +10,23 @@ public class UserContext(IHttpContextAccessor httpContextAccessor) : IUserContex
     {
         var userId = httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        if (userId is null) throw new UnauthorizedException("You are not authorized to access this resource.");
+        if (userId is null)
+        {
+            throw new UnauthorizedException("You are not authorized to access this resource.");
+        }
 
         return Guid.Parse(userId);
+    }
+
+    public string GetRoleName()
+    {
+        var userRoleName = httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.Role);
+
+        if (userRoleName is null)
+        {
+            throw new UnauthorizedException("You are not authorized to access this resource.");
+        }
+
+        return userRoleName;
     }
 }

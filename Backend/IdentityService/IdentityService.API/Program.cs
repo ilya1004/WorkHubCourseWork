@@ -14,7 +14,7 @@ var services = builder.Services;
 services.AddHttpContextAccessor();
 
 services.AddAPI(builder.Configuration);
-services.AddBLL(builder.Configuration);
+services.AddBll(builder.Configuration);
 services.AddDAL(builder.Configuration);
 
 services.AddEndpointsApiExplorer()
