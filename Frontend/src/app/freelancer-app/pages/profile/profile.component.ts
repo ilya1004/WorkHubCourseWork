@@ -17,6 +17,7 @@ import {NzMessageService} from "ng-zorro-antd/message";
 import {NzModalService} from "ng-zorro-antd/modal";
 import {Router, RouterModule} from "@angular/router";
 import {UsersService} from "../../../core/services/users/users.service";
+import { ProfileServiceMockService } from "../../services/profile-service-mock.service";
 
 @Component({
   selector: 'app-profile',
@@ -46,18 +47,18 @@ import {UsersService} from "../../../core/services/users/users.service";
 })
 export class ProfileComponent implements OnInit {
   availableSkills: FreelancerSkill[] = [];
-  
+
   isEditing: boolean = false;
   isChangingPassword: boolean = false;
   isLoadingUserData: boolean = true;
   isLoadingSkills: boolean = true;
   isUpdating: boolean = false;
   isChangingPasswordInProgress: boolean = false;
-  
+
   currentPasswordVisible: boolean = false;
   newPasswordVisible: boolean = false;
   confirmPasswordVisible: boolean = false;
-  
+
   userData: FreelancerUser = {
     id: '',
     userName: '',
@@ -71,7 +72,7 @@ export class ProfileComponent implements OnInit {
     imageUrl: null,
     roleName: ''
   };
-  
+
   editFreelancerForm = new FormGroup({
     firstName: new FormControl('', {
       nonNullable: true,
@@ -93,26 +94,26 @@ export class ProfileComponent implements OnInit {
     }),
     image: new FormControl<File | null>(null),
   });
-  
+
   changePasswordForm = new FormGroup({
     currentPassword: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(6)] }),
     newPassword: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(6)] }),
     confirmNewPassword: new FormControl('', { nonNullable: true, validators: [Validators.required] })
   }, { validators: this.passwordsMatchValidator });
-  
+
   constructor(
-    private profileService: ProfileService,
+    private profileService: ProfileServiceMockService,
     private userService: UsersService,
     private message: NzMessageService,
     private modal: NzModalService,
     private router: Router
   ) {}
-  
+
   ngOnInit(): void {
     this.loadUserData();
     this.loadAvailableSkills();
   }
-  
+
   loadUserData(): void {
     this.isLoadingUserData = true;
     this.profileService.getUserData().subscribe({
@@ -127,7 +128,7 @@ export class ProfileComponent implements OnInit {
       }
     });
   }
-  
+
   loadAvailableSkills(): void {
     this.isLoadingSkills = true;
     this.profileService.getAvailableSkill().subscribe({
@@ -142,7 +143,7 @@ export class ProfileComponent implements OnInit {
       }
     });
   }
-  
+
   onFileSelected(event: Event): void {
     const fileInput = event.target as HTMLInputElement;
     if (fileInput.files && fileInput.files.length > 0) {
@@ -150,13 +151,13 @@ export class ProfileComponent implements OnInit {
       this.editFreelancerForm.patchValue({ image: file });
     }
   }
-  
+
   onSubmitEditForm(): void {
     if (this.editFreelancerForm.valid) {
       this.isUpdating = true;
       const formData = new FormData();
       const formValue = this.editFreelancerForm.getRawValue();
-      
+
       formData.append('FreelancerProfile.FirstName', formValue.firstName);
       formData.append('FreelancerProfile.LastName', formValue.lastName);
       formData.append('FreelancerProfile.About', formValue.about);
@@ -167,7 +168,7 @@ export class ProfileComponent implements OnInit {
       if (formValue.image) {
         formData.append('ImageFile', formValue.image);
       }
-      
+
       this.profileService.updateFreelancerProfile(formData).subscribe({
         next: () => {
           this.isUpdating = false;
@@ -183,7 +184,7 @@ export class ProfileComponent implements OnInit {
       });
     }
   }
-  
+
   onClickEdit(): void {
     this.isEditing = !this.isEditing;
     this.isChangingPassword = false;
@@ -196,7 +197,7 @@ export class ProfileComponent implements OnInit {
       });
     }
   }
-  
+
   onCancelEdit(): void {
     this.isEditing = false;
     this.editFreelancerForm.reset({
@@ -208,11 +209,11 @@ export class ProfileComponent implements OnInit {
       image: null
     });
   }
-  
+
   onImageError(event: Event): void {
     (event.target as HTMLImageElement).src = '/assets/images/avatar-placeholder.png';
   }
-  
+
   onClickChangePassword(): void {
     this.isChangingPassword = !this.isChangingPassword;
     this.isEditing = false;
@@ -223,18 +224,18 @@ export class ProfileComponent implements OnInit {
       this.confirmPasswordVisible = false;
     }
   }
-  
+
   onSubmitChangePassword(): void {
     if (this.changePasswordForm.valid) {
       this.isChangingPasswordInProgress = true;
       const formValue = this.changePasswordForm.getRawValue();
-      
+
       const request = {
         email: this.userData.email!,
         currentPassword: formValue.currentPassword,
         newPassword: formValue.newPassword
       };
-      
+
       this.profileService.changePassword(request).subscribe({
         next: () => {
           this.isChangingPasswordInProgress = false;
@@ -250,7 +251,7 @@ export class ProfileComponent implements OnInit {
       });
     }
   }
-  
+
   onClickDeleteAccount(): void {
     this.modal.confirm({
       nzTitle: 'Delete Account',
@@ -260,7 +261,7 @@ export class ProfileComponent implements OnInit {
       nzOnOk: () => this.deleteAccount()
     });
   }
-  
+
   private deleteAccount(): void {
     this.userService.deleteUser(this.userData.id).subscribe({
       next: () => {
@@ -274,7 +275,7 @@ export class ProfileComponent implements OnInit {
       }
     });
   }
-  
+
   private passwordsMatchValidator(group: AbstractControl): ValidationErrors | null {
     const password = group.get('newPassword')?.value;
     const confirmPassword = group.get('confirmNewPassword')?.value;
