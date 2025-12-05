@@ -1,8 +1,10 @@
+using System.ComponentModel;
+
 namespace ProjectsService.Domain.Enums;
 
 public enum ProjectAcceptanceStatus
 {
-    None = 0,
-    Requested = 1,
-    Accepted = 2
+    [Description("None")] None = 0,
+    [Description("Requested")] Requested = 1,
+    [Description("Accepted")] Accepted = 2
 }

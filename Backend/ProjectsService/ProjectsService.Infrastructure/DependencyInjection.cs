@@ -6,13 +6,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using ProjectsService.Domain.Abstractions.KafkaProducerServices;
 using ProjectsService.Domain.Abstractions.StartupServices;
-using ProjectsService.Infrastructure.Data;
 using ProjectsService.Infrastructure.Repositories;
-using ProjectsService.Infrastructure.Services.DbStartupService;
 using ProjectsService.Infrastructure.Services.HangfireJobsInitializer;
 using ProjectsService.Infrastructure.Services.KafkaConsumerServices;
 using ProjectsService.Infrastructure.Services.KafkaProducerServices;
-using ProjectsService.Infrastructure.Services.LogstashHelpers;
 using Serilog;
 
 namespace ProjectsService.Infrastructure;
@@ -21,11 +18,11 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<CommandsDbContext>(options => 
-            options.UseNpgsql(configuration.GetConnectionString("PostgresConnectionPrimaryDb")));
-        
-        services.AddDbContext<QueriesDbContext>(options => 
-            options.UseNpgsql(configuration.GetConnectionString("PostgresConnectionReplicaDb")));
+        // services.AddDbContext<CommandsDbContext>(options =>
+        //     options.UseNpgsql(configuration.GetConnectionString("PostgresConnectionPrimaryDb")));
+        //
+        // services.AddDbContext<QueriesDbContext>(options =>
+        //     options.UseNpgsql(configuration.GetConnectionString("PostgresConnectionReplicaDb")));
 
         services.AddScoped<IUnitOfWork, AppUnitOfWork>();
         
@@ -44,7 +41,7 @@ public static class DependencyInjection
             .BindConfiguration("CacheOptions");
 
         services.AddScoped<IRecurringJobManager, RecurringJobManager>();
-        services.AddScoped<IDbStartupService, DbStartupService>();
+        // services.AddScoped<IDbStartupService, DbStartupService>();
         services.AddScoped<IBackgroundJobsInitializer, HangfireJobsInitializer>();
         
         services.AddOptionsWithValidateOnStart<KafkaSettings>()
@@ -55,7 +52,7 @@ public static class DependencyInjection
         services.AddHostedService<PaymentsConsumerService>();
         
         services.AddHealthChecks()
-            .AddNpgSql(configuration.GetConnectionString("PostgresConnectionPrimaryDb")!, name: "postgres-primary")
+            // .AddNpgSql(configuration.GetConnectionString("PostgresConnectionPrimaryDb")!, name: "postgres-primary")
             .AddNpgSql(configuration.GetConnectionString("PostgresConnectionReplicaDb")!, name: "postgres-replica")
             .AddNpgSql(configuration.GetConnectionString("PostgresConnectionHangfireDb")!, name: "postgres-hangfire")
             .AddRedis(configuration.GetConnectionString("RedisConnection")!)
@@ -70,13 +67,7 @@ public static class DependencyInjection
         
         Log.Logger = new LoggerConfiguration()
             .Enrich.FromLogContext()
-            .WriteTo.Console(new LogstashTextFormatter())
-            .WriteTo.Http(
-                requestUri: configuration["Logstash:Url"]!, 
-                queueLimitBytes: null,
-                textFormatter: new LogstashTextFormatter(),
-                httpClient: new LogstashHttpClient()
-            )
+            .WriteTo.Console()
             .CreateLogger();
 
         services.AddLogging(logging => logging.AddSerilog());

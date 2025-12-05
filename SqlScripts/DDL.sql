@@ -208,7 +208,7 @@ CREATE TABLE "FreelancerApplications" (
 CREATE TABLE "Reports" (
     "Id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "Description" TEXT,
-    "Status" VARCHAR(256) NOT NULL DEFAULT 'Submitted',
+    "Status" VARCHAR(256) NOT NULL DEFAULT 'Sent',
     "ProjectId" UUID NOT NULL REFERENCES "Projects" ("Id") ON DELETE RESTRICT,
     "ReporterUserId" UUID NOT NULL,
     "ReviewerUserId" UUID

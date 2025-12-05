@@ -1,8 +1,10 @@
-﻿namespace ProjectsService.Domain.Enums;
+﻿using System.ComponentModel;
+
+namespace ProjectsService.Domain.Enums;
 
 public enum ApplicationStatus
 {
-    Pending = 0,
-    Accepted = 1,
-    Rejected = 2
+    [Description("Pending")] Pending = 0,
+    [Description("Accepted")] Accepted = 1,
+    [Description("Rejected")] Rejected = 2
 }

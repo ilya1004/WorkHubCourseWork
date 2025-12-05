@@ -27,8 +27,8 @@ public static class DependencyInjection
             .BindConfiguration("CacheOptions");
 
         services.AddScoped<IUnitOfWork, AppUnitOfWork>();
-        services.AddScoped<ICachedService, RedisService>();
-        services.AddScoped<IDbStartupService, DbStartupService>();
+        // services.AddScoped<ICachedService, RedisService>();
+        // services.AddScoped<IDbStartupService, DbStartupService>();
 
         services.AddHealthChecks()
             .AddNpgSql(configuration.GetConnectionString("PostgresConnection")!)
