@@ -10,5 +10,5 @@ public class ApplicationDbContext : DbContext
     public DbSet<Lifecycle> Lifecycles { get; set; }
     public DbSet<Project> Projects { get; set; }
     public DbSet<Report> Reports { get; set; }
-    public StarredProject StarredProject { get; set; }
+    public DbSet<StarredProject> StarredProjects { get; set; }
 }

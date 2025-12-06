@@ -3,51 +3,51 @@ using ProjectsService.Domain.Abstractions.UserContext;
 
 namespace ProjectsService.Application.UseCases.Commands.ProjectUseCases.DeleteProject;
 
-public class DeleteProjectCommandHandler(
-    IUnitOfWork unitOfWork,
-    IUserContext userContext,
-    ILogger<DeleteProjectCommandHandler> logger) : IRequestHandler<DeleteProjectCommand>
+public class DeleteProjectCommandHandler : IRequestHandler<DeleteProjectCommand>
 {
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IUserContext _userContext;
+    private readonly ILogger<DeleteProjectCommandHandler> _logger;
+
+    public DeleteProjectCommandHandler(IUnitOfWork unitOfWork,
+        IUserContext userContext,
+        ILogger<DeleteProjectCommandHandler> logger)
+    {
+        _unitOfWork = unitOfWork;
+        _userContext = userContext;
+        _logger = logger;
+    }
+
     public async Task Handle(DeleteProjectCommand request, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Deleting project {ProjectId}", request.ProjectId);
-
-        var project = await unitOfWork.ProjectQueriesRepository.GetByIdAsync(
+        var project = await _unitOfWork.ProjectsRepository.GetByIdAsync(
             request.ProjectId, 
             cancellationToken,
-            p => p.Lifecycle);
+            true);
         
-        if (project is null)
+        if (project?.Lifecycle is null)
         {
-            logger.LogWarning("Project {ProjectId} not found", request.ProjectId);
-            
+            _logger.LogError("Project {ProjectId} not found", request.ProjectId);
             throw new NotFoundException($"Project with ID '{request.ProjectId}' not found");
         }
         
-        var userId = userContext.GetUserId();
+        var userId = _userContext.GetUserId();
         var isResourceOwned = userId == project.EmployerUserId;
-        var isAdmin = userContext.GetUserRole() == AppRoles.AdminRole;
+        var isAdmin = _userContext.GetUserRole() == AppRoles.AdminRole;
 
         if (!isResourceOwned && !isAdmin)
         {
-            logger.LogWarning("User {UserId} attempted to delete project {ProjectId} without permission", 
+            _logger.LogError("User {UserId} attempted to delete project {ProjectId} without permission",
                 userId, request.ProjectId);
-            
             throw new ForbiddenException($"You do not have access to project with ID '{request.ProjectId}'");
         }
 
         if (project.Lifecycle.ProjectStatus != ProjectStatus.Cancelled)
         {
-            logger.LogWarning("Project {ProjectId} must be cancelled before deletion", request.ProjectId);
-            
+            _logger.LogWarning("Project {ProjectId} must be cancelled before deletion", request.ProjectId);
             throw new BadRequestException("You need to cancel the project before its removing");
         }
-        
-        logger.LogInformation("Deleting project {ProjectId}", request.ProjectId);
-        
-        await unitOfWork.ProjectCommandsRepository.DeleteAsync(project, cancellationToken);
-        await unitOfWork.SaveAllAsync(cancellationToken);
-        
-        logger.LogInformation("Successfully deleted project {ProjectId}", request.ProjectId);
+
+        await _unitOfWork.ProjectsRepository.DeleteAsync(project.Id, cancellationToken);
     }
 }

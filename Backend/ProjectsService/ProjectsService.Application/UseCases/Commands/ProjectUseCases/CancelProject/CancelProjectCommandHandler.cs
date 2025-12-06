@@ -3,52 +3,56 @@ using ProjectsService.Domain.Abstractions.UserContext;
 
 namespace ProjectsService.Application.UseCases.Commands.ProjectUseCases.CancelProject;
 
-public class CancelProjectCommandHandler(
-    IUnitOfWork unitOfWork,
-    IUserContext userContext,
-    IPaymentsProducerService paymentsProducerService,
-    ILogger<CancelProjectCommandHandler> logger) : IRequestHandler<CancelProjectCommand>
+public class CancelProjectCommandHandler : IRequestHandler<CancelProjectCommand>
 {
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IUserContext _userContext;
+    private readonly IPaymentsProducerService _paymentsProducerService;
+    private readonly ILogger<CancelProjectCommandHandler> _logger;
+
+    public CancelProjectCommandHandler(
+        IUnitOfWork unitOfWork,
+        IUserContext userContext,
+        IPaymentsProducerService paymentsProducerService,
+        ILogger<CancelProjectCommandHandler> logger)
+    {
+        _unitOfWork = unitOfWork;
+        _userContext = userContext;
+        _paymentsProducerService = paymentsProducerService;
+        _logger = logger;
+    }
+
     public async Task Handle(CancelProjectCommand request, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Starting cancellation of project {ProjectId}", request.ProjectId);
+        var project = await _unitOfWork.ProjectsRepository.GetByIdAsync(
+            request.ProjectId,
+            cancellationToken,
+            true);
 
-        var project = await unitOfWork.ProjectQueriesRepository.GetByIdAsync(
-            request.ProjectId, 
-            cancellationToken, 
-            p => p.Lifecycle);
-
-        if (project is null)
+        if (project?.Lifecycle is null)
         {
-            logger.LogWarning("Project {ProjectId} not found", request.ProjectId);
-            
+            _logger.LogError("Project {ProjectId} not found", request.ProjectId);
             throw new NotFoundException($"Project with ID '{request.ProjectId}' not found");
         }
-        
-        var userId = userContext.GetUserId();
+
+        var userId = _userContext.GetUserId();
 
         if (project.EmployerUserId != userId)
         {
-            logger.LogWarning("User {UserId} attempted to cancel project {ProjectId} without permission", userId, request.ProjectId);
-            
+            _logger.LogError("User {UserId} attempted to cancel project {ProjectId} without permission",
+                userId, request.ProjectId);
             throw new ForbiddenException($"You do not have access to project with ID '{request.ProjectId}'");
         }
-        
-        logger.LogInformation("Cancelling project {ProjectId}", request.ProjectId);
-        
-        project.Lifecycle.ProjectStatus = ProjectStatus.Cancelled;
-        
-        await unitOfWork.ProjectCommandsRepository.UpdateAsync(project, cancellationToken);
-        await unitOfWork.SaveAllAsync(cancellationToken);
+
+        var lifecycle = project.Lifecycle;
+
+        lifecycle.ProjectStatus = ProjectStatus.Cancelled;
+
+        await _unitOfWork.LifecyclesRepository.UpdateAsync(lifecycle, cancellationToken);
 
         if (project.PaymentIntentId is not null)
         {
-            logger.LogInformation("Sending payment cancellation for project {ProjectId}, payment intent {PaymentIntentId}", 
-                request.ProjectId, project.PaymentIntentId);
-            
-            await paymentsProducerService.CancelPaymentAsync(project.PaymentIntentId, cancellationToken);    
+            await _paymentsProducerService.CancelPaymentAsync(project.PaymentIntentId, cancellationToken);
         }
-
-        logger.LogInformation("Successfully cancelled project {ProjectId}", request.ProjectId);
     }
 }

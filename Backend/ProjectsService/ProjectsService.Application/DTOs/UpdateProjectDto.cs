@@ -1,7 +1,6 @@
 namespace ProjectsService.Application.DTOs;
 
 public record UpdateProjectDto(
-    string Title,
-    string? Description,
+    string Description,
     decimal Budget,
     Guid? CategoryId);

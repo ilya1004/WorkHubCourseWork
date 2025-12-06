@@ -1,3 +1,3 @@
 namespace ProjectsService.Application.UseCases.Commands.ProjectUseCases.UpdateAcceptanceRequest;
 
-public sealed record UpdateAcceptanceRequestCommand(Guid ProjectId) : IRequest;
+public sealed record RequestProjectAcceptanceCommand(Guid ProjectId) : IRequest;

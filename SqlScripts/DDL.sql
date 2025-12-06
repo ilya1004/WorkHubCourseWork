@@ -177,6 +177,7 @@ CREATE TABLE "Projects" (
     "PaymentIntentId" VARCHAR(256),
     "EmployerUserId" UUID NOT NULL,
     "FreelancerUserId" UUID,
+    "IsActive" BOOLEAN NOT NULL DEFAULT TRUE,
     "CategoryId" UUID REFERENCES "Categories" ("Id") ON DELETE SET NULL
 );
 
@@ -184,7 +185,7 @@ CREATE TABLE "Projects" (
 CREATE TABLE "Lifecycles" (
     "Id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "CreatedAt" TIMESTAMP WITH TIME ZONE NOT NULL,
-    "UpdatedAt" TIMESTAMP WITH TIME ZONE NOT NULL,
+    "UpdatedAt" TIMESTAMP WITH TIME ZONE,
     "ApplicationsStartDate" TIMESTAMP WITH TIME ZONE NOT NULL,
     "ApplicationsDeadline" TIMESTAMP WITH TIME ZONE NOT NULL,
     "WorkStartDate" TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -247,3 +248,30 @@ CREATE INDEX IX_Reports_ReporterUserId ON "Reports" ("ReporterUserId");
 CREATE INDEX IX_Reports_ReviewerUserId ON "Reports" ("ReviewerUserId") WHERE "ReviewerUserId" IS NOT NULL;
 
 CREATE INDEX IX_StarredProjects_FreelancerUserId ON "StarredProjects" ("FreelancerUserId");
+
+
+-- Views
+
+CREATE OR REPLACE VIEW "ProjectInfo" AS
+SELECT 
+    p."Id",
+    p."Title",
+    p."Description",
+    p."Budget",
+    p."PaymentIntentId",
+    p."EmployerUserId",
+    p."FreelancerUserId",
+    p."CategoryId",
+    p."IsActive",
+
+    l."CreatedAt",
+    l."UpdatedAt",
+    l."ApplicationsStartDate",
+    l."ApplicationsDeadline",
+    l."WorkStartDate",
+    l."WorkDeadline",
+    l."AcceptanceStatus",
+    l."ProjectStatus"
+
+FROM "Projects" p
+INNER JOIN "Lifecycles" l ON l."ProjectId" = p."Id";

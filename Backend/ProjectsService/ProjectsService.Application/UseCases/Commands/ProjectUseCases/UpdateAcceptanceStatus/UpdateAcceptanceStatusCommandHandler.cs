@@ -2,69 +2,76 @@ using ProjectsService.Domain.Abstractions.UserContext;
 
 namespace ProjectsService.Application.UseCases.Commands.ProjectUseCases.UpdateAcceptanceStatus;
 
-public class UpdateAcceptanceStatusCommandHandler(
-    IUnitOfWork unitOfWork,
-    IUserContext userContext,
-    ILogger<UpdateAcceptanceStatusCommandHandler> logger) : IRequestHandler<UpdateAcceptanceStatusCommand>
+public class UpdateAcceptanceStatusCommandHandler : IRequestHandler<UpdateAcceptanceStatusCommand>
 {
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IUserContext _userContext;
+    private readonly ILogger<UpdateAcceptanceStatusCommandHandler> _logger;
+
+    public UpdateAcceptanceStatusCommandHandler(IUnitOfWork unitOfWork,
+        IUserContext userContext,
+        ILogger<UpdateAcceptanceStatusCommandHandler> logger)
+    {
+        _unitOfWork = unitOfWork;
+        _userContext = userContext;
+        _logger = logger;
+    }
+
     public async Task Handle(UpdateAcceptanceStatusCommand request, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Updating acceptance status for project {ProjectId}", request.ProjectId);
-
-        var project = await unitOfWork.ProjectQueriesRepository.GetByIdAsync(
+        var project = await _unitOfWork.ProjectsRepository.GetByIdAsync(
             request.ProjectId, 
             cancellationToken, 
-            p => p.Lifecycle);
+            true);
 
-        if (project is null)
+        if (project?.Lifecycle is null)
         {
-            logger.LogWarning("Project {ProjectId} not found", request.ProjectId);
-            
+            _logger.LogError("Project {ProjectId} not found", request.ProjectId);
             throw new NotFoundException($"Project with ID '{request.ProjectId}' not found");
         }
         
-        var userId = userContext.GetUserId();
+        var userId = _userContext.GetUserId();
 
         if (project.EmployerUserId != userId)
         {
-            logger.LogWarning("User {UserId} attempted to update acceptance status for project {ProjectId} without permission", 
+            _logger.LogError("User {UserId} attempted to update acceptance status for project {ProjectId} without permission",
                 userId, request.ProjectId);
-            
             throw new ForbiddenException($"You do not have access to project with ID '{request.ProjectId}'");
         }
 
-        if (!project.Lifecycle.AcceptanceRequested)
+        if (project.Lifecycle.AcceptanceStatus != ProjectAcceptanceStatus.Requested)
         {
-            logger.LogWarning("Acceptance not requested for project {ProjectId}", request.ProjectId);
-            
+            _logger.LogError("Acceptance not requested for project {ProjectId}", request.ProjectId);
             throw new BadRequestException("Project acceptance is not requested yet");
         }
 
         if (project.Lifecycle.ProjectStatus != ProjectStatus.PendingForReview)
         {
-            logger.LogWarning("Invalid project status {Status} for acceptance update", project.Lifecycle.ProjectStatus);
-            
+            _logger.LogError("Invalid project status {Status} for acceptance update", project.Lifecycle.ProjectStatus);
             throw new BadRequestException("Current project status do not allow you to update acceptance status");
         }
+
+        var lifecycle = project.Lifecycle;
         
         if (request.IsAcceptanceConfirmed)
         {
-            logger.LogInformation("Confirming acceptance for project {ProjectId}", request.ProjectId);
-            
-            project.Lifecycle.AcceptanceConfirmed = true;
-            project.Lifecycle.ProjectStatus = ProjectStatus.Completed;
+            lifecycle.AcceptanceStatus = ProjectAcceptanceStatus.Accepted;
+            lifecycle.ProjectStatus = ProjectStatus.Completed;
         }
         else
         {
-            logger.LogInformation("Rejecting acceptance for project {ProjectId}", request.ProjectId);
-            
-            project.Lifecycle.AcceptanceRequested = false;
-            project.Lifecycle.AcceptanceConfirmed = false;
+            lifecycle.AcceptanceStatus = ProjectAcceptanceStatus.None;
+
+            if (DateTime.UtcNow > project.Lifecycle.WorkDeadline)
+            {
+                lifecycle.ProjectStatus = ProjectStatus.Expired;
+            }
+            else
+            {
+                lifecycle.ProjectStatus = ProjectStatus.InProgress;
+            }
         }
         
-        await unitOfWork.ProjectCommandsRepository.UpdateAsync(project, cancellationToken);
-        await unitOfWork.SaveAllAsync(cancellationToken);
-        
-        logger.LogInformation("Successfully updated acceptance status for project {ProjectId}", request.ProjectId);
+        await _unitOfWork.LifecyclesRepository.UpdateAsync(lifecycle, cancellationToken);
     }
 }

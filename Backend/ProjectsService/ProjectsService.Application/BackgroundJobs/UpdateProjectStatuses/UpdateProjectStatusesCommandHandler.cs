@@ -1,32 +1,38 @@
 using Microsoft.Extensions.Options;
 using ProjectsService.Application.Settings;
+using ProjectsService.Domain.Models;
 
 namespace ProjectsService.Application.BackgroundJobs.UpdateProjectStatuses;
 
-public class UpdateProjectStatusesCommandHandler(
-    IUnitOfWork unitOfWork,
-    IOptions<ProjectsSettings> options,
-    ILogger<UpdateProjectStatusesCommandHandler> logger) : IRequestHandler<UpdateProjectStatusesCommand>
+public class UpdateProjectStatusesCommandHandler : IRequestHandler<UpdateProjectStatusesCommand>
 {
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IOptions<ProjectsSettings> _options;
+    private readonly ILogger<UpdateProjectStatusesCommandHandler> _logger;
+
+    public UpdateProjectStatusesCommandHandler(
+        IUnitOfWork unitOfWork,
+        IOptions<ProjectsSettings> options,
+        ILogger<UpdateProjectStatusesCommandHandler> logger)
+    {
+        _unitOfWork = unitOfWork;
+        _options = options;
+        _logger = logger;
+    }
+
     public async Task Handle(UpdateProjectStatusesCommand command, CancellationToken cancellationToken)
     {
-        var projects = await unitOfWork.ProjectQueriesRepository.ListAsync(
-            p =>
-                p.Lifecycle.ProjectStatus != ProjectStatus.Completed &&
-                p.Lifecycle.ProjectStatus != ProjectStatus.Cancelled,
-            cancellationToken,
-            p => p.Lifecycle,
-            p => p.FreelancerApplications);
+        var projectModels = await _unitOfWork.ProjectsRepository.GetByIsActiveAsync(
+            false,
+            cancellationToken);
 
-        logger.LogInformation("Found {ProjectCount} projects to process", projects.Count);
-
-        foreach (var project in projects)
+        foreach (var project in projectModels)
         {
-            var lifecycle = project.Lifecycle;
-            var previousStatus = lifecycle.ProjectStatus;
+            var previousStatus = project.ProjectStatus;
+            var newStatus = project.ProjectStatus;
             var now = DateTime.UtcNow;
 
-            logger.LogInformation("Processing project {ProjectId}, current status: {CurrentStatus}",
+            _logger.LogInformation("Processing project {ProjectId}, current status: {CurrentStatus}",
                 project.Id, previousStatus);
 
             // if (lifecycle.AcceptanceStatus == ProjectAcceptanceStatus.Accepted)
@@ -35,57 +41,69 @@ public class UpdateProjectStatusesCommandHandler(
             //
             //     logger.LogInformation("Project {ProjectId} marked as Completed (AcceptanceConfirmed)", project.Id);
             // }
-            if (now > lifecycle.WorkDeadline &&
-                lifecycle.ProjectStatus == ProjectStatus.Expired &&
-                lifecycle.UpdatedAt < now.AddDays(options.Value.MaxWorkDeadlineExpirationTimeInDays))
-            {
-                lifecycle.ProjectStatus = ProjectStatus.Cancelled;
 
-                logger.LogInformation("Project {ProjectId} marked as Cancelled (Expired deadline)", project.Id);
+            var isProjectHasAcceptedFreelancerApplications =
+                await IsProjectHasAcceptedFreelancerApplications(project.Id, cancellationToken);
+
+            if (now > project.WorkDeadline &&
+                project.ProjectStatus == ProjectStatus.Expired &&
+                project.UpdatedAt < now.AddDays(_options.Value.MaxWorkDeadlineExpirationTimeInDays))
+            {
+                newStatus = ProjectStatus.Cancelled;
+
+                _logger.LogInformation("Project {ProjectId} marked as Cancelled (Expired deadline)", project.Id);
             }
-            else if (now > lifecycle.WorkDeadline &&
-                     lifecycle.ProjectStatus != ProjectStatus.PendingForReview)
+            else if (now > project.WorkDeadline &&
+                     project.ProjectStatus != ProjectStatus.PendingForReview)
             {
-                lifecycle.ProjectStatus = ProjectStatus.Expired;
+                newStatus = ProjectStatus.Expired;
 
-                logger.LogInformation("Project {ProjectId} marked as Expired (Passed work deadline)", project.Id);
+                _logger.LogInformation("Project {ProjectId} marked as Expired (Passed work deadline)", project.Id);
             }
-            else if (now > lifecycle.WorkStartDate &&
-                     IsProjectHasAcceptedFreelancerApplications(project))
+            else if (now > project.WorkStartDate && isProjectHasAcceptedFreelancerApplications)
             {
-                lifecycle.ProjectStatus = ProjectStatus.InProgress;
+                newStatus = ProjectStatus.InProgress;
 
-                logger.LogInformation("Project {ProjectId} marked as InProgress (Work started)", project.Id);
+                _logger.LogInformation("Project {ProjectId} marked as InProgress (Work started)", project.Id);
 
-                UpdateProjectWhenInProgressAsync(project);
+                await _unitOfWork.FreelancerApplicationsRepository.UpdateRejectedStatusWhenNotAcceptedAsync(
+                    project.Id, cancellationToken);
+
+                await _unitOfWork.ProjectsRepository.UpdateFreelancerUserIdAsync(project.Id, cancellationToken);
+
+                await _unitOfWork.FreelancerApplicationsRepository.UpdateRejectedStatusWhenNotAcceptedAsync(
+                    project.Id, cancellationToken);
+
+                await _unitOfWork.ProjectsRepository.UpdateFreelancerUserIdAsync(project.Id, cancellationToken);
             }
-            else if (now > lifecycle.WorkStartDate && project.FreelancerUserId is null)
+            else if (now > project.WorkStartDate && project.FreelancerUserId is null)
             {
-                lifecycle.ProjectStatus = ProjectStatus.Cancelled;
+                newStatus = ProjectStatus.Cancelled;
 
-                logger.LogInformation("Project {ProjectId} marked as Cancelled (No freelancer assigned)", project.Id);
+                _logger.LogInformation("Project {ProjectId} marked as Cancelled (No freelancer assigned)", project.Id);
             }
-            else if (now > lifecycle.ApplicationsDeadline)
+            else if (now > project.ApplicationsDeadline)
             {
-                lifecycle.ProjectStatus = ProjectStatus.WaitingForWorkStart;
+                newStatus = ProjectStatus.WaitingForWorkStart;
 
-                logger.LogInformation("Project {ProjectId} marked as WaitingForWorkStart (Applications deadline passed)", project.Id);
+                _logger.LogInformation(
+                    "Project {ProjectId} marked as WaitingForWorkStart (Applications deadline passed)", project.Id);
             }
-            else if (now > lifecycle.ApplicationsStartDate)
+            else if (now > project.ApplicationsStartDate)
             {
-                lifecycle.ProjectStatus = ProjectStatus.AcceptingApplications;
+                newStatus = ProjectStatus.AcceptingApplications;
 
-                logger.LogInformation("Project {ProjectId} marked as AcceptingApplications (Applications period started)", project.Id);
+                _logger.LogInformation(
+                    "Project {ProjectId} marked as AcceptingApplications (Applications period started)", project.Id);
             }
 
-            if (previousStatus != lifecycle.ProjectStatus)
+            if (previousStatus != newStatus)
             {
-                logger.LogInformation("Status changed for project {ProjectId}: {PreviousStatus} -> {NewStatus}",
-                    project.Id, previousStatus, lifecycle.ProjectStatus);
+                _logger.LogInformation("Status changed for project {ProjectId}: {PreviousStatus} -> {NewStatus}",
+                    project.Id, previousStatus, project.ProjectStatus);
 
-                lifecycle.UpdatedAt = now;
-
-                await unitOfWork.LifecycleCommandsRepository.UpdateAsync(lifecycle, cancellationToken);
+                await _unitOfWork.LifecyclesRepository.UpdateStatusByProjectIdAsync(
+                    project.Id, newStatus, now, cancellationToken);
             }
 
             // if (lifecycle.ProjectStatus == ProjectStatus.InProgress)
@@ -96,29 +114,13 @@ public class UpdateProjectStatusesCommandHandler(
             // }
             // todo: ???
         }
-
-        logger.LogInformation("Saving all changes for {ProjectCount} projects", projects.Count);
-
-        await unitOfWork.SaveAllAsync(cancellationToken);
     }
 
-    private static bool IsProjectHasAcceptedFreelancerApplications(Project project)
+    private async Task<bool> IsProjectHasAcceptedFreelancerApplications(
+        Guid projectId,
+        CancellationToken cancellationToken)
     {
-        return project.FreelancerApplications.Any(a => a.Status == ApplicationStatus.Accepted);
-    }
-
-    private static void UpdateProjectWhenInProgressAsync(Project project)
-    {
-        foreach (var application in project.FreelancerApplications)
-        {
-            if (application.Status != ApplicationStatus.Accepted)
-            {
-                application.Status = ApplicationStatus.Rejected;
-            }
-            else
-            {
-                project.FreelancerUserId = application.FreelancerUserId;
-            }
-        }
+        return await _unitOfWork.FreelancerApplicationsRepository
+            .AnyByProjectIdAndApplicationStatus(projectId, ApplicationStatus.Accepted, cancellationToken);
     }
 }

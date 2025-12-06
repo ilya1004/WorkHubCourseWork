@@ -2,7 +2,7 @@
 
 namespace ProjectsService.Infrastructure.Repositories;
 
-public class CategoriesRepository
+public class CategoriesRepository : ICategoriesRepository
 {
     private readonly ApplicationDbContext _context;
     private readonly ILogger<CategoriesRepository> _logger;
@@ -15,13 +15,31 @@ public class CategoriesRepository
         _logger = logger;
     }
 
-    public async Task<Category?> GetByUserId(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Category?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         try
         {
             return await _context.Categories
                 .FromSql($"""
                           SELECT * FROM "Categories" WHERE "Id" = {id.ToString()}
+                          """)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to get category by id. Error: {Message}", ex.Message);
+            throw new InvalidOperationException($"Failed to get category by id. Error: {ex.Message}");
+        }
+    }
+
+    public async Task<Category?> GetByName(string name, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await _context.Categories
+                .FromSql($"""
+                          SELECT * FROM "Categories" WHERE "Name" = {name}
                           """)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);

@@ -2,60 +2,79 @@ using ProjectsService.Domain.Abstractions.UserContext;
 
 namespace ProjectsService.Application.UseCases.Commands.ProjectUseCases.CreateProject;
 
-public class CreateProjectCommandHandler(
-    IUnitOfWork unitOfWork, 
-    IMapper mapper,
-    IUserContext userContext,
-    ILogger<CreateProjectCommandHandler> logger) : IRequestHandler<CreateProjectCommand, Guid>
+public class CreateProjectCommandHandler : IRequestHandler<CreateProjectCommand, Project>
 {
-    public async Task<Guid> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IUserContext _userContext;
+    private readonly ILogger<CreateProjectCommandHandler> _logger;
+
+    public CreateProjectCommandHandler(
+        IUnitOfWork unitOfWork,
+        IUserContext userContext,
+        ILogger<CreateProjectCommandHandler> logger)
     {
-        var userId = userContext.GetUserId();
-        
-        logger.LogInformation("User {UserId} creating new project with title '{Title}'", userId, request.Project.Title);
-            
-        var existingProject = await unitOfWork.ProjectQueriesRepository.FirstOrDefaultAsync(
-            p => p.Title == request.Project.Title && p.EmployerUserId == userId, cancellationToken);
+        _unitOfWork = unitOfWork;
+        _userContext = userContext;
+        _logger = logger;
+    }
+
+    public async Task<Project> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
+    {
+        var userId = _userContext.GetUserId();
+
+        var existingProject = await _unitOfWork.ProjectsRepository.GetByEmployerAndTitleAsync(
+            userId, request.Project.Title, cancellationToken);
 
         if (existingProject is not null)
         {
-            logger.LogWarning("Project with title '{Title}' already exists for user {UserId}", request.Project.Title, userId);
-            
-            throw new AlreadyExistsException($"Project with title '{request.Project.Title}' already exists with this employer.");
+            _logger.LogError("Project with title '{Title}' already exists for user {UserId}", request.Project.Title,
+                userId);
+            throw new AlreadyExistsException(
+                $"Project with title '{request.Project.Title}' already exists with this employer.");
         }
 
         if (request.Project.CategoryId.HasValue)
         {
-            logger.LogInformation("Checking category {CategoryId} existence", request.Project.CategoryId);
-            
-            var isCategoryExists = await unitOfWork.CategoryQueriesRepository.AnyAsync(
-                c => c.Id == request.Project.CategoryId, cancellationToken);
+            _logger.LogInformation("Checking category {CategoryId} existence", request.Project.CategoryId);
 
-            if (!isCategoryExists)
+            var existingCategory = await _unitOfWork.CategoriesRepository.GetByIdAsync(
+                request.Project.CategoryId.Value, cancellationToken);
+
+            if (existingCategory is null)
             {
-                logger.LogWarning("Category {CategoryId} not found", request.Project.CategoryId);
-                
+                _logger.LogError("Category {CategoryId} not found", request.Project.CategoryId);
                 throw new NotFoundException($"Category with ID '{request.Project.CategoryId}' not found");
             }
         }
 
-        var project = mapper.Map<Project>(request.Project);
-        project.EmployerUserId = userId;
-        
-        logger.LogInformation("Adding new project {ProjectId}", project.Id);
-        
-        await unitOfWork.ProjectCommandsRepository.AddAsync(project, cancellationToken);
-        
-        var lifecycle = mapper.Map<Lifecycle>(request);
-        lifecycle.ProjectId = project.Id;
+        var project = new Project
+        {
+            Id = Guid.CreateVersion7(),
+            Title = request.Project.Title,
+            Description = request.Project.Description,
+            Budget = request.Project.Budget,
+            EmployerUserId = userId,
+            IsActive = true,
+            CategoryId = request.Project.CategoryId,
+        };
 
-        logger.LogInformation("Adding lifecycle for project {ProjectId}", project.Id);
-        
-        await unitOfWork.LifecycleCommandsRepository.AddAsync(lifecycle, cancellationToken);
-        await unitOfWork.SaveAllAsync(cancellationToken);
-        
-        logger.LogInformation("Successfully created project {ProjectId}", project.Id);
+        var lifecycle = new Lifecycle
+        {
+            Id = Guid.CreateVersion7(),
+            CreatedAt = DateTime.UtcNow,
+            ApplicationsStartDate = request.Lifecycle.ApplicationsStartDate,
+            ApplicationsDeadline = request.Lifecycle.ApplicationsDeadline,
+            WorkStartDate = default,
+            WorkDeadline = default,
+            AcceptanceStatus = ProjectAcceptanceStatus.None,
+            ProjectStatus = ProjectStatus.Published,
+            ProjectId = project.Id,
+        };
 
-        return project.Id;
+        await _unitOfWork.ProjectsRepository.CreateAsync(project, cancellationToken);
+
+        await _unitOfWork.LifecyclesRepository.CreateAsync(lifecycle, cancellationToken);
+
+        return project;
     }
 }

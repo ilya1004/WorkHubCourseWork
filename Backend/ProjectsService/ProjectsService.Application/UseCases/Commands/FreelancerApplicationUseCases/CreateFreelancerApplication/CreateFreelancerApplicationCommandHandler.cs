@@ -2,37 +2,51 @@ using ProjectsService.Domain.Abstractions.UserContext;
 
 namespace ProjectsService.Application.UseCases.Commands.FreelancerApplicationUseCases.CreateFreelancerApplication;
 
-public class CreateFreelancerApplicationCommandHandler(
-    IUnitOfWork unitOfWork,
-    IMapper mapper,
-    IUserContext userContext,
-    ILogger<CreateFreelancerApplicationCommandHandler> logger) : IRequestHandler<CreateFreelancerApplicationCommand>
+public class CreateFreelancerApplicationCommandHandler : IRequestHandler<CreateFreelancerApplicationCommand>
 {
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IUserContext _userContext;
+    private readonly ILogger<CreateFreelancerApplicationCommandHandler> _logger;
+
+    public CreateFreelancerApplicationCommandHandler(
+        IUnitOfWork unitOfWork,
+        IUserContext userContext,
+        ILogger<CreateFreelancerApplicationCommandHandler> logger)
+    {
+        _unitOfWork = unitOfWork;
+        _userContext = userContext;
+        _logger = logger;
+    }
+
     public async Task Handle(CreateFreelancerApplicationCommand request, CancellationToken cancellationToken)
     {
-        var userId = userContext.GetUserId();
-        
-        logger.LogInformation("User {UserId} creating application for project {ProjectId}", userId, request.ProjectId);
-        
-        var freelancerApplication = await unitOfWork.FreelancerApplicationQueriesRepository.FirstOrDefaultAsync(
-            fa => fa.ProjectId == request.ProjectId && fa.FreelancerUserId == userId,
-            cancellationToken);
+        var userId = _userContext.GetUserId();
 
-        if (freelancerApplication is not null)
+        var freelancerApplications =
+            await _unitOfWork.FreelancerApplicationsRepository.GetByProjectIdAsync(
+                request.ProjectId, cancellationToken);
+
+        var userFreelancerApplication = freelancerApplications
+            .FirstOrDefault(x => x.FreelancerUserId == userId);
+
+        if (userFreelancerApplication is not null)
         {
-            logger.LogWarning("User {UserId} already has application for project {ProjectId}", userId, request.ProjectId);
-            
-            throw new AlreadyExistsException($"Freelancer application to the project with ID '{request.ProjectId}' already exists.");
+            _logger.LogError("User {UserId} already has application for project {ProjectId}", userId,
+                request.ProjectId);
+            throw new AlreadyExistsException(
+                $"Freelancer application to the project with ID '{request.ProjectId}' already exists.");
         }
-        
-        var newFreelancerApplication = mapper.Map<FreelancerApplication>(request);
-        newFreelancerApplication.FreelancerUserId = userId;
-        
-        logger.LogInformation("Adding new freelancer application for project {ProjectId}", request.ProjectId);
-        
-        await unitOfWork.FreelancerApplicationCommandsRepository.AddAsync(newFreelancerApplication, cancellationToken);
-        await unitOfWork.SaveAllAsync(cancellationToken);
-        
-        logger.LogInformation("Successfully created freelancer application for project {ProjectId}", request.ProjectId);
+
+        var newFreelancerApplication = new FreelancerApplication
+        {
+            Id = Guid.CreateVersion7(),
+            ProjectId = request.ProjectId,
+            CreatedAt = DateTime.UtcNow,
+            CvId = request.CvId,
+            FreelancerUserId = userId,
+            Status = ApplicationStatus.Pending,
+        };
+
+        await _unitOfWork.FreelancerApplicationsRepository.CreateAsync(newFreelancerApplication, cancellationToken);
     }
 }

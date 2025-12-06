@@ -107,7 +107,7 @@ public class ProjectsController(IMediator mediator, IMapper mapper) : Controller
     [Authorize(Policy = AuthPolicies.FreelancerPolicy)]
     public async Task<IActionResult> UpdateAcceptanceRequest([FromRoute] Guid projectId, CancellationToken cancellationToken = default)
     {
-        await mediator.Send(new UpdateAcceptanceRequestCommand(projectId), cancellationToken);
+        await mediator.Send(new RequestProjectAcceptanceCommand(projectId), cancellationToken);
 
         return NoContent();
     }

@@ -2,86 +2,88 @@ using ProjectsService.Domain.Abstractions.UserContext;
 
 namespace ProjectsService.Application.UseCases.Commands.FreelancerApplicationUseCases.AcceptFreelancerApplication;
 
-public class AcceptFreelancerApplicationCommandHandler(
-    IUnitOfWork unitOfWork,
-    IUserContext userContext,
-    ILogger<AcceptFreelancerApplicationCommandHandler> logger) : IRequestHandler<AcceptFreelancerApplicationCommand>
+public class AcceptFreelancerApplicationCommandHandler : IRequestHandler<AcceptFreelancerApplicationCommand>
 {
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IUserContext _userContext;
+    private readonly ILogger<AcceptFreelancerApplicationCommandHandler> _logger;
+
+    public AcceptFreelancerApplicationCommandHandler(
+        IUnitOfWork unitOfWork,
+        IUserContext userContext,
+        ILogger<AcceptFreelancerApplicationCommandHandler> logger)
+    {
+        _unitOfWork = unitOfWork;
+        _userContext = userContext;
+        _logger = logger;
+    }
+
     public async Task Handle(AcceptFreelancerApplicationCommand request, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Starting to accept freelancer application {ApplicationId} for project {ProjectId}", 
-            request.ApplicationId, request.ProjectId);
-
-        var project = await unitOfWork.ProjectQueriesRepository.GetByIdAsync(
+        var project = await _unitOfWork.ProjectsRepository.GetByIdAsync(
             request.ProjectId,
             cancellationToken,
-            p => p.Lifecycle);
+            true);
 
-        if (project is null)
+        if (project?.Lifecycle is null)
         {
-            logger.LogWarning("Project {ProjectId} not found", request.ProjectId);
-            
+            _logger.LogError("Project {ProjectId} not found", request.ProjectId);
             throw new NotFoundException($"Project with ID '{request.ProjectId}' not found");
         }
-        
-        var userId = userContext.GetUserId();
-        
+
+        var userId = _userContext.GetUserId();
+
         if (project.EmployerUserId != userId)
         {
-            logger.LogWarning("User {UserId} attempted to access project {ProjectId} without permission", userId, request.ProjectId);
-            
+            _logger.LogError("User {UserId} attempted to access project {ProjectId} without permission", userId,
+                request.ProjectId);
             throw new ForbiddenException($"You do not have access to project with ID '{request.ProjectId}'");
         }
 
         if (project.FreelancerUserId is not null)
         {
-            logger.LogWarning("Project {ProjectId} already has freelancer assigned", request.ProjectId);
-            
+            _logger.LogError("Project {ProjectId} already has freelancer assigned", request.ProjectId);
             throw new BadRequestException("This project already has freelancer to work on it");
         }
 
         if (project.Lifecycle.ProjectStatus != ProjectStatus.AcceptingApplications)
         {
-            logger.LogWarning("Invalid project status {Status} for accepting applications", project.Lifecycle.ProjectStatus);
-            
-            throw new BadRequestException("You can accept applications to this project only during accepting applications stage");
+            _logger.LogError("Invalid project status {Status} for accepting applications",
+                project.Lifecycle.ProjectStatus);
+            throw new BadRequestException(
+                "You can accept applications to this project only during accepting applications stage");
         }
 
-        var hasAcceptedApplication = await unitOfWork.FreelancerApplicationQueriesRepository.AnyAsync(
-            fa => fa.Status == ApplicationStatus.Accepted, cancellationToken);
+        var hasAcceptedApplication =
+            await _unitOfWork.FreelancerApplicationsRepository.AnyByProjectIdAndApplicationStatus(
+                project.Id, ApplicationStatus.Accepted, cancellationToken);
 
         if (hasAcceptedApplication)
         {
-            logger.LogWarning("You already has accepted freelancer application to this project with ID '{ProjectId}'", project.Id);
-            
-            throw new BadRequestException($"You already has accepted freelancer application to this project with ID '{project.Id}'");
+            _logger.LogError("You already has accepted freelancer application to this project with ID '{ProjectId}'",
+                project.Id);
+            throw new BadRequestException(
+                $"You already has accepted freelancer application to this project with ID '{project.Id}'");
         }
-        
-        var freelancerApplication = await unitOfWork.FreelancerApplicationQueriesRepository.GetByIdAsync(
-            request.ApplicationId,
-            cancellationToken);
+
+        var freelancerApplication = await _unitOfWork.FreelancerApplicationsRepository.GetByIdAsync(
+            request.ApplicationId, cancellationToken);
 
         if (freelancerApplication is null)
         {
-            logger.LogWarning("Freelancer application {ApplicationId} not found", request.ApplicationId);
-            
+            _logger.LogError("Freelancer application {ApplicationId} not found", request.ApplicationId);
             throw new NotFoundException($"Freelancer application with ID '{request.ApplicationId}' not found");
         }
 
         if (freelancerApplication.Status != ApplicationStatus.Pending)
         {
-            logger.LogWarning("Freelancer application {ApplicationId} has invalid status {Status}", 
+            _logger.LogError("Freelancer application {ApplicationId} has invalid status {Status}",
                 request.ApplicationId, freelancerApplication.Status);
-            
             throw new BadRequestException("Freelancer application status is not pending");
         }
 
         freelancerApplication.Status = ApplicationStatus.Accepted;
 
-        await unitOfWork.FreelancerApplicationCommandsRepository.UpdateAsync(freelancerApplication, cancellationToken);
-        await unitOfWork.SaveAllAsync(cancellationToken);
-        
-        logger.LogInformation("Successfully accepted freelancer application {ApplicationId} for project {ProjectId}", 
-            request.ApplicationId, request.ProjectId);
+        await _unitOfWork.FreelancerApplicationsRepository.UpdateAsync(freelancerApplication, cancellationToken);
     }
 }

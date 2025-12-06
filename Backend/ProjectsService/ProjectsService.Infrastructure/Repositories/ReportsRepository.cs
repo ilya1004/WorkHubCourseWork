@@ -3,7 +3,7 @@ using ProjectsService.Infrastructure.Data;
 
 namespace ProjectsService.Infrastructure.Repositories;
 
-public class ReportsRepository
+public class ReportsRepository : IReportsRepository
 {
     private readonly ApplicationDbContext _context;
     private readonly ILogger<ReportsRepository> _logger;
@@ -77,7 +77,10 @@ public class ReportsRepository
         }
     }
 
-    public async Task UpdateStatusAsync(Guid reportId, ReportStatus reportStatus, CancellationToken cancellationToken = default)
+    public async Task UpdateStatusAsync(
+        Guid reportId,
+        ReportStatus reportStatus,
+        CancellationToken cancellationToken = default)
     {
         try
         {

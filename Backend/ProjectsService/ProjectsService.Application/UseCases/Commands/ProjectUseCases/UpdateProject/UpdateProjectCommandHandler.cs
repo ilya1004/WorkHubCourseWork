@@ -2,75 +2,79 @@ using ProjectsService.Domain.Abstractions.UserContext;
 
 namespace ProjectsService.Application.UseCases.Commands.ProjectUseCases.UpdateProject;
 
-public class UpdateProjectCommandHandler(
-    IUnitOfWork unitOfWork, 
-    IMapper mapper,
-    IUserContext userContext,
-    ILogger<UpdateProjectCommandHandler> logger) : IRequestHandler<UpdateProjectCommand>
+public class UpdateProjectCommandHandler : IRequestHandler<UpdateProjectCommand, Project>
 {
-    public async Task Handle(UpdateProjectCommand request, CancellationToken cancellationToken)
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IUserContext _userContext;
+    private readonly ILogger<UpdateProjectCommandHandler> _logger;
+
+    public UpdateProjectCommandHandler(
+        IUnitOfWork unitOfWork,
+        IUserContext userContext,
+        ILogger<UpdateProjectCommandHandler> logger)
     {
-        logger.LogInformation("Updating project {ProjectId}", request.ProjectId);
+        _unitOfWork = unitOfWork;
+        _userContext = userContext;
+        _logger = logger;
+    }
 
-        var project = await unitOfWork.ProjectQueriesRepository.GetByIdAsync(request.ProjectId, cancellationToken);
+    public async Task<Project> Handle(UpdateProjectCommand request, CancellationToken cancellationToken)
+    {
+        var project = await _unitOfWork.ProjectsRepository.GetByIdAsync(
+            request.ProjectId,
+            cancellationToken,
+            true);
 
-        if (project is null)
+        if (project?.Lifecycle is null)
         {
-            logger.LogWarning("Project {ProjectId} not found", request.ProjectId);
-            
+            _logger.LogError("Project {ProjectId} not found", request.ProjectId);
             throw new NotFoundException($"Project with ID '{request.ProjectId}' not found");
         }
         
-        var userId = userContext.GetUserId();
+        var userId = _userContext.GetUserId();
         
         if (project.EmployerUserId != userId)
         {
-            logger.LogWarning("User {UserId} attempted to update project {ProjectId} without permission", userId, request.ProjectId);
-            
+            _logger.LogError("User {UserId} attempted to update project {ProjectId} without permission", userId, request.ProjectId);
             throw new ForbiddenException($"You do not have access to project with ID '{request.ProjectId}'");
         }
-        
-        var lifecycle = await unitOfWork.LifecycleQueriesRepository.FirstOrDefaultAsync(
-            l => l.ProjectId == project.Id, cancellationToken);
-        
-        if (lifecycle is null)
+
+        if (project.Lifecycle.ProjectStatus != ProjectStatus.Published)
         {
-            logger.LogWarning("Lifecycle not found for project {ProjectId}", project.Id);
-            
-            throw new NotFoundException($"Project lifecycle with ProjectId '{project.Id}' not found");
-        }
-        
-        if (lifecycle.ProjectStatus != ProjectStatus.Published)
-        {
-            logger.LogWarning("Invalid project status {Status} for update", lifecycle.ProjectStatus);
-            
+            _logger.LogError("Invalid project status {Status} for update", project.Lifecycle.ProjectStatus);
             throw new BadRequestException("You cannot edit this project after the start of accepting applications");
         }
         
         if (request.Project.CategoryId.HasValue)
         {
-            logger.LogInformation("Checking category {CategoryId} existence", request.Project.CategoryId);
+            _logger.LogInformation("Checking category {CategoryId} existence", request.Project.CategoryId);
             
-            var isCategoryExists = await unitOfWork.CategoryQueriesRepository.AnyAsync(
-                c => c.Id == request.Project.CategoryId, cancellationToken);
+            var existingCategory = await _unitOfWork.CategoriesRepository.GetByIdAsync(
+                request.Project.CategoryId.Value, cancellationToken);
 
-            if (!isCategoryExists)
+            if (existingCategory is null)
             {
-                logger.LogWarning("Category {CategoryId} not found", request.Project.CategoryId);
-                
+                _logger.LogError("Category {CategoryId} not found", request.Project.CategoryId);
                 throw new NotFoundException($"Category with ID '{request.Project.CategoryId}' not found");
             }
+
+            project.CategoryId = request.Project.CategoryId.Value;
         }
-        
-        mapper.Map(request.Project, project);
-        mapper.Map(request.Lifecycle, lifecycle);
-        
-        logger.LogInformation("Saving project {ProjectId} updates", request.ProjectId);
-        
-        await unitOfWork.ProjectCommandsRepository.UpdateAsync(project, cancellationToken);
-        await unitOfWork.LifecycleCommandsRepository.UpdateAsync(lifecycle, cancellationToken);
-        await unitOfWork.SaveAllAsync(cancellationToken);
-        
-        logger.LogInformation("Successfully updated project {ProjectId}", request.ProjectId);
+
+        project.Description = request.Project.Description;
+        project.Budget = request.Project.Budget;
+
+        var lifecycle = project.Lifecycle;
+
+        lifecycle.ApplicationsStartDate = request.Lifecycle.ApplicationsStartDate;
+        lifecycle.ApplicationsDeadline = request.Lifecycle.ApplicationsDeadline;
+        lifecycle.WorkStartDate = request.Lifecycle.WorkStartDate;
+        lifecycle.WorkDeadline = request.Lifecycle.WorkDeadline;
+        lifecycle.UpdatedAt = DateTime.UtcNow;
+
+        await _unitOfWork.ProjectsRepository.UpdateAsync(project, cancellationToken);
+        await _unitOfWork.LifecyclesRepository.UpdateAsync(lifecycle, cancellationToken);
+
+        return project;
     }
 }
