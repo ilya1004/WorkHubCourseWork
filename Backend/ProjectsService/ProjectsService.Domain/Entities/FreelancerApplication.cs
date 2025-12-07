@@ -8,7 +8,7 @@ public class FreelancerApplication : Entity
     public DateTime CreatedAt { get; set; }
     public ApplicationStatus Status { get; set; }
     public Guid ProjectId { get; set; }
-    public Project Project { get; set; }
+    public Project? Project { get; set; }
     public Guid FreelancerUserId { get; set; }
     public Guid? CvId { get; set; }
 }

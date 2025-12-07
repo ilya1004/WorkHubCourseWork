@@ -27,44 +27,44 @@ public static class DependencyInjection
     {
         services.AddOptionsWithValidateOnStart<StripeSettings>()
             .BindConfiguration("StripeSettings");
-        
+
         var stripeSettings = configuration.GetRequiredSection("StripeSettings").Get<StripeSettings>()!;
 
         StripeConfiguration.ApiKey = stripeSettings.SecretKey;
 
-        services.AddAutoMapper(Assembly.GetExecutingAssembly());
+        services.AddAutoMapper(config => config.AddMaps(Assembly.GetExecutingAssembly()));
 
         services.AddScoped<IEmployerAccountsService, StripeEmployerAccountsService>();
         services.AddScoped<IFreelancerAccountsService, StripeFreelancerAccountsService>();
         services.AddScoped<IEmployerPaymentsService, StripeEmployerPaymentsService>();
         services.AddScoped<IPaymentMethodsService, StripePaymentMethodsService>();
         services.AddScoped<ITransfersService, StripeTransfersService>();
-        
+
         services.AddOptionsWithValidateOnStart<GrpcSettings>()
             .BindConfiguration("GrpcSettings");
-        
+
         var grpcSettings = configuration.GetRequiredSection("GrpcSettings").Get<GrpcSettings>()!;
 
         services.AddSingleton<GrpcLoggingInterceptor>();
         services.AddSingleton<AuthInterceptor>();
-        
+
         services.AddGrpcClient<Employers.Employers.EmployersClient>(options =>
             {
                 options.Address = new Uri(grpcSettings.IdentityServiceAddress);
             })
             .AddInterceptor<GrpcLoggingInterceptor>()
             .AddInterceptor<AuthInterceptor>();
-        
+
         services.AddGrpcClient<Freelancers.Freelancers.FreelancersClient>(options =>
             {
                 options.Address = new Uri(grpcSettings.IdentityServiceAddress);
             })
             .AddInterceptor<GrpcLoggingInterceptor>()
             .AddInterceptor<AuthInterceptor>();
-        
-        services.AddGrpcClient<Projects.Projects.ProjectsClient>(options => 
-            { 
-                options.Address = new Uri(grpcSettings.ProjectsServiceAddress); 
+
+        services.AddGrpcClient<Projects.Projects.ProjectsClient>(options =>
+            {
+                options.Address = new Uri(grpcSettings.ProjectsServiceAddress);
             })
             .AddInterceptor<GrpcLoggingInterceptor>()
             .AddInterceptor<AuthInterceptor>();
@@ -75,17 +75,17 @@ public static class DependencyInjection
 
         services.AddOptionsWithValidateOnStart<KafkaSettings>()
             .BindConfiguration("KafkaSettings");
-        
+
         var kafkaSettings = configuration.GetRequiredSection("KafkaSettings").Get<KafkaSettings>()!;
-        
+
         services.AddSingleton<IAccountsProducerService, AccountsProducerService>();
         services.AddSingleton<IPaymentsProducerService, PaymentsProducerService>();
-        
+
         services.AddHostedService<PaymentsConsumerService>();
 
         services.AddHealthChecks()
             .AddCheck<StripeHealthCheck>("stipe", HealthStatus.Unhealthy)
-            .AddKafka(new ProducerConfig 
+            .AddKafka(new ProducerConfig
             {
                 BootstrapServers = kafkaSettings.BootstrapServers
             }, name: "kafka")
@@ -93,16 +93,10 @@ public static class DependencyInjection
                 elasticsearchUri: configuration["Elasticsearch:Url"]!,
                 name: "elasticsearch",
                 failureStatus: HealthStatus.Unhealthy);
-        
+
         Log.Logger = new LoggerConfiguration()
             .Enrich.FromLogContext()
             .WriteTo.Console(new LogstashTextFormatter())
-            .WriteTo.Http(
-                requestUri: configuration["Logstash:Url"]!, 
-                queueLimitBytes: null,
-                textFormatter: new LogstashTextFormatter(),
-                httpClient: new LogstashHttpClient()
-            )
             .CreateLogger();
 
         services.AddLogging(logging => logging.AddSerilog());

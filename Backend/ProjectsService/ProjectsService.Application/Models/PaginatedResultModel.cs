@@ -2,7 +2,7 @@ using ProjectsService.Domain.Primitives;
 
 namespace ProjectsService.Application.Models;
 
-public record PaginatedResultModel<TEntity> where TEntity : Entity
+public record PaginatedResultModel<TEntity> where TEntity : class
 {
     public List<TEntity> Items { get; set; } = [];
     public int TotalCount { get; set; }

@@ -21,9 +21,9 @@ public static class DependencyInjection
     {
         services.AddTransient<GlobalLoggingMiddleware>();
         services.AddTransient<GlobalExceptionHandlingMiddleware>();
-        
+
         var jwtSettings = configuration.GetRequiredSection("JwtSettings").Get<JwtSettings>();
-        
+
         services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -47,31 +47,15 @@ public static class DependencyInjection
             });
 
         services.AddAuthorizationBuilder()
-            .AddPolicy(AuthPolicies.AdminPolicy, policy =>
-            {
-                policy.RequireRole(AppRoles.AdminRole);
-            })
-            .AddPolicy(AuthPolicies.FreelancerPolicy, policy =>
-            {
-                policy.RequireRole(AppRoles.FreelancerRole);
-            })
-            .AddPolicy(AuthPolicies.EmployerPolicy, policy =>
-            {
-                policy.RequireRole(AppRoles.EmployerRole);
-            })
-            .AddPolicy(AuthPolicies.FreelancerOrEmployerPolicy, policy =>
-            {
-                policy.RequireRole(AppRoles.FreelancerRole, AppRoles.EmployerRole);
-            })
-            .AddPolicy(AuthPolicies.AdminOrEmployerPolicy, policy =>
-            {
-                policy.RequireRole(AppRoles.AdminRole, AppRoles.EmployerRole);
-            })
-            .AddPolicy(AuthPolicies.AdminOrFreelancerPolicy, policy =>
-            {
-                policy.RequireRole(AppRoles.AdminRole, AppRoles.FreelancerRole);
-            });
-        
+            .AddPolicy(AuthPolicies.AdminPolicy, policy => { policy.RequireRole(AppRoles.AdminRole); })
+            .AddPolicy(AuthPolicies.FreelancerPolicy, policy => { policy.RequireRole(AppRoles.FreelancerRole); })
+            .AddPolicy(AuthPolicies.EmployerPolicy, policy => { policy.RequireRole(AppRoles.EmployerRole); })
+            .AddPolicy(AuthPolicies.FreelancerOrEmployerPolicy,
+                policy => { policy.RequireRole(AppRoles.FreelancerRole, AppRoles.EmployerRole); })
+            .AddPolicy(AuthPolicies.AdminOrEmployerPolicy, policy => { policy.RequireRole(AppRoles.AdminRole, AppRoles.EmployerRole); })
+            .AddPolicy(AuthPolicies.AdminOrFreelancerPolicy,
+                policy => { policy.RequireRole(AppRoles.AdminRole, AppRoles.FreelancerRole); });
+
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         services.AddFluentValidationAutoValidation(config =>
         {
@@ -80,7 +64,7 @@ public static class DependencyInjection
             config.EnableQueryBindingSourceAutomaticValidation = true;
         });
 
-        services.AddAutoMapper(Assembly.GetExecutingAssembly());
+        services.AddAutoMapper(config => config.AddMaps(Assembly.GetExecutingAssembly()));
 
         services.AddOptionsWithValidateOnStart<ProjectsSettings>()
             .BindConfiguration("ProjectsSettings");
@@ -89,14 +73,14 @@ public static class DependencyInjection
 
         services.AddSingleton<GrpcLoggingInterceptor>();
         services.AddSingleton<ErrorHandlingInterceptor>();
-        
+
         services.AddGrpc(options =>
         {
             options.EnableDetailedErrors = true;
             options.Interceptors.Add<GrpcLoggingInterceptor>();
             options.Interceptors.Add<ErrorHandlingInterceptor>();
         });
-        
+
         return services;
     }
 }

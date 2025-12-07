@@ -50,7 +50,7 @@ public class PasswordHasher : IPasswordHasher
         }
 
         var parts = hashedPassword.Split('$');
-        if (parts.Length != 5)
+        if (parts.Length != 6)
         {
             return false;
         }

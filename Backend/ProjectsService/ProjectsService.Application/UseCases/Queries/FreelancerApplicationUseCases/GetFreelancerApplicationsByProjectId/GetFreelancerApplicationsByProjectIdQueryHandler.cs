@@ -4,50 +4,57 @@ using ProjectsService.Domain.Abstractions.UserContext;
 
 namespace ProjectsService.Application.UseCases.Queries.FreelancerApplicationUseCases.GetFreelancerApplicationsByProjectId;
 
-public class GetFreelancerApplicationsByProjectIdQueryHandler(
-    IUnitOfWork unitOfWork,
-    IUserContext userContext,
-    ILogger<GetFreelancerApplicationsByProjectIdQueryHandler> logger) : IRequestHandler<GetFreelancerApplicationsByProjectIdQuery, PaginatedResultModel<FreelancerApplication>>
+public class GetFreelancerApplicationsByProjectIdQueryHandler : IRequestHandler<GetFreelancerApplicationsByProjectIdQuery,
+    PaginatedResultModel<FreelancerApplication>>
 {
-    public async Task<PaginatedResultModel<FreelancerApplication>> Handle(GetFreelancerApplicationsByProjectIdQuery request, CancellationToken cancellationToken)
-    {
-        logger.LogInformation("Getting freelancer applications for project ID: {ProjectId}", request.ProjectId);
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IUserContext _userContext;
+    private readonly ILogger<GetFreelancerApplicationsByProjectIdQueryHandler> _logger;
 
-        var project = await unitOfWork.ProjectQueriesRepository.GetByIdAsync(request.ProjectId, cancellationToken);
-        
+    public GetFreelancerApplicationsByProjectIdQueryHandler(
+        IUnitOfWork unitOfWork,
+        IUserContext userContext,
+        ILogger<GetFreelancerApplicationsByProjectIdQueryHandler> logger)
+    {
+        _unitOfWork = unitOfWork;
+        _userContext = userContext;
+        _logger = logger;
+    }
+
+    public async Task<PaginatedResultModel<FreelancerApplication>> Handle(
+        GetFreelancerApplicationsByProjectIdQuery request,
+        CancellationToken cancellationToken)
+    {
+        var project = await _unitOfWork.ProjectsRepository.GetByIdAsync(request.ProjectId, cancellationToken);
+
         if (project is null)
         {
-            logger.LogWarning("Project with ID {ProjectId} not found", request.ProjectId);
-            
+            _logger.LogError("Project with ID {ProjectId} not found", request.ProjectId);
             throw new NotFoundException($"Project with ID '{request.ProjectId}' not found");
         }
 
-        var userId = userContext.GetUserId();
+        var userId = _userContext.GetUserId();
         var isResourceOwner = userId == project.EmployerUserId;
-        var isAdmin = userContext.GetUserRole() == AppRoles.AdminRole;
-        
+        var isAdmin = _userContext.GetUserRole() == AppRoles.AdminRole;
+
         if (!isResourceOwner && !isAdmin)
         {
-            logger.LogWarning("User {UserId} attempted to access project {ProjectId} applications without permission", 
+            _logger.LogError("User {UserId} attempted to access project {ProjectId} applications without permission",
                 userId, request.ProjectId);
-            
             throw new ForbiddenException($"You do not have access to Project with ID '{request.ProjectId}'");
         }
-        
+
         var offset = (request.PageNo - 1) * request.PageSize;
-        
-        var applications = await unitOfWork.FreelancerApplicationQueriesRepository.PaginatedListAsync(
-            fa => fa.ProjectId == request.ProjectId,
+
+        var applications = await _unitOfWork.FreelancerApplicationsRepository.GetAllPaginatedByProjectAsync(
+            request.ProjectId,
             offset,
             request.PageSize,
             cancellationToken);
-        
-        var applicationsCount = await unitOfWork.FreelancerApplicationQueriesRepository.CountAsync(
-            fa => fa.ProjectId == request.ProjectId, 
-            cancellationToken);
 
-        logger.LogInformation("Retrieved {Count} applications for project {ProjectId} out of {TotalCount}", 
-            applications.Count, request.ProjectId, applicationsCount);
+        var applicationsCount = await _unitOfWork.FreelancerApplicationsRepository.CountByProjectAsync(
+            request.ProjectId,
+            cancellationToken);
 
         return new PaginatedResultModel<FreelancerApplication>
         {

@@ -1,4 +1,5 @@
-﻿using ProjectsService.Domain.Enums;
+﻿using Elastic.Clients.Elasticsearch.MachineLearning;
+using ProjectsService.Domain.Enums;
 using ProjectsService.Infrastructure.Data;
 
 namespace ProjectsService.Infrastructure.Repositories;
@@ -16,16 +17,33 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
         _logger = logger;
     }
 
-    public async Task<FreelancerApplication?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<FreelancerApplication?> GetByIdAsync(
+        Guid id,
+        CancellationToken cancellationToken = default,
+        bool includeRelatedEntities = false)
     {
         try
         {
-            return await _context.FreelancerApplications
+            var freelancerApplication = await _context.FreelancerApplications
                 .FromSql($"""
                           SELECT * FROM "FreelancerApplications" WHERE "Id" = {id.ToString()}
                           """)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
+
+            if (freelancerApplication is null || !includeRelatedEntities)
+            {
+                return freelancerApplication;
+            }
+
+            freelancerApplication.Project = await _context.Projects
+                .FromSql($"""
+                          SELECT * FROM "Projects" WHERE "Id" = {id.ToString()}
+                          """)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return freelancerApplication;
         }
         catch (Exception ex)
         {
@@ -44,7 +62,7 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
                 .FromSql($"""
                           SELECT * FROM "FreelancerApplications" 
                           WHERE "ProjectId" = {projectId.ToString()}
-                          ORDER BY "CreatedAt" DESC
+                          ORDER BY "Id" DESC
                           """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
@@ -66,7 +84,7 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
                 .FromSql($"""
                           SELECT * FROM "FreelancerApplications" 
                           WHERE "FreelancerUserId" = {freelancerUserId.ToString()}
-                          ORDER BY "CreatedAt" DESC
+                          ORDER BY "Id" DESC
                           """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
@@ -76,6 +94,197 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
             _logger.LogError("Failed to get applications by freelancer user id. Error: {Message}", ex.Message);
             throw new InvalidOperationException(
                 $"Failed to get applications by freelancer user id. Error: {ex.Message}");
+        }
+    }
+
+    public async Task<IReadOnlyList<FreelancerApplication>> GetAllPaginatedAsync(
+        int offset,
+        int limit,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await _context.FreelancerApplications
+                .FromSql($"""
+                          SELECT * FROM "FreelancerApplications"
+                          ORDER BY "Id"
+                          LIMIT {limit} OFFSET {offset}
+                          """)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to get freelancer applications. Error: {Message}", ex.Message);
+            throw new InvalidOperationException($"Failed to get freelancer applications. Error: {ex.Message}");
+        }
+    }
+
+    public async Task<IReadOnlyList<FreelancerApplication>> GetAllPaginatedByProjectAsync(
+        Guid projectId,
+        int offset,
+        int limit,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await _context.FreelancerApplications
+                .FromSql($"""
+                          SELECT * FROM "FreelancerApplications"
+                          ORDER BY "Id"
+                          WHERE "ProjectId" = {projectId.ToString()}
+                          LIMIT {limit} OFFSET {offset}
+                          """)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to get freelancer applications. Error: {Message}", ex.Message);
+            throw new InvalidOperationException($"Failed to get freelancer applications. Error: {ex.Message}");
+        }
+    }
+
+    public async Task<IReadOnlyList<FreelancerApplication>> GetByFilterAsync(
+        DateTime? startDate,
+        DateTime? endDate,
+        ApplicationStatus? applicationStatus,
+        int limit,
+        int offset,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var sql = """
+                      SELECT * FROM "FreelancerApplications"
+                      WHERE 1 = 1
+                      """;
+
+            var conditions = new List<string>();
+
+            if (startDate.HasValue)
+            {
+                conditions.Add($""" "CreatedAt" >= {startDate.Value} """);
+            }
+
+            if (endDate.HasValue)
+            {
+                var endOfDay = endDate.Value.AddDays(1).AddTicks(-1);
+                conditions.Add($""" "CreatedAt" <= {endOfDay} """);
+            }
+
+            if (applicationStatus.HasValue)
+            {
+                conditions.Add($""" "Status" = {applicationStatus.Value.ToString()} """);
+            }
+
+            if (conditions.Any())
+            {
+                sql += string.Join(" AND ", conditions);
+            }
+
+            sql += $"""
+                    ORDER BY "Id" DESC
+                    LIMIT {limit} OFFSET {offset}
+                    """;
+
+            return await _context.FreelancerApplications
+                .FromSqlRaw(sql)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "Failed to get freelancer applications by filter. StartDate: {StartDate}, EndDate: {EndDate}, Status: {Status}",
+                startDate, endDate, applicationStatus);
+            throw new InvalidOperationException("Failed to retrieve freelancer applications by filter.", ex);
+        }
+    }
+
+    public async Task<int> CountByFilterAsync(
+        DateTime? startDate,
+        DateTime? endDate,
+        ApplicationStatus? applicationStatus,
+        int limit,
+        int offset,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var sql = """
+                      SELECT COUNT(*) FROM "FreelancerApplications"
+                      WHERE 1 = 1
+                      """;
+
+            var conditions = new List<string>();
+
+            if (startDate.HasValue)
+            {
+                conditions.Add($""" "CreatedAt" >= {startDate.Value} """);
+            }
+
+            if (endDate.HasValue)
+            {
+                var endOfDay = endDate.Value.AddDays(1).AddTicks(-1);
+                conditions.Add($""" "CreatedAt" <= {endOfDay} """);
+            }
+
+            if (applicationStatus.HasValue)
+            {
+                conditions.Add($""" "Status" = {applicationStatus.Value.ToString()} """);
+            }
+
+            if (conditions.Any())
+            {
+                sql += string.Join(" AND ", conditions);
+            }
+
+            return await _context.Database
+                .SqlQueryRaw<int>(sql)
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to count freelancer applications by filter.");
+            throw new InvalidOperationException("Failed to count freelancer applications by filter.", ex);
+        }
+    }
+
+    public async Task<int> CountAllAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await _context.Database
+                .SqlQuery<int>(
+                    $"""
+                        SELECT COUNT(*) FROM "FreelancerApplications"
+                     """)
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to get freelancer applications count. Error: {Message}", ex.Message);
+            throw new InvalidOperationException($"Failed to get freelancer applications count. Error: {ex.Message}");
+        }
+    }
+
+    public async Task<int> CountByProjectAsync(Guid projectId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await _context.Database
+                .SqlQuery<int>(
+                    $"""
+                        SELECT COUNT(*) FROM "FreelancerApplications"
+                        WHERE "ProjectId" = {projectId.ToString()}
+                     """)
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to get freelancer applications count. Error: {Message}", ex.Message);
+            throw new InvalidOperationException($"Failed to get freelancer applications count. Error: {ex.Message}");
         }
     }
 

@@ -14,14 +14,14 @@ public static class MessageConfiguration
             {
                 cm.AutoMap();
                 cm.SetIgnoreExtraElements(true);
-                
-                cm.MapIdMember(m => m.Id)
-                    .SetIdGenerator(GuidGenerator.Instance)
-                    .SetSerializer(new GuidSerializer(GuidRepresentation.Standard));
+
+                // cm.MapIdMember(c => c.Id)
+                //     .SetIdGenerator(GuidGenerator.Instance)
+                //     .SetSerializer(new StringSerializer(BsonType.ObjectId));
 
                 cm.MapMember(m => m.CreatedAt)
-                    .SetDefaultValue(() => DateTime.UtcNow)
-                    .SetSerializer(new DateTimeSerializer(BsonType.DateTime));
+                    .SetDefaultValue(() => DateTime.UtcNow);
+                    // .SetSerializer(new DateTimeSerializer(BsonType.DateTime));
 
                 cm.MapMember(m => m.FileId).SetIgnoreIfNull(true);
                 cm.MapMember(m => m.Text).SetIgnoreIfNull(true);

@@ -4,17 +4,25 @@ using ProjectsService.Domain.Abstractions.UserContext;
 
 namespace ProjectsService.Application.UseCases.Queries.FreelancerApplicationUseCases.GetMyFreelancerApplicationsByFilter;
 
-public class GetMyFreelancerApplicationsByFilterQueryHandler(
-    IUnitOfWork unitOfWork,
-    IUserContext userContext,
-    ILogger<GetMyFreelancerApplicationsByFilterQueryHandler> logger) : IRequestHandler<GetMyFreelancerApplicationsByFilterQuery, PaginatedResultModel<FreelancerApplication>>
+public class GetMyFreelancerApplicationsByFilterQueryHandler : IRequestHandler<GetMyFreelancerApplicationsByFilterQuery,
+    PaginatedResultModel<FreelancerApplication>>
 {
-    public async Task<PaginatedResultModel<FreelancerApplication>> Handle(GetMyFreelancerApplicationsByFilterQuery request, CancellationToken cancellationToken)
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IUserContext _userContext;
+
+    public GetMyFreelancerApplicationsByFilterQueryHandler(
+        IUnitOfWork unitOfWork,
+        IUserContext userContext)
     {
-        var userId = userContext.GetUserId();
-        
-        logger.LogInformation("User {UserId} getting filtered freelancer applications with filters: {@Filters}", 
-            userId, request);
+        _unitOfWork = unitOfWork;
+        _userContext = userContext;
+    }
+
+    public async Task<PaginatedResultModel<FreelancerApplication>> Handle(
+        GetMyFreelancerApplicationsByFilterQuery request,
+        CancellationToken cancellationToken)
+    {
+        var userId = _userContext.GetUserId();
 
         var offset = (request.PageNo - 1) * request.PageSize;
 
@@ -26,14 +34,11 @@ public class GetMyFreelancerApplicationsByFilterQueryHandler(
             offset,
             request.PageSize);
 
-        var applications = await unitOfWork.FreelancerApplicationQueriesRepository.GetByFilterAsync(
-            specification, cancellationToken);
+        var applications = await _unitOfWork.FreelancerApplicationsRepository.GetByFilterAsync(
+            request.StartDate, request.EndDate, request.ApplicationStatus, request.PageSize, offset, cancellationToken);
 
-        var applicationsCount = await unitOfWork.FreelancerApplicationQueriesRepository.CountByFilterAsync(
-            specification, cancellationToken);
-
-        logger.LogInformation("Retrieved {Count} filtered applications out of {TotalCount} for user {UserId}", 
-            applications.Count, applicationsCount, userId);
+        var applicationsCount = await _unitOfWork.FreelancerApplicationsRepository.CountByFilterAsync(
+            request.StartDate, request.EndDate, request.ApplicationStatus, request.PageSize, offset, cancellationToken);
 
         return new PaginatedResultModel<FreelancerApplication>
         {

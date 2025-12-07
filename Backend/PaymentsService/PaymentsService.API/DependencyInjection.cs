@@ -12,11 +12,11 @@ namespace PaymentsService.API;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddAPI(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddApi(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddTransient<GlobalLoggingMiddleware>();
         services.AddTransient<GlobalExceptionHandlingMiddleware>();
-        
+
         var jwtSettings = configuration.GetRequiredSection("JwtSettings").Get<JwtSettings>();
 
         services.AddAuthentication(options =>
@@ -42,20 +42,11 @@ public static class DependencyInjection
             });
 
         services.AddAuthorizationBuilder()
-            .AddPolicy(AuthPolicies.AdminPolicy, policy =>
-            {
-                policy.RequireRole(AppRoles.AdminRole);
-            })
-            .AddPolicy(AuthPolicies.FreelancerPolicy, policy =>
-            {
-                policy.RequireRole(AppRoles.FreelancerRole);
-            })
-            .AddPolicy(AuthPolicies.EmployerPolicy, policy =>
-            {
-                policy.RequireRole(AppRoles.EmployerRole);
-            });
+            .AddPolicy(AuthPolicies.AdminPolicy, policy => { policy.RequireRole(AppRoles.AdminRole); })
+            .AddPolicy(AuthPolicies.FreelancerPolicy, policy => { policy.RequireRole(AppRoles.FreelancerRole); })
+            .AddPolicy(AuthPolicies.EmployerPolicy, policy => { policy.RequireRole(AppRoles.EmployerRole); });
 
-        services.AddAutoMapper(Assembly.GetExecutingAssembly());
+        services.AddAutoMapper(config => config.AddMaps(Assembly.GetExecutingAssembly()));
 
         services.AddScoped<IUserContext, UserContext>();
 

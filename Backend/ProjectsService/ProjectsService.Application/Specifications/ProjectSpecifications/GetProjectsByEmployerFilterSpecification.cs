@@ -12,12 +12,10 @@ public class GetProjectsByEmployerFilterSpecification : Specification<Project>
         int limit)
         : base(p =>
             p.EmployerUserId == employerId &&
-            (!updatedAtStartDate.HasValue || updatedAtStartDate.Value <= p.Lifecycle.UpdatedAt) && 
+            (!updatedAtStartDate.HasValue || updatedAtStartDate.Value <= p.Lifecycle.UpdatedAt) &&
             (!updatedAtEndDate.HasValue || p.Lifecycle.UpdatedAt <= updatedAtEndDate.Value.AddDays(1)) &&
             (!projectStatus.HasValue || p.Lifecycle.ProjectStatus == projectStatus.Value) &&
-            (!acceptanceRequestedAndNotConfirmed.HasValue || 
-             p.Lifecycle.AcceptanceRequested == acceptanceRequestedAndNotConfirmed 
-             && p.Lifecycle.AcceptanceConfirmed == !acceptanceRequestedAndNotConfirmed))
+            !acceptanceRequestedAndNotConfirmed.HasValue)
     {
         AddInclude(p => p.Category!);
         AddInclude(p => p.Lifecycle);

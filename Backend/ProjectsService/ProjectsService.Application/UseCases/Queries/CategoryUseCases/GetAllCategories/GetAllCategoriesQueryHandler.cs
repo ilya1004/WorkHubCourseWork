@@ -2,26 +2,25 @@ using ProjectsService.Application.Models;
 
 namespace ProjectsService.Application.UseCases.Queries.CategoryUseCases.GetAllCategories;
 
-public class GetAllCategoriesQueryHandler(
-    IUnitOfWork unitOfWork,
-    ILogger<GetAllCategoriesQueryHandler> logger) : IRequestHandler<GetAllCategoriesQuery, PaginatedResultModel<Category>>
+public class GetAllCategoriesQueryHandler : IRequestHandler<GetAllCategoriesQuery, PaginatedResultModel<Category>>
 {
+    private readonly IUnitOfWork _unitOfWork;
+
+    public GetAllCategoriesQueryHandler(IUnitOfWork unitOfWork)
+    {
+        _unitOfWork = unitOfWork;
+    }
+
     public async Task<PaginatedResultModel<Category>> Handle(GetAllCategoriesQuery request, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Getting all categories with pagination - Page: {PageNo}, Size: {PageSize}", 
-            request.PageNo, request.PageSize);
-
         var offset = (request.PageNo - 1) * request.PageSize;
 
-        var categories = await unitOfWork.CategoryQueriesRepository.PaginatedListAllAsync(
+        var categories = await _unitOfWork.CategoriesRepository.GetAllPaginatedAsync(
             offset,
             request.PageSize,
             cancellationToken);
         
-        var categoriesCount = await unitOfWork.CategoryQueriesRepository.CountAllAsync(cancellationToken);
-
-        logger.LogInformation("Retrieved {Count} categories out of {TotalCount}", 
-            categories.Count, categoriesCount);
+        var categoriesCount = await _unitOfWork.CategoriesRepository.CountAllAsync(cancellationToken);
 
         return new PaginatedResultModel<Category>
         {

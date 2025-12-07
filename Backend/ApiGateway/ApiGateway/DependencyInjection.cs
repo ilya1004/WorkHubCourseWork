@@ -14,7 +14,7 @@ public static class DependencyInjection
     public static IServiceCollection AddAuthConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
         var jwtSettings = configuration.GetRequiredSection("JwtSettings").Get<JwtSettings>();
-        
+
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
@@ -87,12 +87,6 @@ public static class DependencyInjection
         Log.Logger = new LoggerConfiguration()
             .Enrich.FromLogContext()
             .WriteTo.Console(new LogstashTextFormatter())
-            .WriteTo.Http(
-                requestUri: configuration["Logstash:Url"]!, 
-                queueLimitBytes: null,
-                textFormatter: new LogstashTextFormatter(),
-                httpClient: new LogstashHttpClient()
-            )
             .CreateLogger();
 
         services.AddLogging(logging => logging.AddSerilog());

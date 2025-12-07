@@ -1,10 +1,6 @@
 ﻿using IdentityService.DAL.Abstractions.DbStartupService;
-using IdentityService.DAL.Abstractions.RedisService;
-using IdentityService.DAL.Abstractions.Repositories;
-using IdentityService.DAL.Data;
 using IdentityService.DAL.Repositories;
 using IdentityService.DAL.Services.DbStartupService;
-using IdentityService.DAL.Services.RedisService;
 using IdentityService.DAL.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,8 +23,17 @@ public static class DependencyInjection
             .BindConfiguration("CacheOptions");
 
         services.AddScoped<IUnitOfWork, AppUnitOfWork>();
-        // services.AddScoped<ICachedService, RedisService>();
-        // services.AddScoped<IDbStartupService, DbStartupService>();
+        services.AddScoped<IDbStartupService, DbStartupService>();
+
+        services.AddScoped<ICvLanguagesRepository, CvLanguagesRepository>();
+        services.AddScoped<ICvSkillsRepository, CvSkillsRepository>();
+        services.AddScoped<ICvsRepository, CvsRepository>();
+        services.AddScoped<ICvWorkExperiencesRepository, CvWorkExperiencesRepository>();
+        services.AddScoped<IEmployerIndustriesRepository, EmployerIndustriesRepository>();
+        services.AddScoped<IEmployerProfilesRepository, EmployerProfilesRepository>();
+        services.AddScoped<IFreelancerProfilesRepository, FreelancerProfilesRepository>();
+        services.AddScoped<IRolesRepository, RolesRepository>();
+        services.AddScoped<IUsersRepository, UsersRepository>();
 
         services.AddHealthChecks()
             .AddNpgSql(configuration.GetConnectionString("PostgresConnection")!)

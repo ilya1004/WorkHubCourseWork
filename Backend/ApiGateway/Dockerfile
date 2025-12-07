@@ -1,5 +1,5 @@
 # Используем официальный образ ASP.NET Core
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 WORKDIR /app
 ENV ASPNETCORE_ENVIRONMENT=Release
 
@@ -15,7 +15,7 @@ ENV ASPNETCORE_Kestrel__Certificates__Default__Password="HttpsPassword"
 EXPOSE 5000 7000
 
 # Сборка и публикация
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 

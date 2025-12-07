@@ -1,40 +1,60 @@
 using ProjectsService.Application.Models;
 using ProjectsService.Application.Specifications.ProjectSpecifications;
 using ProjectsService.Domain.Abstractions.UserContext;
+using ProjectsService.Domain.Models;
 
 namespace ProjectsService.Application.UseCases.Queries.ProjectUseCases.GetProjectsByEmployerFilter;
 
-public class GetProjectsByEmployerFilterQueryHandler(
-    IUnitOfWork unitOfWork,
-    IUserContext userContext,
-    ILogger<GetProjectsByEmployerFilterQueryHandler> logger) : IRequestHandler<GetProjectsByEmployerFilterQuery, PaginatedResultModel<Project>>
+public class GetProjectsByEmployerFilterQueryHandler : IRequestHandler<GetProjectsByEmployerFilterQuery, PaginatedResultModel<ProjectInfo>>
 {
-    public async Task<PaginatedResultModel<Project>> Handle(GetProjectsByEmployerFilterQuery request, CancellationToken cancellationToken)
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IUserContext _userContext;
+
+    public GetProjectsByEmployerFilterQueryHandler(
+        IUnitOfWork unitOfWork,
+        IUserContext userContext)
     {
-        var userId = userContext.GetUserId();
-        
-        logger.LogInformation("User {UserId} getting employer filtered projects with filters: {@Filters}", 
-            userId, request);
+        _unitOfWork = unitOfWork;
+        _userContext = userContext;
+    }
+
+    public async Task<PaginatedResultModel<ProjectInfo>> Handle(GetProjectsByEmployerFilterQuery request, CancellationToken cancellationToken)
+    {
+        var userId = _userContext.GetUserId();
 
         var offset = (request.PageNo - 1) * request.PageSize;
 
-        var specification = new GetProjectsByEmployerFilterSpecification(
-            userId,
-            request.UpdatedAtStartDate,
-            request.UpdatedAtEndDate,
-            request.ProjectStatus,
-            request.AcceptanceRequestedAndNotConfirmed,
-            offset,
-            request.PageSize);
+        var projects = await _unitOfWork.ProjectsRepository.GetFilteredAsync(
+            categoryId: null,
+            employerUserId: userId,
+            freelancerUserId: null,
+            projectStatus: null,
+            acceptanceStatus: null,
+            searchTitle:  null,
+            isActive: null,
+            updatedAtStartDate: request.UpdatedAtStartDate,
+            updatedAtEndDate: request.UpdatedAtEndDate,
+            budgetFrom: null,
+            budgetTo: null,
+            offset: offset,
+            limit: request.PageSize,
+            cancellationToken);
 
-        var projects = await unitOfWork.ProjectQueriesRepository.GetByFilterAsync(specification, cancellationToken);
-        
-        var projectsCount = await unitOfWork.ProjectQueriesRepository.CountByFilterAsync(specification, cancellationToken);
-        
-        logger.LogInformation("Retrieved {Count} employer filtered projects out of {TotalCount} for user {UserId}", 
-            projects.Count, projectsCount, userId);
+        var projectsCount = await _unitOfWork.ProjectsRepository.CountByFilteredAsync(
+            categoryId: null,
+            employerUserId: userId,
+            freelancerUserId: null,
+            projectStatus: null,
+            acceptanceStatus: null,
+            searchTitle:  null,
+            isActive: null,
+            updatedAtStartDate: request.UpdatedAtStartDate,
+            updatedAtEndDate: request.UpdatedAtEndDate,
+            budgetFrom: null,
+            budgetTo: null,
+            cancellationToken);
 
-        return new PaginatedResultModel<Project>
+        return new PaginatedResultModel<ProjectInfo>
         {
             Items = projects.ToList(),
             TotalCount = projectsCount,

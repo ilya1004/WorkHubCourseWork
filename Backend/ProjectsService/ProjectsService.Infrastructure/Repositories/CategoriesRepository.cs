@@ -70,6 +70,44 @@ public class CategoriesRepository : ICategoriesRepository
         }
     }
 
+    public async Task<IReadOnlyList<Category>> GetAllPaginatedAsync(int offset, int limit, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await _context.Categories
+                .FromSql($"""
+                          SELECT * FROM "Categories"
+                          ORDER BY "Id"
+                          LIMIT {limit} OFFSET {offset}
+                          """)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to get categories. Error: {Message}", ex.Message);
+            throw new InvalidOperationException($"Failed to get categories. Error: {ex.Message}");
+        }
+    }
+
+    public async Task<int> CountAllAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await _context.Database
+                .SqlQuery<int>(
+                    $"""
+                        SELECT COUNT(*) FROM "Categories"
+                     """)
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to get categories count. Error: {Message}", ex.Message);
+            throw new InvalidOperationException($"Failed to get categories count. Error: {ex.Message}");
+        }
+    }
+
     public async Task CreateAsync(Category category, CancellationToken cancellationToken = default)
     {
         try

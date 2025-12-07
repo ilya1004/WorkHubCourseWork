@@ -16,11 +16,11 @@ namespace ChatService.API;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddAPI(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddApi(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddTransient<GlobalLoggingMiddleware>();
         services.AddTransient<GlobalExceptionHandlingMiddleware>();
-        
+
         services.AddSignalR()
             .AddHubOptions<ChatHub>(options =>
             {
@@ -28,17 +28,17 @@ public static class DependencyInjection
                 options.AddFilter<GlobalHubLoggingFilter>();
                 options.AddFilter<GlobalHubExceptionFilter>();
             });
-        
-        services.AddAutoMapper(Assembly.GetExecutingAssembly());
-        
+
+        services.AddAutoMapper(config => config.AddMaps(Assembly.GetExecutingAssembly()));
+
         var jwtSettings = configuration.GetRequiredSection("JwtSettings").Get<JwtSettings>();
-        
+
         services.AddAuthentication(options =>
-        {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        })
-            .AddJwtBearer(options => 
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
             {
                 options.RequireHttpsMetadata = false;
                 options.SaveToken = true;
@@ -77,6 +77,7 @@ public static class DependencyInjection
                                 context.Token = token;
                             }
                         }
+
                         return Task.CompletedTask;
                     },
                     OnAuthenticationFailed = context =>
@@ -93,15 +94,12 @@ public static class DependencyInjection
             });
 
         services.AddAuthorizationBuilder()
-            .AddPolicy(AuthPolicies.AdminPolicy, policy =>
-            {
-                policy.RequireRole(AppRoles.AdminRole);
-            });
-        
+            .AddPolicy(AuthPolicies.AdminPolicy, policy => { policy.RequireRole(AppRoles.AdminRole); });
+
         services.AddScoped<IUserContext, UserContext>();
 
         services.AddHealthChecks();
-        
+
         return services;
     }
 }

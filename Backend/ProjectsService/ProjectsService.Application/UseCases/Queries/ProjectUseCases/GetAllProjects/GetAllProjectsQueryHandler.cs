@@ -1,31 +1,28 @@
 using ProjectsService.Application.Models;
+using ProjectsService.Domain.Models;
 
 namespace ProjectsService.Application.UseCases.Queries.ProjectUseCases.GetAllProjects;
 
-public class GetAllProjectsQueryHandler(
-    IUnitOfWork unitOfWork,
-    ILogger<GetAllProjectsQueryHandler> logger) : IRequestHandler<GetAllProjectsQuery, PaginatedResultModel<Project>>
+public class GetAllProjectsQueryHandler : IRequestHandler<GetAllProjectsQuery, PaginatedResultModel<ProjectInfo>>
 {
-    public async Task<PaginatedResultModel<Project>> Handle(GetAllProjectsQuery request, CancellationToken cancellationToken)
+    private readonly IUnitOfWork _unitOfWork;
+
+    public GetAllProjectsQueryHandler(
+        IUnitOfWork unitOfWork)
     {
-        logger.LogInformation("Getting all projects with pagination - Page: {PageNo}, Size: {PageSize}", 
-            request.PageNo, request.PageSize);
+        _unitOfWork = unitOfWork;
+    }
 
+    public async Task<PaginatedResultModel<ProjectInfo>> Handle(GetAllProjectsQuery request, CancellationToken cancellationToken)
+    {
         var offset = (request.PageNo - 1) * request.PageSize;
-        
-        var projects = await unitOfWork.ProjectQueriesRepository.PaginatedListAllAsync(
-            offset, 
-            request.PageSize, 
-            cancellationToken,
-            p => p.Lifecycle,
-            p => p.Category!);
 
-        var projectsCount = await unitOfWork.ProjectQueriesRepository.CountAllAsync(cancellationToken);
+        var projects = await _unitOfWork.ProjectsRepository.PaginatedListAllAsync(
+            offset, request.PageSize, cancellationToken);
 
-        logger.LogInformation("Retrieved {Count} projects out of {TotalCount}", 
-            projects.Count, projectsCount);
+        var projectsCount = await _unitOfWork.ProjectsRepository.CountAllAsync(cancellationToken);
 
-        return new PaginatedResultModel<Project>
+        return new PaginatedResultModel<ProjectInfo>
         {
             Items = projects.ToList(),
             TotalCount = projectsCount,

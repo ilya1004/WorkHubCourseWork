@@ -262,6 +262,7 @@ SELECT
     p."EmployerUserId",
     p."FreelancerUserId",
     p."CategoryId",
+    c."Name" AS "CategoryName",
     p."IsActive",
 
     l."CreatedAt",
@@ -275,3 +276,4 @@ SELECT
 
 FROM "Projects" p
 INNER JOIN "Lifecycles" l ON l."ProjectId" = p."Id";
+INNER JOIN "Categories" c ON p."CategoryId" = c."Id";

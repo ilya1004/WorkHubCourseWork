@@ -1,3 +1,3 @@
 namespace ProjectsService.API.Contracts.FreelancerApplicationContracts;
 
-public sealed record CreateFreelancerApplicationRequest(Guid ProjectId);
+public sealed record CreateFreelancerApplicationRequest(Guid ProjectId, Guid CvId);

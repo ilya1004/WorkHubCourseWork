@@ -1,4 +1,5 @@
 using ProjectsService.Application.Models;
+using ProjectsService.Domain.Models;
 
 namespace ProjectsService.Application.UseCases.Queries.ProjectUseCases.GetProjectsByFilter;
 
@@ -10,4 +11,4 @@ public sealed record GetProjectsByFilterQuery(
     Guid? EmployerId,
     ProjectStatus? ProjectStatus,
     int PageNo = 1, 
-    int PageSize = 10) : IRequest<PaginatedResultModel<Project>>;
+    int PageSize = 10) : IRequest<PaginatedResultModel<ProjectInfo>>;

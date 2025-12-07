@@ -14,11 +14,11 @@ public class PaymentsConsumerService(
     ILogger<PaymentsConsumerService> logger) : BackgroundService
 {
     private IConsumer<Ignore, string> _consumer = null!;
-    
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("Starting payments consumer service");
-        
+
         var config = new ConsumerConfig
         {
             BootstrapServers = options.Value.BootstrapServers,
@@ -27,9 +27,9 @@ public class PaymentsConsumerService(
         };
 
         _consumer = new ConsumerBuilder<Ignore, string>(config).Build();
-        
+
         _consumer.Subscribe(options.Value.PaymentIntentSavingTopic);
-        
+
         logger.LogInformation("Subscribed to topic: {Topic}", options.Value.PaymentIntentSavingTopic);
 
         await Task.Run(() => ConsumeMessagesAsync(stoppingToken), stoppingToken);
@@ -40,26 +40,26 @@ public class PaymentsConsumerService(
         try
         {
             logger.LogInformation("Starting to consume payment messages");
-            
+
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
                     var result = _consumer.Consume(stoppingToken);
-                    
+
                     logger.LogInformation("Received payment message with key: {Key}", result.Message.Key);
-                    
+
                     var dto = JsonSerializer.Deserialize<SavePaymentIntentIdDto>(result.Message.Value);
-                    
+
                     if (dto is null)
                     {
                         logger.LogError("Failed to deserialize payment message");
-                        
+
                         throw new BadRequestException("Error occurred during message deserialization");
                     }
 
                     logger.LogInformation("Processing payment message for project {ProjectId}", dto.ProjectId);
-                    
+
                     await ProcessMessageAsync(dto, stoppingToken);
                 }
                 catch (ConsumeException ex)
@@ -79,38 +79,26 @@ public class PaymentsConsumerService(
         finally
         {
             _consumer.Close();
-            
+
             logger.LogInformation("Kafka consumer closed successfully");
         }
     }
 
     private async Task ProcessMessageAsync(SavePaymentIntentIdDto dto, CancellationToken stoppingToken)
     {
-        logger.LogInformation("Processing payment intent {PaymentIntentId} for project {ProjectId}", 
-            dto.PaymentIntentId, dto.ProjectId);
-
         using var scope = serviceScopeFactory.CreateScope();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-        var project = await unitOfWork.ProjectQueriesRepository.GetByIdAsync(
-            Guid.Parse(dto.ProjectId), stoppingToken);
+        var project = await unitOfWork.ProjectsRepository.GetByIdAsync(Guid.Parse(dto.ProjectId), stoppingToken);
 
         if (project is null)
         {
-            logger.LogWarning("Project {ProjectId} not found", dto.ProjectId);
-            
+            logger.LogError("Project {ProjectId} not found", dto.ProjectId);
             throw new NotFoundException($"Project with ID '{dto.ProjectId}' not found");
         }
 
         project.PaymentIntentId = dto.PaymentIntentId;
 
-        logger.LogInformation("Updating project {ProjectId} with payment intent {PaymentIntentId}", 
-            dto.ProjectId, dto.PaymentIntentId);
-        
-        await unitOfWork.ProjectCommandsRepository.UpdateAsync(project, stoppingToken);
-        await unitOfWork.SaveAllAsync(stoppingToken);
-        
-        logger.LogInformation("Successfully processed payment intent {PaymentIntentId} for project {ProjectId}", 
-            dto.PaymentIntentId, dto.ProjectId);
+        await unitOfWork.ProjectsRepository.UpdateAsync(project, stoppingToken);
     }
 }

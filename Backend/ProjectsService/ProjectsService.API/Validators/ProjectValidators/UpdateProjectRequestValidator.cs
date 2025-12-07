@@ -13,10 +13,6 @@ public class UpdateProjectRequestValidator : AbstractValidator<UpdateProjectRequ
         RuleFor(x => x.Lifecycle)
             .NotNull().WithMessage("Lifecycle data is required.");
 
-        RuleFor(x => x.Project.Title)
-            .NotEmpty().WithMessage("Title is required.")
-            .MaximumLength(200).WithMessage("Title must not exceed 200 characters.");
-
         RuleFor(x => x.Project.Description)
             .MaximumLength(1000).WithMessage("Description must not exceed 1000 characters.");
 

@@ -11,14 +11,12 @@ public static class DependencyInjection
     public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddMediatR(config =>
-        {
-            config.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
-        });
-        
+            config.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-        
-        services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
+        services.AddAutoMapper(config => config.AddMaps(Assembly.GetExecutingAssembly()));
 
         return services;
     }

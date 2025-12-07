@@ -2,28 +2,31 @@ using ProjectsService.Application.Models;
 
 namespace ProjectsService.Application.UseCases.Queries.FreelancerApplicationUseCases.GetAllFreelancerApplications;
 
-public class GetAllFreelancerApplicationsQueryHandler(
-    IUnitOfWork unitOfWork,
-    ILogger<GetAllFreelancerApplicationsQueryHandler> logger) : IRequestHandler<GetAllFreelancerApplicationsQuery, PaginatedResultModel<FreelancerApplication>>
+public class GetAllFreelancerApplicationsQueryHandler : IRequestHandler<GetAllFreelancerApplicationsQuery,
+    PaginatedResultModel<FreelancerApplication>>
 {
-    public async Task<PaginatedResultModel<FreelancerApplication>> Handle(GetAllFreelancerApplicationsQuery request, CancellationToken cancellationToken)
-    {
-        logger.LogInformation("Getting all freelancer applications with pagination - Page: {PageNo}, Size: {PageSize}", 
-            request.PageNo, request.PageSize);
+    private readonly IUnitOfWork _unitOfWork;
 
+    public GetAllFreelancerApplicationsQueryHandler(
+        IUnitOfWork unitOfWork)
+    {
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task<PaginatedResultModel<FreelancerApplication>> Handle(
+        GetAllFreelancerApplicationsQuery request,
+        CancellationToken cancellationToken)
+    {
         var offset = (request.PageNo - 1) * request.PageSize;
 
-        var applications = await unitOfWork.FreelancerApplicationQueriesRepository.PaginatedListAllAsync(
-            offset, request.PageSize, cancellationToken, fa => fa.Project);
-        
-        var applicationsCount = await unitOfWork.FreelancerApplicationQueriesRepository.CountAllAsync(cancellationToken);
+        var freelancerApplications = await _unitOfWork.FreelancerApplicationsRepository.GetAllPaginatedAsync(
+            offset, request.PageSize, cancellationToken);
 
-        logger.LogInformation("Retrieved {Count} applications out of {TotalCount}", 
-            applications.Count, applicationsCount);
+        var applicationsCount = await _unitOfWork.FreelancerApplicationsRepository.CountAllAsync(cancellationToken);
 
         return new PaginatedResultModel<FreelancerApplication>
         {
-            Items = applications.ToList(),
+            Items = freelancerApplications.ToList(),
             TotalCount = applicationsCount,
             PageNo = request.PageNo,
             PageSize = request.PageSize

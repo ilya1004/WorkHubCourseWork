@@ -1,4 +1,6 @@
-﻿using ProjectsService.Domain.Enums;
+﻿using System.Globalization;
+using System.Runtime.CompilerServices;
+using ProjectsService.Domain.Enums;
 using ProjectsService.Domain.Models;
 using ProjectsService.Infrastructure.Data;
 
@@ -20,7 +22,8 @@ public class ProjectsRepository : IProjectsRepository
     public async Task<Project?> GetByIdAsync(
         Guid id,
         CancellationToken cancellationToken = default,
-        bool includeRelatedEntities = false)
+        bool includeRelatedEntities = false,
+        bool includeRelatedCollections = false)
     {
         try
         {
@@ -51,12 +54,47 @@ public class ProjectsRepository : IProjectsRepository
                     .FirstOrDefaultAsync(cancellationToken);
             }
 
+            if (includeRelatedCollections)
+            {
+                project.FreelancerApplications = await _context.FreelancerApplications
+                    .FromSql($"""
+                              SELECT * FROM "FreelancerApplications" 
+                              WHERE "ProjectId" = {project.Id.ToString()}
+                              ORDER BY "Id" DESC
+                              """)
+                    .AsNoTracking()
+                    .ToListAsync(cancellationToken);
+            }
+
             return project;
         }
         catch (Exception ex)
         {
             _logger.LogError("Failed to get project by id. Error: {Message}", ex.Message);
             throw new InvalidOperationException($"Failed to get project by id. Error: {ex.Message}");
+        }
+    }
+
+    public async Task<IReadOnlyList<ProjectInfo>> PaginatedListAllAsync(
+        int offset,
+        int limit,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await _context.Database
+                .SqlQuery<ProjectInfo>($"""
+                                        SELECT * FROM "ProjectInfo"
+                                        ORDER BY "Id" DESC
+                                        LIMIT {limit} OFFSET {offset}
+                                        """)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to get projects. Error: {Message}", ex.Message);
+            throw new InvalidOperationException($"Failed to get projects. Error: {ex.Message}");
         }
     }
 
@@ -104,18 +142,18 @@ public class ProjectsRepository : IProjectsRepository
         }
     }
 
-    public async Task<IReadOnlyList<ProjectModel>> GetByIsActiveAsync(
+    public async Task<IReadOnlyList<ProjectInfo>> GetByIsActiveAsync(
         bool? isActive,
         CancellationToken cancellationToken = default)
     {
         try
         {
             return await _context.Database
-                .SqlQuery<ProjectModel>($"""
-                                         SELECT * FROM "ProjectInfo"
-                                         WHERE "IsActive" = {isActive}
-                                         ORDER BY "Id" DESC
-                                         """)
+                .SqlQuery<ProjectInfo>($"""
+                                        SELECT * FROM "ProjectInfo"
+                                        WHERE "IsActive" = {isActive}
+                                        ORDER BY "Id" DESC
+                                        """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }
@@ -126,7 +164,7 @@ public class ProjectsRepository : IProjectsRepository
         }
     }
 
-    public async Task<IReadOnlyList<ProjectModel>> GetFilteredAsync(
+    public async Task<IReadOnlyList<ProjectInfo>> GetFilteredAsync(
         Guid? categoryId = null,
         Guid? employerUserId = null,
         Guid? freelancerUserId = null,
@@ -134,14 +172,18 @@ public class ProjectsRepository : IProjectsRepository
         ProjectAcceptanceStatus? acceptanceStatus = null,
         string? searchTitle = null,
         bool? isActive = null,
+        DateTime? updatedAtStartDate = null,
+        DateTime? updatedAtEndDate = null,
+        decimal? budgetFrom = null,
+        decimal? budgetTo = null,
         int offset = 0,
-        int limit = 20,
+        int limit = 10,
         CancellationToken cancellationToken = default)
     {
         try
         {
             var sql = """
-                      SELECT * FROM "ProjectModel"
+                      SELECT * FROM "ProjectInfo"
                       WHERE 1 = 1
                       """;
 
@@ -182,10 +224,31 @@ public class ProjectsRepository : IProjectsRepository
 
             if (isActive.HasValue)
             {
-                conditions.Add($""" "IsActive" = {isActive.Value.ToString()} """);
+                conditions.Add($""" "IsActive" = {isActive.Value.ToString().ToLower()} """);
             }
 
-            if (conditions.Count != 0)
+            if (updatedAtStartDate.HasValue)
+            {
+                conditions.Add($""" "UpdatedAt" >= {updatedAtStartDate.Value} """);
+            }
+
+            if (updatedAtEndDate.HasValue)
+            {
+                var endOfDay = updatedAtEndDate.Value.Date.AddDays(1).AddTicks(-1);
+                conditions.Add($""" "UpdatedAt" <= {endOfDay} """);
+            }
+
+            if (budgetFrom.HasValue)
+            {
+                conditions.Add($""" "Budget"Budget" >= {budgetFrom.Value} """);
+            }
+
+            if (budgetTo.HasValue)
+            {
+                conditions.Add($""" "Budget" <= {budgetTo.Value} """);
+            }
+
+            if (conditions.Count > 0)
             {
                 sql += string.Join(" AND ", conditions);
             }
@@ -195,17 +258,115 @@ public class ProjectsRepository : IProjectsRepository
                     LIMIT {limit} OFFSET {offset}
                     """;
 
-            var result = await _context.Set<ProjectModel>()
-                .FromSqlRaw(sql)
+            return await _context.Set<ProjectInfo>()
+                .FromSql(FormattableStringFactory.Create(sql))
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
-
-            return result;
         }
         catch (Exception ex)
         {
-            _logger.LogError("Failed to get filtered projects. Error: {Message}", ex.Message);
+            _logger.LogError(ex, "Failed to get filtered projects (with budget filter).");
             throw new InvalidOperationException("Failed to retrieve projects with filters.", ex);
+        }
+    }
+
+    public async Task<int> CountByFilteredAsync(
+        Guid? categoryId = null,
+        Guid? employerUserId = null,
+        Guid? freelancerUserId = null,
+        ProjectStatus? projectStatus = null,
+        ProjectAcceptanceStatus? acceptanceStatus = null,
+        string? searchTitle = null,
+        bool? isActive = null,
+        DateTime? updatedAtStartDate = null,
+        DateTime? updatedAtEndDate = null,
+        decimal? budgetFrom = null,
+        decimal? budgetTo = null,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var sql = """
+                      SELECT COUNT(*) FROM "ProjectInfo"
+                      WHERE 1 = 1
+                      """;
+
+            var conditions = new List<string>();
+
+            if (categoryId.HasValue)
+            {
+                conditions.Add($""" "CategoryId" = {categoryId.Value.ToString()} """);
+            }
+
+            if (employerUserId.HasValue)
+            {
+                conditions.Add($""" "EmployerUserId" = {employerUserId.Value.ToString()} """);
+            }
+
+            if (freelancerUserId.HasValue)
+            {
+                conditions.Add($""" "FreelancerUserId" = {freelancerUserId.Value.ToString()} """);
+            }
+
+            if (projectStatus.HasValue)
+            {
+                conditions.Add($""" "ProjectStatus" = {projectStatus.Value.ToString()} """);
+            }
+
+            if (acceptanceStatus.HasValue)
+            {
+                conditions.Add($""" "AcceptanceStatus" = {acceptanceStatus.Value.ToString()} """);
+            }
+
+            if (!string.IsNullOrWhiteSpace(searchTitle))
+            {
+                var search = searchTitle.Trim().ToLower();
+                conditions.Add($"""
+                                LOWER("Title") LIKE '%{search}%'
+                                """);
+            }
+
+            if (isActive.HasValue)
+            {
+                conditions.Add($""" "IsActive" = {isActive.Value.ToString().ToLower()} """);
+            }
+
+            if (updatedAtStartDate.HasValue)
+            {
+                conditions.Add($""" "UpdatedAt" >= {updatedAtStartDate.Value} """);
+            }
+
+            if (updatedAtEndDate.HasValue)
+            {
+                var endOfDay = updatedAtEndDate.Value.Date.AddDays(1).AddTicks(-1);
+                conditions.Add($""" "UpdatedAt" <= {endOfDay} """);
+            }
+
+            if (budgetFrom.HasValue)
+            {
+                conditions.Add($""" "Budget" >= {budgetFrom.Value} """);
+            }
+
+            if (budgetTo.HasValue)
+            {
+                conditions.Add($""" "Budget" <= {budgetTo.Value} """);
+            }
+
+            if (conditions.Count > 0)
+            {
+                sql += string.Join(" AND ", conditions);
+            }
+
+            var count = await _context.Database
+                .SqlQuery<int>(FormattableStringFactory.Create(sql))
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return count;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to count projects with budget filter.");
+            throw new InvalidOperationException("Failed to count projects with filters.", ex);
         }
     }
 
@@ -275,6 +436,24 @@ public class ProjectsRepository : IProjectsRepository
         }
     }
 
+    public async Task<int> CountAllAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await _context.Database
+                .SqlQuery<int>(
+                    $"""
+                        SELECT COUNT(*) FROM "Projects"
+                     """)
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to get projects count. Error: {Message}", ex.Message);
+            throw new InvalidOperationException($"Failed to get projects count. Error: {ex.Message}");
+        }
+    }
+
     public async Task UpdateFreelancerUserIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         try
@@ -325,6 +504,31 @@ public class ProjectsRepository : IProjectsRepository
             {
                 _logger.LogError("Failed to update project. Affected [{rowsAffected}] rows", rowsAffected);
                 throw new InvalidOperationException($"Failed to update project. Affected [{rowsAffected}] rows");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to update project. Error: {Message}", ex.Message);
+            throw new InvalidOperationException($"Failed to update project. Error: {ex.Message}");
+        }
+    }
+
+    public async Task UpdatePaymentIntentAsync(Guid id, string paymentIntentId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+                $"""
+                 UPDATE "Projects"
+                 SET "PaymentIntentId" = {paymentIntentId}
+                 WHERE "Id" = {id.ToString()}
+                 """,
+                cancellationToken);
+
+            if (rowsAffected != 1)
+            {
+                _logger.LogError("Failed to update project payment intent id. Affected [{rowsAffected}] rows", rowsAffected);
+                throw new InvalidOperationException($"Failed to update project payment intent id. Affected [{rowsAffected}] rows");
             }
         }
         catch (Exception ex)

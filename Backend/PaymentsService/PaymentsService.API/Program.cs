@@ -11,7 +11,7 @@ var services = builder.Services;
 services.AddControllers();
 services.AddHttpContextAccessor();
 
-services.AddAPI(builder.Configuration);
+services.AddApi(builder.Configuration);
 services.AddApplication();
 services.AddInfrastructure(builder.Configuration);
 

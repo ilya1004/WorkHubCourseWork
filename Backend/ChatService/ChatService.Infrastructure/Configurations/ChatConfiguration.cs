@@ -15,13 +15,13 @@ public static class ChatConfiguration
                 cm.AutoMap();
                 cm.SetIgnoreExtraElements(true);
                 
-                cm.MapIdMember(c => c.Id)
-                    .SetIdGenerator(GuidGenerator.Instance)
-                    .SetSerializer(new GuidSerializer(GuidRepresentation.Standard));
+                // cm.MapIdMember(c => c.Id)
+                //     .SetIdGenerator(GuidGenerator.Instance)
+                //     .SetSerializer(new StringSerializer(BsonType.ObjectId));
 
                 cm.MapMember(c => c.CreatedAt)
-                    .SetDefaultValue(() => DateTime.UtcNow)
-                    .SetSerializer(new DateTimeSerializer(BsonType.DateTime));
+                    .SetDefaultValue(() => DateTime.UtcNow);
+                // .SetSerializer(new DateTimeSerializer(BsonType.DateTime));
             });
         }
     }

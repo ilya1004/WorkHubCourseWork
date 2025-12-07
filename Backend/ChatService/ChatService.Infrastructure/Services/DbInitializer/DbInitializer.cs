@@ -6,42 +6,43 @@ using Microsoft.Extensions.Options;
 
 namespace ChatService.Infrastructure.Services.DbInitializer;
 
-public class DbInitializer(
-    IOptions<MongoDbSettings> options,
-    ILogger<DbInitializer> logger) : IDbInitializer
+public class DbInitializer : IDbInitializer
 {
-    public async Task InitializeDbAsync(IConfiguration configuration)
-    {
-        logger.LogInformation("Starting database initialization");
+    private readonly IOptions<MongoDbSettings> _options;
+    private readonly ILogger<DbInitializer> _logger;
 
+    public DbInitializer(
+        IOptions<MongoDbSettings> options,
+        ILogger<DbInitializer> logger)
+    {
+        _options = options;
+        _logger = logger;
+    }
+
+    public async Task InitializeDbAsync()
+    {
         try
         {
-            var client = new MongoClient(options.Value.ConnectionString);
-            var database = client.GetDatabase(options.Value.DatabaseName);
-            
-            logger.LogInformation("Connected to MongoDB database: {DatabaseName}", options.Value.DatabaseName);
+            var client = new MongoClient(_options.Value.ConnectionString);
+            var database = client.GetDatabase(_options.Value.DatabaseName);
 
             var collections = (await database.ListCollectionNamesAsync()).ToList();
 
             if (!collections.Contains("Chats"))
             {
-                logger.LogInformation("Creating 'Chats' collection");
-                
+                _logger.LogInformation("Creating 'Chats' collection");
                 await database.CreateCollectionAsync("Chats");
             }
 
             if (!collections.Contains("Messages"))
             {
-                logger.LogInformation("Creating 'Messages' collection");
-                
+                _logger.LogInformation("Creating 'Messages' collection");
                 await database.CreateCollectionAsync("Messages");
             }
-
-            logger.LogInformation("Database initialization completed successfully");
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Database initialization failed");
+            _logger.LogError(ex, "Database initialization failed");
             throw new Exception("Database initialization failed", ex);
         }
     }

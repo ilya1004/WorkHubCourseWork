@@ -123,13 +123,26 @@ public class UsersRepository : IUsersRepository
 
     public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
-        try {
-            return await _context.Users
+        try
+        {
+            var user = await _context.Users
                 .FromSql($"""
                           SELECT * FROM "Users" WHERE "Email" = {email}
                           """)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
+
+            if (user is not null)
+            {
+                user.Role = await _context.Roles
+                    .FromSqlInterpolated($"""
+                                          SELECT * FROM "Roles" WHERE "Id" = {user.RoleId}
+                                          """)
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(cancellationToken);
+            }
+
+            return user;
         }
         catch (Exception ex)
         {
@@ -151,7 +164,7 @@ public class UsersRepository : IUsersRepository
             {
                 var refreshTokenExpiryTimeString = $"'{refreshTokenExpiryTime:yyyy-MM-dd HH:mm:ss.ffffff}Z'";
 
-                rowsAffected = await _context.Database.ExecuteSqlAsync(
+                rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                     $"""
                      UPDATE "Users"
                      SET "RefreshToken" = {refreshToken},
@@ -162,7 +175,7 @@ public class UsersRepository : IUsersRepository
             }
             else
             {
-                rowsAffected = await _context.Database.ExecuteSqlAsync(
+                rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                     $"""
                      UPDATE "Users"
                      SET "RefreshToken" = NULL,

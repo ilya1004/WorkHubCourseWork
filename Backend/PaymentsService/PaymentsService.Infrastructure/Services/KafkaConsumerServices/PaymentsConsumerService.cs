@@ -6,28 +6,37 @@ using PaymentsService.Domain.Abstractions.PaymentsServices;
 
 namespace PaymentsService.Infrastructure.Services.KafkaConsumerServices;
 
-public class PaymentsConsumerService(
-    IOptions<KafkaSettings> options,
-    IServiceScopeFactory serviceScopeFactory,
-    ILogger<PaymentsConsumerService> logger) : BackgroundService
+public class PaymentsConsumerService : BackgroundService
 {
     private IConsumer<Ignore, string> _consumer = null!;
-    
+    private readonly IOptions<KafkaSettings> _options;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly ILogger<PaymentsConsumerService> _logger;
+
+    public PaymentsConsumerService(IOptions<KafkaSettings> options,
+        IServiceScopeFactory serviceScopeFactory,
+        ILogger<PaymentsConsumerService> logger)
+    {
+        _options = options;
+        _serviceScopeFactory = serviceScopeFactory;
+        _logger = logger;
+    }
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("Starting payments consumer service");
+        _logger.LogInformation("Starting payments consumer service");
         
         var config = new ConsumerConfig
         {
-            BootstrapServers = options.Value.BootstrapServers,
+            BootstrapServers = _options.Value.BootstrapServers,
             GroupId = "payments_group",
             AutoOffsetReset = AutoOffsetReset.Earliest
         };
 
         _consumer = new ConsumerBuilder<Ignore, string>(config).Build();
-        _consumer.Subscribe(options.Value.PaymentCancellationTopic);
+        _consumer.Subscribe(_options.Value.PaymentCancellationTopic);
         
-        logger.LogInformation("Subscribed to topic: {Topic}", options.Value.PaymentCancellationTopic);
+        _logger.LogInformation("Subscribed to topic: {Topic}", _options.Value.PaymentCancellationTopic);
 
         await Task.Run(() => ConsumeMessagesAsync(stoppingToken), stoppingToken);
     }
@@ -36,7 +45,7 @@ public class PaymentsConsumerService(
     {
         try
         {
-            logger.LogInformation("Starting to consume messages");
+            _logger.LogInformation("Starting to consume messages");
             
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -44,36 +53,36 @@ public class PaymentsConsumerService(
                 {
                     var result = _consumer.Consume(stoppingToken);
                  
-                    logger.LogInformation("Received message from Kafka. ProjectId: {ProjectId}", result.Message.Value);
+                    _logger.LogInformation("Received message from Kafka. ProjectId: {ProjectId}", result.Message.Value);
                     
-                    using var scope = serviceScopeFactory.CreateScope();
+                    using var scope = _serviceScopeFactory.CreateScope();
                     var employerPaymentsService = scope.ServiceProvider.GetRequiredService<IEmployerPaymentsService>();
 
-                    logger.LogInformation("Processing payment cancellation for project: {ProjectId}", result.Message.Value);
+                    _logger.LogInformation("Processing payment cancellation for project: {ProjectId}", result.Message.Value);
                     
                     await employerPaymentsService.CancelPaymentIntentForProjectAsync(result.Message.Value, stoppingToken);
                     
-                    logger.LogInformation("Successfully processed payment cancellation for project: {ProjectId}", result.Message.Value);
+                    _logger.LogInformation("Successfully processed payment cancellation for project: {ProjectId}", result.Message.Value);
                 }
                 catch (ConsumeException ex)
                 {
-                    logger.LogError(ex, "Error consuming Kafka message. Error: {ErrorMessage}", ex.Error.Reason);
+                    _logger.LogError(ex, "Error consuming Kafka message. Error: {ErrorMessage}", ex.Error.Reason);
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Error processing payment cancellation. Error: {ErrorMessage}", ex.Message);
+                    _logger.LogError(ex, "Error processing payment cancellation. Error: {ErrorMessage}", ex.Message);
                 }
             }
         }
         catch (OperationCanceledException)
         {
-            logger.LogInformation("Payments consumer service is stopping due to cancellation request");
+            _logger.LogInformation("Payments consumer service is stopping due to cancellation request");
         }
         finally
         {
             _consumer.Close();
             
-            logger.LogInformation("Kafka consumer closed successfully");
+            _logger.LogInformation("Kafka consumer closed successfully");
         }
     }
 }

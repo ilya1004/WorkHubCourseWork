@@ -14,7 +14,7 @@ var services = builder.Services;
 services.AddControllers();
 services.AddHttpContextAccessor();
 
-services.AddAPI(builder.Configuration);
+services.AddApi(builder.Configuration);
 services.AddApplication(builder.Configuration);
 services.AddInfrastructure(builder.Configuration);
 
@@ -26,7 +26,7 @@ using (var scope = app.Services.CreateScope())
     await azuriteStartupService.CreateContainerIfNotExistAsync();
 
     var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
-    await dbInitializer.InitializeDbAsync(builder.Configuration);
+    await dbInitializer.InitializeDbAsync();
 }
 
 app.UseRouting();

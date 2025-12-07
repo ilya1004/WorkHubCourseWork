@@ -10,6 +10,9 @@ public class DbStartupService : IDbStartupService
     private readonly ILogger<DbStartupService> _logger;
     private readonly IPasswordHasher _passwordHasher;
 
+    private readonly Guid _employerUserId = Guid.Parse("019af9e2-46ee-7192-9e22-3a76a357e7b5");
+    private readonly Guid _freelancerUserId = Guid.Parse("019af9e3-7dce-72f3-b17a-f8f725edbed3");
+
     public DbStartupService(
         IUnitOfWork unitOfWork,
         ILogger<DbStartupService> logger,
@@ -89,7 +92,7 @@ public class DbStartupService : IDbStartupService
 
         var freelancer = new User
         {
-            Id = Guid.CreateVersion7(),
+            Id = _freelancerUserId,
             RegisteredAt = DateTime.UtcNow,
             Email = "ilya@gmail.com",
             PasswordHash = _passwordHasher.HashPassword("Ilya_123"),
@@ -113,7 +116,7 @@ public class DbStartupService : IDbStartupService
 
         var employer = new User
         {
-            Id = Guid.CreateVersion7(),
+            Id = _employerUserId,
             RegisteredAt = DateTime.UtcNow,
             Email = "pavlusha@gmail.com",
             PasswordHash = _passwordHasher.HashPassword("Pavlusha_123"),

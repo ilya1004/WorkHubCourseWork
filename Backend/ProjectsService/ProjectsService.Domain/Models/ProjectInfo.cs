@@ -2,7 +2,7 @@ using ProjectsService.Domain.Enums;
 
 namespace ProjectsService.Domain.Models;
 
-public class ProjectModel
+public class ProjectInfo
 {
     public Guid Id { get; set; }
     public string Title { get; set; }
@@ -12,6 +12,7 @@ public class ProjectModel
     public Guid EmployerUserId { get; set; }
     public Guid? FreelancerUserId { get; set; }
     public Guid? CategoryId { get; set; }
+    public string CategoryName { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public DateTime ApplicationsStartDate { get; set; }
