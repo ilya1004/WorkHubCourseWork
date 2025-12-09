@@ -21,7 +21,7 @@ public class ReportsRepository : IReportsRepository
         try
         {
             return await _context.Reports
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "Reports" WHERE "Id" = {id.ToString()}
                           """)
                 .AsNoTracking()
@@ -39,7 +39,7 @@ public class ReportsRepository : IReportsRepository
         try
         {
             return await _context.Reports
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "Reports"
                           ORDER BY "Id"
                           """)
@@ -57,7 +57,7 @@ public class ReportsRepository : IReportsRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  INSERT INTO "Reports" ("Id", "Description", "Status", "ProjectId", "ReporterUserId")
                  VALUES ({report.Id}, {report.Description}, {report.Status}, {report.ProjectId}, {report.ReporterUserId})
@@ -84,7 +84,7 @@ public class ReportsRepository : IReportsRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  UPDATE "Reports"
                  SET "Status" = {reportStatus}
@@ -109,7 +109,7 @@ public class ReportsRepository : IReportsRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  DELETE FROM "Categories"
                  WHERE "Id" = {id.ToString()}

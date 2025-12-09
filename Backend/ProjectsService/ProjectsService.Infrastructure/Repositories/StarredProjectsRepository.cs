@@ -23,7 +23,7 @@ public class StarredProjectsRepository : IStarredProjectsRepository
         try
         {
             return await _context.StarredProjects
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT 1 FROM "StarredProjects" 
                           WHERE "ProjectId" = {projectId.ToString()} 
                             AND "FreelancerUserId" = {freelancerUserId.ToString()}
@@ -44,7 +44,7 @@ public class StarredProjectsRepository : IStarredProjectsRepository
         try
         {
             return await _context.StarredProjects
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "StarredProjects" 
                           WHERE "FreelancerUserId" = {freelancerUserId.ToString()}
                           ORDER BY "Id" DESC
@@ -63,7 +63,7 @@ public class StarredProjectsRepository : IStarredProjectsRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  INSERT INTO "StarredProjects" ("Id", "ProjectId", "FreelancerUserId")
                  VALUES ({starredProject.Id}, {starredProject.ProjectId}, {starredProject.FreelancerUserId})
@@ -87,7 +87,7 @@ public class StarredProjectsRepository : IStarredProjectsRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  DELETE FROM "StarredProjects"
                  WHERE "Id" = {id.ToString()}

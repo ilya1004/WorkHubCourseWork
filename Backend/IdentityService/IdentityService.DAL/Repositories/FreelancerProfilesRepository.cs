@@ -15,7 +15,7 @@ public class FreelancerProfilesRepository : IFreelancerProfilesRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  UPDATE "FreelancerProfiles"
                  SET "StripeAccountId" = {stripeAccountId}
@@ -43,7 +43,7 @@ public class FreelancerProfilesRepository : IFreelancerProfilesRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  UPDATE "FreelancerProfiles"
                  SET "FirstName" = {profile.FirstName}, 
@@ -71,7 +71,7 @@ public class FreelancerProfilesRepository : IFreelancerProfilesRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  INSERT INTO "FreelancerProfiles" ("Id", "FirstName", "LastName", "Nickname", "UserId")
                  VALUES ({profile.Id}, {profile.FirstName}, {profile.LastName}, {profile.Nickname}, {profile.UserId})

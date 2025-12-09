@@ -34,7 +34,7 @@ public class UsersRepository : IUsersRepository
             }
 
             var role = await _context.Roles
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "Roles" WHERE "Id" = {user.RoleId.ToString()}
                           """)
                 .AsNoTracking()
@@ -43,7 +43,7 @@ public class UsersRepository : IUsersRepository
             if (role?.Name == AppRoles.FreelancerRole)
             {
                 user.FreelancerProfile = await _context.FreelancerProfiles
-                    .FromSql($"""
+                    .FromSqlInterpolated($"""
                               SELECT * FROM "FreelancerProfiles" WHERE "UserId" = {user.Id.ToString()}
                               """)
                     .AsNoTracking()
@@ -53,7 +53,7 @@ public class UsersRepository : IUsersRepository
             if (role?.Name == AppRoles.FreelancerRole)
             {
                 user.EmployerProfile = await _context.EmployerProfiles
-                    .FromSql($"""
+                    .FromSqlInterpolated($"""
                               SELECT * FROM "EmployerProfiles" WHERE "UserId" = {user.Id.ToString()}
                               """)
                     .AsNoTracking()
@@ -62,7 +62,7 @@ public class UsersRepository : IUsersRepository
                 if (user.EmployerProfile is not null)
                 {
                     user.EmployerProfile.Industry = await _context.EmployerIndustries
-                        .FromSql($"""
+                        .FromSqlInterpolated($"""
                                   SELECT * FROM "EmployerIndustries" WHERE "Id" = {user.EmployerProfile.IndustryId.ToString()}
                                   """)
                         .AsNoTracking()
@@ -126,7 +126,7 @@ public class UsersRepository : IUsersRepository
         try
         {
             var user = await _context.Users
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "Users" WHERE "Email" = {email}
                           """)
                 .AsNoTracking()
@@ -162,14 +162,12 @@ public class UsersRepository : IUsersRepository
             int rowsAffected;
             if (refreshToken is not null && refreshTokenExpiryTime is not null)
             {
-                var refreshTokenExpiryTimeString = $"'{refreshTokenExpiryTime:yyyy-MM-dd HH:mm:ss.ffffff}Z'";
-
                 rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                     $"""
                      UPDATE "Users"
                      SET "RefreshToken" = {refreshToken},
-                         "RefreshTokenExpiryTime" = {refreshTokenExpiryTimeString}
-                     WHERE "Id" = {id.ToString()}
+                         "RefreshTokenExpiryTime" = {refreshTokenExpiryTime}
+                     WHERE "Id" = {id}
                      """,
                     cancellationToken);
             }
@@ -180,7 +178,7 @@ public class UsersRepository : IUsersRepository
                      UPDATE "Users"
                      SET "RefreshToken" = NULL,
                          "RefreshTokenExpiryTime" = NULL
-                     WHERE "Id" = {id.ToString()}
+                     WHERE "Id" = {id}
                      """,
                     cancellationToken);
             }
@@ -206,7 +204,7 @@ public class UsersRepository : IUsersRepository
         try
         {
             return await _context.Users
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "User"
                           ORDER BY "Id"
                           LIMIT {limit} OFFSET {offset}
@@ -262,7 +260,7 @@ public class UsersRepository : IUsersRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  UPDATE "Users"
                  SET "IsEmailConfirmed" = TRUE
@@ -287,7 +285,7 @@ public class UsersRepository : IUsersRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  UPDATE "Users"
                  SET "PasswordHash" = {passwordHash}
@@ -312,7 +310,7 @@ public class UsersRepository : IUsersRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  UPDATE "Users"
                  SET "ImageUrl" = {imageUrl}
@@ -337,7 +335,7 @@ public class UsersRepository : IUsersRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  INSERT INTO "Users" ("Id", "RegisteredAt", "Email", "PasswordHash", "IsEmailConfirmed", "RoleId")
                  VALUES ({user.Id}, {user.RegisteredAt}, {user.Email}, {user.PasswordHash}, {user.IsEmailConfirmed}, {user.RoleId})
@@ -361,7 +359,7 @@ public class UsersRepository : IUsersRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  DELETE FROM "Users"
                  WHERE "Id" = {id}

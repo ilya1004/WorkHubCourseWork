@@ -20,7 +20,7 @@ public class CategoriesRepository : ICategoriesRepository
         try
         {
             return await _context.Categories
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "Categories" WHERE "Id" = {id.ToString()}
                           """)
                 .AsNoTracking()
@@ -38,7 +38,7 @@ public class CategoriesRepository : ICategoriesRepository
         try
         {
             return await _context.Categories
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "Categories" WHERE "Name" = {name}
                           """)
                 .AsNoTracking()
@@ -56,7 +56,7 @@ public class CategoriesRepository : ICategoriesRepository
         try
         {
             return await _context.Categories
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "Categories"
                           ORDER BY "Id"
                           """)
@@ -75,7 +75,7 @@ public class CategoriesRepository : ICategoriesRepository
         try
         {
             return await _context.Categories
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "Categories"
                           ORDER BY "Id"
                           LIMIT {limit} OFFSET {offset}
@@ -112,7 +112,7 @@ public class CategoriesRepository : ICategoriesRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  INSERT INTO "Categories" ("Id", "Name")
                  VALUES ({category.Id}, {category.Name})
@@ -136,7 +136,7 @@ public class CategoriesRepository : ICategoriesRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  UPDATE "Categories"
                  SET "Name" = {category.Name}
@@ -161,7 +161,7 @@ public class CategoriesRepository : ICategoriesRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  DELETE FROM "Categories"
                  WHERE "Id" = {id.ToString()}

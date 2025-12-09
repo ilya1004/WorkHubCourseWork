@@ -28,7 +28,7 @@ public class ProjectsRepository : IProjectsRepository
         try
         {
             var project = await _context.Projects
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "Projects" WHERE "Id" = {id.ToString()}
                           """)
                 .AsNoTracking()
@@ -38,7 +38,7 @@ public class ProjectsRepository : IProjectsRepository
                 return project;
 
             project.Lifecycle = await _context.Lifecycles
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "Lifecycles" WHERE "ProjectId" = {id.ToString()}
                           """)
                 .AsNoTracking()
@@ -47,7 +47,7 @@ public class ProjectsRepository : IProjectsRepository
             if (project.CategoryId.HasValue)
             {
                 project.Category = await _context.Categories
-                    .FromSql($"""
+                    .FromSqlInterpolated($"""
                               SELECT * FROM "Categories" WHERE "Id" = {project.CategoryId.Value.ToString()}
                               """)
                     .AsNoTracking()
@@ -57,7 +57,7 @@ public class ProjectsRepository : IProjectsRepository
             if (includeRelatedCollections)
             {
                 project.FreelancerApplications = await _context.FreelancerApplications
-                    .FromSql($"""
+                    .FromSqlInterpolated($"""
                               SELECT * FROM "FreelancerApplications" 
                               WHERE "ProjectId" = {project.Id.ToString()}
                               ORDER BY "Id" DESC
@@ -105,7 +105,7 @@ public class ProjectsRepository : IProjectsRepository
         try
         {
             return await _context.Projects
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "Projects" 
                           WHERE "EmployerUserId" = {employerUserId.ToString()}
                           ORDER BY "Id" DESC
@@ -128,7 +128,7 @@ public class ProjectsRepository : IProjectsRepository
         try
         {
             return await _context.Projects
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "Projects" 
                           WHERE "EmployerUserId" = {employerUserId.ToString()} AND "Title" = {title}
                           """)
@@ -259,7 +259,7 @@ public class ProjectsRepository : IProjectsRepository
                     """;
 
             return await _context.Set<ProjectInfo>()
-                .FromSql(FormattableStringFactory.Create(sql))
+                .FromSqlInterpolated(FormattableStringFactory.Create(sql))
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }
@@ -374,7 +374,7 @@ public class ProjectsRepository : IProjectsRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  INSERT INTO "Projects" (
                      "Id", "Title", "Description", "Budget", "PaymentIntentId",
@@ -413,7 +413,7 @@ public class ProjectsRepository : IProjectsRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  UPDATE "Projects"
                  SET "FreelancerUserId" = {freelancerUserId},
@@ -458,7 +458,7 @@ public class ProjectsRepository : IProjectsRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  UPDATE "Projects"
                  SET "FreelancerUserId" = (
@@ -487,7 +487,7 @@ public class ProjectsRepository : IProjectsRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  UPDATE "Projects"
                  SET 
@@ -517,7 +517,7 @@ public class ProjectsRepository : IProjectsRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  UPDATE "Projects"
                  SET "PaymentIntentId" = {paymentIntentId}
@@ -542,7 +542,7 @@ public class ProjectsRepository : IProjectsRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  UPDATE "Projects"
                  SET "IsActive" = {isActive}
@@ -569,7 +569,7 @@ public class ProjectsRepository : IProjectsRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  DELETE FROM "Projects" WHERE "Id" = {id.ToString()}
                  """,

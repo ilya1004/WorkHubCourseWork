@@ -16,7 +16,7 @@ public class EmployerIndustriesRepository : IEmployerIndustriesRepository
         try
         {
             return await _context.EmployerIndustries
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "EmployerIndustries" WHERE "Id" = {id.ToString()}
                           """)
                 .AsNoTracking()
@@ -34,7 +34,7 @@ public class EmployerIndustriesRepository : IEmployerIndustriesRepository
         try
         {
             return await _context.EmployerIndustries
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "EmployerIndustries" WHERE "Name" = {name}
                           """)
                 .AsNoTracking()
@@ -55,7 +55,7 @@ public class EmployerIndustriesRepository : IEmployerIndustriesRepository
         try
         {
             return await _context.EmployerIndustries
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "EmployerIndustries"
                           ORDER BY "Id"
                           LIMIT {limit} OFFSET {offset}
@@ -91,7 +91,7 @@ public class EmployerIndustriesRepository : IEmployerIndustriesRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  INSERT INTO "EmployerIndustries" ("Id", "Name")
                  VALUES ({employerIndustry.Id}, {employerIndustry.Name})
@@ -115,7 +115,7 @@ public class EmployerIndustriesRepository : IEmployerIndustriesRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  UPDATE "EmployerIndustries"
                  SET "Name" = {employerIndustry.Name}
@@ -140,7 +140,7 @@ public class EmployerIndustriesRepository : IEmployerIndustriesRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  DELETE FROM "EmployerIndustries"
                  WHERE "Id" = {id.ToString()}

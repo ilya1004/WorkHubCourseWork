@@ -16,7 +16,7 @@ public class RolesRepository : IRolesRepository
         try
         {
             return await _context.Roles
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "Roles" WHERE "Name" = {roleName}
                           """)
                 .AsNoTracking()
@@ -33,7 +33,7 @@ public class RolesRepository : IRolesRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  INSERT INTO "Roles" ("Id", "Name")
                  VALUES ({role.Id}, {role.Name})

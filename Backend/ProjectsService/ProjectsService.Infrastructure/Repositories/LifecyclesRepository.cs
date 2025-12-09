@@ -22,7 +22,7 @@ public class LifecyclesRepository : ILifecyclesRepository
         try
         {
             var lifecycle = await _context.Lifecycles
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "Lifecycles" WHERE "ProjectId" = {projectId.ToString()}
                           """)
                 .AsNoTracking()
@@ -31,7 +31,7 @@ public class LifecyclesRepository : ILifecyclesRepository
             if (lifecycle is not null && includeProject)
             {
                 lifecycle.Project = await _context.Projects
-                    .FromSql($"""
+                    .FromSqlInterpolated($"""
                               SELECT * FROM "Projects" WHERE "Id" = {projectId.ToString()}
                               """)
                     .AsNoTracking()
@@ -55,7 +55,7 @@ public class LifecyclesRepository : ILifecyclesRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  UPDATE "Lifecycles"
                  SET 
@@ -82,7 +82,7 @@ public class LifecyclesRepository : ILifecyclesRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  INSERT INTO "Lifecycles" (
                      "Id", "CreatedAt", "ApplicationsStartDate", "ApplicationsDeadline",
@@ -119,7 +119,7 @@ public class LifecyclesRepository : ILifecyclesRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  UPDATE "Lifecycles"
                  SET 
@@ -155,7 +155,7 @@ public class LifecyclesRepository : ILifecyclesRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  UPDATE "Lifecycles"
                  SET 
@@ -187,7 +187,7 @@ public class LifecyclesRepository : ILifecyclesRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  UPDATE "Lifecycles"
                  SET 

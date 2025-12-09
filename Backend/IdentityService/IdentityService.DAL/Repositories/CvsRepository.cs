@@ -16,7 +16,7 @@ public class CvsRepository : ICvsRepository
         try
         {
             var cv = await _context.Cvs
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "Cvs" WHERE "Id" = {cvId.ToString()}
                           """)
                 .AsNoTracking()
@@ -28,21 +28,21 @@ public class CvsRepository : ICvsRepository
             }
 
             cv.WorkExperiences = await _context.Set<CvWorkExperience>()
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "CvWorkExperiences" WHERE "CvId" = {cvId.ToString()}
                           """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
             cv.Skills = await _context.Set<CvSkill>()
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "CvSkills" WHERE "CvId" = {cvId.ToString()}
                           """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
             cv.Languages = await _context.Set<CvLanguage>()
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "CvLanguages" WHERE "CvId" = {cvId.ToString()}
                           """)
                 .AsNoTracking()
@@ -62,7 +62,7 @@ public class CvsRepository : ICvsRepository
         try
         {
             return await _context.Cvs
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "Cvs" 
                           WHERE "FreelancerUserId" = {freelancerUserId.ToString()}
                           ORDER BY "Id"
@@ -82,7 +82,7 @@ public class CvsRepository : ICvsRepository
         try
         {
             var cv = await _context.Cvs
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "Cvs" 
                           WHERE "Id" = {cvId.ToString()} AND "IsPublic" = true
                           """)
@@ -95,21 +95,21 @@ public class CvsRepository : ICvsRepository
             }
 
             cv.WorkExperiences = await _context.Set<CvWorkExperience>()
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "CvWorkExperiences" WHERE "CvId" = {cvId.ToString()}
                           """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
             cv.Skills = await _context.Set<CvSkill>()
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "CvSkills" WHERE "CvId" = {cvId.ToString()}
                           """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
             cv.Languages = await _context.Set<CvLanguage>()
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "CvLanguages" WHERE "CvId" = {cvId.ToString()}
                           """)
                 .AsNoTracking()
@@ -128,7 +128,7 @@ public class CvsRepository : ICvsRepository
     {
         try
         {
-            var rows = await _context.Database.ExecuteSqlAsync(
+            var rows = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  INSERT INTO "Cvs" ("Id", "Title", "UserSpecialization", "UserEducation", "IsPublic", "FreelancerUserId")
                  VALUES ({cv.Id}, {cv.Title}, {cv.UserSpecialization}, {cv.UserEducation}, {cv.IsPublic}, {cv.FreelancerUserId})
@@ -150,7 +150,7 @@ public class CvsRepository : ICvsRepository
     {
         try
         {
-            var rows = await _context.Database.ExecuteSqlAsync(
+            var rows = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  UPDATE "Cvs"
                  SET "Title" = {cv.Title},
@@ -176,7 +176,7 @@ public class CvsRepository : ICvsRepository
     {
         try
         {
-            var rows = await _context.Database.ExecuteSqlAsync(
+            var rows = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  DELETE FROM "Cvs" WHERE "Id" = {cvId}
                  """, cancellationToken);

@@ -14,7 +14,7 @@ public class CvWorkExperiencesRepository : ICvWorkExperiencesRepository
     public async Task<CvWorkExperience?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await _context.Set<CvWorkExperience>()
-            .FromSql($"""
+            .FromSqlInterpolated($"""
                       SELECT * FROM "CvWorkExperiences" WHERE "Id" = {id.ToString()}
                       """)
             .AsNoTracking()
@@ -24,7 +24,7 @@ public class CvWorkExperiencesRepository : ICvWorkExperiencesRepository
     public async Task<IReadOnlyList<CvWorkExperience>> GetByCvIdAsync(Guid cvId, CancellationToken cancellationToken = default)
     {
         return await _context.Set<CvWorkExperience>()
-            .FromSql($"""
+            .FromSqlInterpolated($"""
                       SELECT * FROM "CvWorkExperiences" WHERE "CvId" = {cvId.ToString()} ORDER BY "StartDate" DESC
                       """)
             .AsNoTracking()
@@ -35,7 +35,7 @@ public class CvWorkExperiencesRepository : ICvWorkExperiencesRepository
     {
         try
         {
-            var rows = await _context.Database.ExecuteSqlAsync(
+            var rows = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  INSERT INTO "CvWorkExperiences" ("Id", "UserSpecialization", "StartDate", "EndDate", "Responsibilities", "CvId")
                  VALUES ({experience.Id}, {experience.UserSpecialization}, {experience.StartDate:yyyy-MM-dd},
@@ -58,7 +58,7 @@ public class CvWorkExperiencesRepository : ICvWorkExperiencesRepository
     {
         try
         {
-            var rows = await _context.Database.ExecuteSqlAsync(
+            var rows = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  UPDATE "CvWorkExperiences"
                  SET "UserSpecialization" = {experience.UserSpecialization},
@@ -84,7 +84,7 @@ public class CvWorkExperiencesRepository : ICvWorkExperiencesRepository
     {
         try
         {
-            var rows = await _context.Database.ExecuteSqlAsync(
+            var rows = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  DELETE FROM "CvWorkExperiences" WHERE "Id" = {id}
                  """, cancellationToken);
@@ -105,7 +105,7 @@ public class CvWorkExperiencesRepository : ICvWorkExperiencesRepository
     {
         try
         {
-            await _context.Database.ExecuteSqlAsync(
+            await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  DELETE FROM "CvWorkExperiences" WHERE "CvId" = {cvId}
                  """, cancellationToken);

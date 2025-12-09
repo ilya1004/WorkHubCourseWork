@@ -15,7 +15,7 @@ public class EmployerProfilesRepository : IEmployerProfilesRepository
     {
         try {
             return await _context.EmployerProfiles
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "EmployerProfiles" WHERE "UserId" = {userId.ToString()}
                           """)
                 .AsNoTracking()
@@ -32,7 +32,7 @@ public class EmployerProfilesRepository : IEmployerProfilesRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  UPDATE "EmployerProfiles"
                  SET "StripeCustomerId" = {stripeCustomerId}
@@ -60,7 +60,7 @@ public class EmployerProfilesRepository : IEmployerProfilesRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  UPDATE "EmployerProfiles"
                  SET "CompanyName" = {profile.CompanyName}, "About" = {profile.About}, "IndustryId" = {profile.IndustryId}  
@@ -85,7 +85,7 @@ public class EmployerProfilesRepository : IEmployerProfilesRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  INSERT INTO "EmployerProfiles" ("Id", "CompanyName", "UserId")
                  VALUES ({profile.Id}, {profile.CompanyName}, {profile.UserId})

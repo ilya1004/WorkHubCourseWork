@@ -1,4 +1,5 @@
-﻿using Elastic.Clients.Elasticsearch.MachineLearning;
+﻿using System.Runtime.CompilerServices;
+using Elastic.Clients.Elasticsearch.MachineLearning;
 using ProjectsService.Domain.Enums;
 using ProjectsService.Infrastructure.Data;
 
@@ -25,7 +26,7 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
         try
         {
             var freelancerApplication = await _context.FreelancerApplications
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "FreelancerApplications" WHERE "Id" = {id.ToString()}
                           """)
                 .AsNoTracking()
@@ -37,7 +38,7 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
             }
 
             freelancerApplication.Project = await _context.Projects
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "Projects" WHERE "Id" = {id.ToString()}
                           """)
                 .AsNoTracking()
@@ -59,7 +60,7 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
         try
         {
             return await _context.FreelancerApplications
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "FreelancerApplications" 
                           WHERE "ProjectId" = {projectId.ToString()}
                           ORDER BY "Id" DESC
@@ -81,7 +82,7 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
         try
         {
             return await _context.FreelancerApplications
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "FreelancerApplications" 
                           WHERE "FreelancerUserId" = {freelancerUserId.ToString()}
                           ORDER BY "Id" DESC
@@ -105,7 +106,7 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
         try
         {
             return await _context.FreelancerApplications
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "FreelancerApplications"
                           ORDER BY "Id"
                           LIMIT {limit} OFFSET {offset}
@@ -129,7 +130,7 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
         try
         {
             return await _context.FreelancerApplications
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "FreelancerApplications"
                           ORDER BY "Id"
                           WHERE "ProjectId" = {projectId.ToString()}
@@ -189,7 +190,7 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
                     """;
 
             return await _context.FreelancerApplications
-                .FromSqlRaw(sql)
+                .FromSqlInterpolated(FormattableStringFactory.Create(sql))
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }
@@ -319,7 +320,7 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
     {
         try
         {
-            await _context.Database.ExecuteSqlAsync(
+            await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  UPDATE "FreelancerApplications"
                  SET "Status" = {nameof(ApplicationStatus.Rejected)},
@@ -339,7 +340,7 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  INSERT INTO "FreelancerApplications" (
                      "Id", "CreatedAt", "Status", "CvId", "FreelancerUserId", "ProjectId"
@@ -374,7 +375,7 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  UPDATE "FreelancerApplications"
                  SET 
@@ -403,7 +404,7 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  DELETE FROM "FreelancerApplications"
                  WHERE "Id" = {id.ToString()}

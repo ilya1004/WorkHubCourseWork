@@ -16,7 +16,7 @@ public class CvLanguagesRepository : ICvLanguagesRepository
         try
         {
             return await _context.Set<CvLanguage>()
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "CvLanguages" WHERE "Id" = {id.ToString()}
                           """)
                 .AsNoTracking()
@@ -34,7 +34,7 @@ public class CvLanguagesRepository : ICvLanguagesRepository
         try
         {
             return await _context.Set<CvLanguage>()
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "CvLanguages" WHERE "CvId" = {cvId.ToString()} ORDER BY "Name"
                           """)
                 .AsNoTracking()
@@ -51,7 +51,7 @@ public class CvLanguagesRepository : ICvLanguagesRepository
     {
         try
         {
-            var rows = await _context.Database.ExecuteSqlAsync(
+            var rows = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  INSERT INTO "CvLanguages" ("Id", "Name", "Level", "CvId")
                  VALUES ({language.Id}, {language.Name}, {(int)language.Level}, {language.CvId})
@@ -73,7 +73,7 @@ public class CvLanguagesRepository : ICvLanguagesRepository
     {
         try
         {
-            var rows = await _context.Database.ExecuteSqlAsync(
+            var rows = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  DELETE FROM "CvLanguages" WHERE "Id" = {id}
                  """, cancellationToken);
@@ -94,7 +94,7 @@ public class CvLanguagesRepository : ICvLanguagesRepository
     {
         try
         {
-            await _context.Database.ExecuteSqlAsync(
+            await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  DELETE FROM "CvSkills" WHERE "CvId" = {cvId}
                  """, cancellationToken);

@@ -16,7 +16,7 @@ public class CvSkillsRepository : ICvSkillsRepository
         try
         {
             return await _context.Set<CvSkill>()
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "CvSkills" WHERE "Id" = {id.ToString()}
                           """)
                 .AsNoTracking()
@@ -34,7 +34,7 @@ public class CvSkillsRepository : ICvSkillsRepository
         try
         {
             return await _context.Set<CvSkill>()
-                .FromSql($"""
+                .FromSqlInterpolated($"""
                           SELECT * FROM "CvSkills" WHERE "CvId" = {cvId.ToString()} ORDER BY "Name"
                           """)
                 .AsNoTracking()
@@ -51,7 +51,7 @@ public class CvSkillsRepository : ICvSkillsRepository
     {
         try
         {
-            var rows = await _context.Database.ExecuteSqlAsync(
+            var rows = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  INSERT INTO "CvSkills" ("Id", "Name", "ExperienceInYears", "CvId")
                  VALUES ({skill.Id}, {skill.Name}, {skill.ExperienceInYears}, {skill.CvId})
@@ -73,7 +73,7 @@ public class CvSkillsRepository : ICvSkillsRepository
     {
         try
         {
-            var rows = await _context.Database.ExecuteSqlAsync(
+            var rows = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  DELETE FROM "CvSkills" WHERE "Id" = {id}
                  """, cancellationToken);
@@ -94,7 +94,7 @@ public class CvSkillsRepository : ICvSkillsRepository
     {
         try
         {
-            await _context.Database.ExecuteSqlAsync(
+            await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  DELETE FROM "CvSkills" WHERE "CvId" = {cvId}
                  """, cancellationToken);
