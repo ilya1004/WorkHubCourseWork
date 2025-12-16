@@ -214,7 +214,7 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
         try
         {
             var sql = """
-                      SELECT COUNT(*) FROM "FreelancerApplications"
+                      SELECT COUNT(*) AS "Value" FROM "FreelancerApplications"
                       WHERE 1 = 1
                       """;
 
@@ -243,7 +243,7 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
 
             return await _context.Database
                 .SqlQueryRaw<int>(sql)
-                .FirstOrDefaultAsync(cancellationToken);
+                .SingleAsync(cancellationToken);
         }
         catch (Exception ex)
         {
@@ -259,9 +259,9 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
             return await _context.Database
                 .SqlQuery<int>(
                     $"""
-                        SELECT COUNT(*) FROM "FreelancerApplications"
+                        SELECT COUNT(*) AS "Value" FROM "FreelancerApplications"
                      """)
-                .FirstOrDefaultAsync(cancellationToken);
+                .SingleAsync(cancellationToken);
         }
         catch (Exception ex)
         {
@@ -277,10 +277,10 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
             return await _context.Database
                 .SqlQuery<int>(
                     $"""
-                        SELECT COUNT(*) FROM "FreelancerApplications"
+                        SELECT COUNT(*) AS "Value" FROM "FreelancerApplications"
                         WHERE "ProjectId" = {projectId.ToString()}
                      """)
-                .FirstOrDefaultAsync(cancellationToken);
+                .SingleAsync(cancellationToken);
         }
         catch (Exception ex)
         {

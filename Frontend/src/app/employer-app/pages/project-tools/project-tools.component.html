@@ -100,15 +100,6 @@
           <nz-descriptions-item nzTitle="About">
             {{ freelancerDetails.about || 'Not provided' }}
           </nz-descriptions-item>
-          <nz-descriptions-item nzTitle="Skills">
-            @if (freelancerDetails.skills.length > 0) {
-              @for (skill of freelancerDetails.skills; track skill.id) {
-                <nz-tag nzColor="blue">{{ skill.name }}</nz-tag>
-              }
-            } @else {
-              <span>No skills added yet</span>
-            }
-          </nz-descriptions-item>
         </nz-descriptions>
         <nz-divider></nz-divider>
         <div nz-flex nzGap="middle">

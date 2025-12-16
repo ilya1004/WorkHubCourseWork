@@ -56,17 +56,6 @@
         <nz-descriptions-item nzTitle="Full Name">{{ freelancer.firstName }} {{ freelancer.lastName }}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="Username">{{ freelancer.userName }}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="Email">{{ freelancer.email }}</nz-descriptions-item>
-        <nz-descriptions-item nzTitle="Skills" nzSpan="2">
-          <div>
-            @if (freelancer.skills.length > 0) {
-              @for (skill of freelancer.skills; track skill.id) {
-                <nz-tag nzColor="blue">{{ skill.name }}</nz-tag>
-              }
-            } @else {
-              <span>No skills added yet</span>
-            }
-          </div>
-        </nz-descriptions-item>
         <nz-descriptions-item nzTitle="Registered At">{{ freelancer.registeredAt | date }}</nz-descriptions-item>
       </nz-descriptions>
       <p *ngIf="!freelancer" style="margin-top: 10px;">No freelancer assigned to this project yet.</p>

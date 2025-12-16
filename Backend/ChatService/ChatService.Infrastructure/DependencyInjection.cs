@@ -50,14 +50,14 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, AppUnitOfWork>();
         services.AddScoped<IDbInitializer, DbInitializer>();
         services.AddScoped<IAzuriteStartupService, AzuriteStartupService>();
-        
+
         services.AddHealthChecks()
             .AddMongoDb(_ => new MongoClient(mongoSettings.ConnectionString))
-            .AddAzureBlobStorage(_ => new BlobServiceClient(azuriteSettings.ConnectionString))
-            .AddElasticsearch(
-                elasticsearchUri: configuration["Elasticsearch:Url"]!,
-                name: "elasticsearch",
-                failureStatus: HealthStatus.Unhealthy);
+            .AddAzureBlobStorage(_ => new BlobServiceClient(azuriteSettings.ConnectionString));
+            // .AddElasticsearch(
+            //     elasticsearchUri: configuration["Elasticsearch:Url"]!,
+            //     name: "elasticsearch",
+            //     failureStatus: HealthStatus.Unhealthy);
         
         Log.Logger = new LoggerConfiguration()
             .Enrich.FromLogContext()

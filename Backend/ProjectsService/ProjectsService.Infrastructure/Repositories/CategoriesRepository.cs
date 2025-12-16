@@ -97,9 +97,9 @@ public class CategoriesRepository : ICategoriesRepository
             return await _context.Database
                 .SqlQuery<int>(
                     $"""
-                        SELECT COUNT(*) FROM "Categories"
+                        SELECT COUNT(*) AS "Value" FROM "Categories"
                      """)
-                .FirstOrDefaultAsync(cancellationToken);
+                .SingleAsync(cancellationToken);
         }
         catch (Exception ex)
         {

@@ -36,8 +36,8 @@ public static class DependencyInjection
         services.AddScoped<IUsersRepository, UsersRepository>();
 
         services.AddHealthChecks()
-            .AddNpgSql(configuration.GetConnectionString("PostgresConnection")!)
-            .AddRedis(configuration.GetConnectionString("RedisConnection")!);
+            .AddNpgSql(configuration.GetConnectionString("PostgresConnection")!);
+            // .AddRedis(configuration.GetConnectionString("RedisConnection")!);
 
         return services;
     }

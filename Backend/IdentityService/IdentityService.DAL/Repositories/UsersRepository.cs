@@ -35,8 +35,8 @@ public class UsersRepository : IUsersRepository
 
             var role = await _context.Roles
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "Roles" WHERE "Id" = {user.RoleId.ToString()}
-                          """)
+                                      SELECT * FROM "Roles" WHERE "Id" = {user.RoleId.ToString()}
+                                      """)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -44,8 +44,8 @@ public class UsersRepository : IUsersRepository
             {
                 user.FreelancerProfile = await _context.FreelancerProfiles
                     .FromSqlInterpolated($"""
-                              SELECT * FROM "FreelancerProfiles" WHERE "UserId" = {user.Id.ToString()}
-                              """)
+                                          SELECT * FROM "FreelancerProfiles" WHERE "UserId" = {user.Id.ToString()}
+                                          """)
                     .AsNoTracking()
                     .FirstOrDefaultAsync(cancellationToken);
             }
@@ -54,8 +54,8 @@ public class UsersRepository : IUsersRepository
             {
                 user.EmployerProfile = await _context.EmployerProfiles
                     .FromSqlInterpolated($"""
-                              SELECT * FROM "EmployerProfiles" WHERE "UserId" = {user.Id.ToString()}
-                              """)
+                                          SELECT * FROM "EmployerProfiles" WHERE "UserId" = {user.Id.ToString()}
+                                          """)
                     .AsNoTracking()
                     .FirstOrDefaultAsync(cancellationToken);
 
@@ -63,8 +63,8 @@ public class UsersRepository : IUsersRepository
                 {
                     user.EmployerProfile.Industry = await _context.EmployerIndustries
                         .FromSqlInterpolated($"""
-                                  SELECT * FROM "EmployerIndustries" WHERE "Id" = {user.EmployerProfile.IndustryId.ToString()}
-                                  """)
+                                              SELECT * FROM "EmployerIndustries" WHERE "Id" = {user.EmployerProfile.IndustryId.ToString()}
+                                              """)
                         .AsNoTracking()
                         .FirstOrDefaultAsync(cancellationToken);
                 }
@@ -79,15 +79,17 @@ public class UsersRepository : IUsersRepository
         }
     }
 
-    public async Task<FreelancerUserModel?> GetFreelancerByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<FreelancerUserModel?> GetFreelancerByIdAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
     {
         try
         {
             var user = await _context.Database
-                .SqlQuery<FreelancerUserModel>(
-                    $"""
-                        SELECT * FROM "FreelancerUser" WHERE "Id" = {id.ToString()}
-                     """)
+                .SqlQuery<FreelancerUserModel>($"""
+                                                SELECT * FROM "FreelancerUser"
+                                                WHERE "Id" = {id}
+                                                """)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -95,8 +97,8 @@ public class UsersRepository : IUsersRepository
         }
         catch (Exception ex)
         {
-            _logger.LogError("Failed to get employer user by id. Error: {Message}", ex.Message);
-            throw new InvalidOperationException($"Failed to get employer user by id. Error: {ex.Message}");
+            _logger.LogError("Failed to get freelancer user by id. Error: {Message}", ex.Message);
+            throw new InvalidOperationException($"Failed to get freelancer user by id. Error: {ex.Message}");
         }
     }
 
@@ -105,10 +107,10 @@ public class UsersRepository : IUsersRepository
         try
         {
             var user = await _context.Database
-                .SqlQuery<EmployerUserModel>(
-                    $"""
-                        SELECT * FROM "EmployerUser" WHERE "Id" = {id.ToString()}
-                     """)
+                .SqlQuery<EmployerUserModel>($"""
+                                              SELECT * FROM "EmployerUser"
+                                              WHERE "Id" = {id}
+                                              """)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -127,8 +129,8 @@ public class UsersRepository : IUsersRepository
         {
             var user = await _context.Users
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "Users" WHERE "Email" = {email}
-                          """)
+                                      SELECT * FROM "Users" WHERE "Email" = {email}
+                                      """)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -205,10 +207,10 @@ public class UsersRepository : IUsersRepository
         {
             return await _context.Users
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "User"
-                          ORDER BY "Id"
-                          LIMIT {limit} OFFSET {offset}
-                          """)
+                                      SELECT * FROM "Users"
+                                      ORDER BY "Id"
+                                      LIMIT {limit} OFFSET {offset}
+                                      """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }
@@ -226,10 +228,10 @@ public class UsersRepository : IUsersRepository
             return await _context.Database
                 .SqlQuery<int>(
                     $"""
-                        SELECT COUNT(*) FROM "User"
+                        SELECT COUNT(*) AS "Value" FROM "Users"
                         WHERE "IsActive" = {isActive.ToString()}
                      """)
-                .FirstOrDefaultAsync(cancellationToken);
+                .SingleAsync(cancellationToken);
         }
         catch (Exception ex)
         {
@@ -245,9 +247,9 @@ public class UsersRepository : IUsersRepository
             return await _context.Database
                 .SqlQuery<int>(
                     $"""
-                        SELECT COUNT(*) FROM "User"
+                        SELECT COUNT(*) AS "Value" FROM "Users"
                      """)
-                .FirstOrDefaultAsync(cancellationToken);
+                .SingleAsync(cancellationToken);
         }
         catch (Exception ex)
         {
@@ -281,7 +283,10 @@ public class UsersRepository : IUsersRepository
         }
     }
 
-    public async Task UpdatePasswordHashAsync(Guid id, string passwordHash, CancellationToken cancellationToken = default)
+    public async Task UpdatePasswordHashAsync(
+        Guid id,
+        string passwordHash,
+        CancellationToken cancellationToken = default)
     {
         try
         {

@@ -20,7 +20,7 @@ namespace IdentityService.API;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddAPI(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddApi(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddControllers()
             .AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);

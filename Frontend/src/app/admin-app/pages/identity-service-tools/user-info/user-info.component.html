@@ -26,17 +26,6 @@
       <nz-descriptions-item nzTitle="First Name">{{ user!.freelancerProfile!.firstName }}</nz-descriptions-item>
       <nz-descriptions-item nzTitle="Last Name">{{ user!.freelancerProfile!.lastName }}</nz-descriptions-item>
       <nz-descriptions-item nzTitle="About">{{ user!.freelancerProfile!.about || 'None' }}</nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Skills">
-        <div>
-          @if (user!.freelancerProfile!.skills.length > 0) {
-            @for (skill of user!.freelancerProfile!.skills; track skill.id) {
-              <nz-tag nzColor="blue">{{ skill.name }}</nz-tag>
-            }
-          } @else {
-            <span>No skills added yet</span>
-          }
-        </div>
-      </nz-descriptions-item>
       <nz-descriptions-item nzTitle="Stripe Account ID">{{ user!.freelancerProfile?.stripeAccountId || 'None' }}</nz-descriptions-item>
     </nz-descriptions>
     

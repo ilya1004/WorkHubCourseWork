@@ -18,13 +18,22 @@ namespace IdentityService.API.Controllers;
 
 [ApiController]
 [Route("api/users")]
-public class UsersController(IMediator mediator, IMapper mapper) : ControllerBase
+public class UsersController : ControllerBase
 {
+    private readonly IMediator _mediator;
+    private readonly IMapper _mapper;
+
+    public UsersController(IMediator mediator, IMapper mapper)
+    {
+        _mediator = mediator;
+        _mapper = mapper;
+    }
+
     [HttpPost]
     [Route("freelancer")]
     public async Task<IActionResult> RegisterFreelancer(RegisterFreelancerRequest request, CancellationToken cancellationToken)
     {
-        await mediator.Send(mapper.Map<RegisterFreelancerCommand>(request), cancellationToken);
+        await _mediator.Send(_mapper.Map<RegisterFreelancerCommand>(request), cancellationToken);
 
         return StatusCode(StatusCodes.Status201Created);
     }
@@ -33,7 +42,7 @@ public class UsersController(IMediator mediator, IMapper mapper) : ControllerBas
     [Route("employer")]
     public async Task<IActionResult> RegisterEmployer(RegisterEmployerRequest request, CancellationToken cancellationToken)
     {
-        await mediator.Send(mapper.Map<RegisterEmployerCommand>(request), cancellationToken);
+        await _mediator.Send(_mapper.Map<RegisterEmployerCommand>(request), cancellationToken);
 
         return StatusCode(StatusCodes.Status201Created);
     }
@@ -42,7 +51,7 @@ public class UsersController(IMediator mediator, IMapper mapper) : ControllerBas
     [Authorize(Policy = AuthPolicies.AdminPolicy)]
     public async Task<IActionResult> GetAllUsers([FromQuery] GetPaginatedListRequest request, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetAllUsersQuery(request.PageNo, request.PageSize), cancellationToken);
+        var result = await _mediator.Send(new GetAllUsersQuery(request.PageNo, request.PageSize), cancellationToken);
 
         return Ok(result);
     }
@@ -52,7 +61,7 @@ public class UsersController(IMediator mediator, IMapper mapper) : ControllerBas
     [Authorize(Policy = AuthPolicies.AdminPolicy)]
     public async Task<IActionResult> GetUserById([FromRoute] Guid userId, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetUserByIdQuery(userId), cancellationToken);
+        var result = await _mediator.Send(new GetUserByIdQuery(userId), cancellationToken);
 
         return Ok(result);
     }
@@ -62,7 +71,7 @@ public class UsersController(IMediator mediator, IMapper mapper) : ControllerBas
     [Authorize]
     public async Task<IActionResult> GetFreelancerUserInfoById([FromRoute] Guid userId, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetFreelancerUserByIdQuery(userId), cancellationToken);
+        var result = await _mediator.Send(new GetFreelancerUserByIdQuery(userId), cancellationToken);
 
         return Ok(result);
     }
@@ -72,7 +81,7 @@ public class UsersController(IMediator mediator, IMapper mapper) : ControllerBas
     [Authorize]
     public async Task<IActionResult> GetEmployerUserInfoById([FromRoute] Guid userId, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetEmployerUserByIdQuery(userId), cancellationToken);
+        var result = await _mediator.Send(new GetEmployerUserByIdQuery(userId), cancellationToken);
 
         return Ok(result);
     }
@@ -82,7 +91,7 @@ public class UsersController(IMediator mediator, IMapper mapper) : ControllerBas
     [Authorize(Policy = AuthPolicies.FreelancerPolicy)]
     public async Task<IActionResult> GetCurrentFreelancerUserInfo(CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetCurrentFreelancerUserQuery(), cancellationToken);
+        var result = await _mediator.Send(new GetCurrentFreelancerUserQuery(), cancellationToken);
 
         return Ok(result);
     }
@@ -92,7 +101,7 @@ public class UsersController(IMediator mediator, IMapper mapper) : ControllerBas
     [Authorize(Policy = AuthPolicies.EmployerPolicy)]
     public async Task<IActionResult> GetCurrentEmployerUserInfo(CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetCurrentEmployerUserQuery(), cancellationToken);
+        var result = await _mediator.Send(new GetCurrentEmployerUserQuery(), cancellationToken);
 
         return Ok(result);
     }
@@ -103,7 +112,7 @@ public class UsersController(IMediator mediator, IMapper mapper) : ControllerBas
     public async Task<IActionResult> UpdateFreelancerProfile([FromForm] UpdateFreelancerProfileRequest request,
         CancellationToken cancellationToken)
     {
-        await mediator.Send(mapper.Map<UpdateFreelancerProfileCommand>(request), cancellationToken);
+        await _mediator.Send(_mapper.Map<UpdateFreelancerProfileCommand>(request), cancellationToken);
 
         return NoContent();
     }
@@ -114,7 +123,7 @@ public class UsersController(IMediator mediator, IMapper mapper) : ControllerBas
     public async Task<IActionResult> UpdateEmployerProfile([FromForm] UpdateEmployerProfileRequest request,
         CancellationToken cancellationToken)
     {
-        await mediator.Send(mapper.Map<UpdateEmployerProfileCommand>(request), cancellationToken);
+        await _mediator.Send(_mapper.Map<UpdateEmployerProfileCommand>(request), cancellationToken);
 
         return NoContent();
     }
@@ -124,7 +133,7 @@ public class UsersController(IMediator mediator, IMapper mapper) : ControllerBas
     [Authorize]
     public async Task<IActionResult> ChangePassword(ChangePasswordRequest request, CancellationToken cancellationToken)
     {
-        await mediator.Send(mapper.Map<ChangePasswordCommand>(request), cancellationToken);
+        await _mediator.Send(_mapper.Map<ChangePasswordCommand>(request), cancellationToken);
 
         return NoContent();
     }
@@ -134,7 +143,7 @@ public class UsersController(IMediator mediator, IMapper mapper) : ControllerBas
     [Authorize]
     public async Task<IActionResult> DeleteUser([FromRoute] Guid userId, CancellationToken cancellationToken)
     {
-        await mediator.Send(new DeleteUserCommand(userId), cancellationToken);
+        await _mediator.Send(new DeleteUserCommand(userId), cancellationToken);
 
         return NoContent();
     }

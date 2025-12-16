@@ -156,7 +156,7 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - postgres_identity_data:/var/lib/postgresql/data
+      - postgres_identity_data:/var/lib/postgresql
       - ./DockerConfig/InitPostgresIdentityDb:/docker-entrypoint-initdb.d:ro
     environment:
       POSTGRES_USER: postgres
@@ -175,7 +175,7 @@ services:
     image: postgres:latest
     container_name: postgres_projects
     volumes:
-      - postgres_projects_data:/var/lib/postgresql/data
+      - postgres_projects_data:/var/lib/postgresql
       - ./DockerConfig/InitPostgresProjectsDb:/docker-entrypoint-initdb.d:ro
     environment:
       POSTGRES_USER: postgres
@@ -194,7 +194,7 @@ services:
     image: postgres:latest
     container_name: postgres_hangfire
     volumes:
-      - postgres_hangfire_data:/var/lib/postgresql/data
+      - postgres_hangfire_data:/var/lib/postgresql
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: passpass

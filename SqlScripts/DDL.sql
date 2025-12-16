@@ -130,7 +130,7 @@ SELECT
     r."Name" AS "RoleName",
     
     ep."CompanyName",
-    ep."About" AS "CompanyAbout",
+    ep."About",
     ep."StripeCustomerId",
     ei."Id" AS "IndustryId",
     ei."Name" AS "IndustryName"
@@ -150,7 +150,7 @@ SELECT
     fp."FirstName",
     fp."LastName",
     fp."Nickname",
-    fp."About" AS "FreelancerAbout",
+    fp."About",
     fp."StripeAccountId"
 FROM "Users" u
 INNER JOIN "FreelancerProfiles" fp ON fp."UserId" = u."Id"

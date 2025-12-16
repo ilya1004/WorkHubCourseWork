@@ -287,7 +287,7 @@ public class ProjectsRepository : IProjectsRepository
         try
         {
             var sql = """
-                      SELECT COUNT(*) FROM "ProjectInfo"
+                      SELECT COUNT(*) AS "Value" FROM "ProjectInfo"
                       WHERE 1 = 1
                       """;
 
@@ -359,7 +359,7 @@ public class ProjectsRepository : IProjectsRepository
 
             var count = await _context.Database
                 .SqlQuery<int>(FormattableStringFactory.Create(sql))
-                .FirstOrDefaultAsync(cancellationToken);
+                .SingleAsync(cancellationToken);
 
             return count;
         }
@@ -443,9 +443,9 @@ public class ProjectsRepository : IProjectsRepository
             return await _context.Database
                 .SqlQuery<int>(
                     $"""
-                        SELECT COUNT(*) FROM "Projects"
+                        SELECT COUNT(*) AS "Value" FROM "Projects"
                      """)
-                .FirstOrDefaultAsync(cancellationToken);
+                .SingleAsync(cancellationToken);
         }
         catch (Exception ex)
         {

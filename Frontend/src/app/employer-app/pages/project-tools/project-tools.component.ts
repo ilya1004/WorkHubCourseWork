@@ -17,7 +17,6 @@ import {Category} from '../../../core/interfaces/project/category.interface';
 import {ApplicationStatus, FreelancerApplication} from '../../../core/interfaces/project/freelancer-application.interface';
 import {FreelancerUser} from '../../../core/interfaces/freelancer/freelancer-user.interface';
 import {PROJECT_STATUSES} from "../../../core/data/constants";
-import {NzTagComponent} from "ng-zorro-antd/tag";
 import {NzModalService} from "ng-zorro-antd/modal";
 import {NzDescriptionsComponent, NzDescriptionsItemComponent} from "ng-zorro-antd/descriptions";
 import {PaginatedResult} from "../../../core/interfaces/common/paginated-result.interface";
@@ -47,7 +46,6 @@ import {ProjectStatus} from '../../../core/interfaces/project/lifecycle.interfac
     NgForOf,
     NgIf,
     DatePipe,
-    NzTagComponent,
     NzDescriptionsComponent,
     NzDescriptionsItemComponent,
     CreateProjectComponent,

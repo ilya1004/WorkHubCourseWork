@@ -3,7 +3,6 @@ import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {PaginatedResult} from '../../core/interfaces/common/paginated-result.interface';
 import {FreelancerUser} from "../../core/interfaces/freelancer/freelancer-user.interface";
-import {FreelancerSkill} from "../../core/interfaces/freelancer/freelancer-skill.interface";
 import {environment} from "../../../environments/environment";
 
 @Injectable({
@@ -18,12 +17,6 @@ export class ProfileService {
   getUserData(): Observable<FreelancerUser> {
     return this.httpClient.get<FreelancerUser>(
       `${environment.IDENTITY_SERVICE_API_URL}users/my-freelancer-info`
-    );
-  }
-
-  getAvailableSkill(): Observable<PaginatedResult<FreelancerSkill>> {
-    return this.httpClient.get<PaginatedResult<FreelancerSkill>>(
-      `${environment.IDENTITY_SERVICE_API_URL}freelancer-skills`
     );
   }
 

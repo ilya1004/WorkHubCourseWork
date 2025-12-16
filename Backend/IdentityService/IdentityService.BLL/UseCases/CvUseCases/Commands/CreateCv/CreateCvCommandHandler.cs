@@ -28,16 +28,16 @@ public class CreateCvCommandHandler : IRequestHandler<CreateCvCommand, Cv>
         var cv = new Cv
         {
             Id = cvId,
-            Title = request.Title,
-            UserSpecialization = request.UserSpecialization,
-            UserEducation = request.UserEducation,
-            IsPublic = request.IsPublic,
+            Title = request.CvDto.Title,
+            UserSpecialization = request.CvDto.UserSpecialization,
+            UserEducation = request.CvDto.UserEducation,
+            IsPublic = request.CvDto.IsPublic,
             FreelancerUserId = currentUserId
         };
 
         await _unitOfWork.CvsRepository.CreateAsync(cv, cancellationToken);
 
-        foreach (var langDto in request.Languages)
+        foreach (var langDto in request.CvDto.CvLanguages)
         {
             var lang = new CvLanguage
             {
@@ -49,7 +49,7 @@ public class CreateCvCommandHandler : IRequestHandler<CreateCvCommand, Cv>
             await _unitOfWork.CvLanguagesRepository.AddAsync(lang, cancellationToken);
         }
 
-        foreach (var skillDto in request.Skills)
+        foreach (var skillDto in request.CvDto.CvSkills)
         {
             var skill = new CvSkill
             {
@@ -61,7 +61,7 @@ public class CreateCvCommandHandler : IRequestHandler<CreateCvCommand, Cv>
             await _unitOfWork.CvSkillsRepository.AddAsync(skill, cancellationToken);
         }
 
-        foreach (var expDto in request.WorkExperiences)
+        foreach (var expDto in request.CvDto.CvWorkExperiences)
         {
             var exp = new CvWorkExperience
             {

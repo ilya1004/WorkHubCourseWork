@@ -9,7 +9,6 @@ import {NzButtonComponent} from "ng-zorro-antd/button";
 import {NzCardComponent} from "ng-zorro-antd/card";
 import {NzDescriptionsComponent, NzDescriptionsItemComponent} from "ng-zorro-antd/descriptions";
 import {DatePipe, NgIf} from "@angular/common";
-import {NzTagComponent} from "ng-zorro-antd/tag";
 
 @Component({
   selector: 'app-project-info',
@@ -20,8 +19,7 @@ import {NzTagComponent} from "ng-zorro-antd/tag";
     NzDescriptionsComponent,
     NgIf,
     NzDescriptionsItemComponent,
-    DatePipe,
-    NzTagComponent
+    DatePipe
   ],
   templateUrl: './project-info.component.html',
   styleUrl: './project-info.component.scss'

@@ -11,14 +11,17 @@ public class CvsRepository : ICvsRepository
         _logger = logger;
     }
 
-    public async Task<Cv?> GetByIdAsync(Guid cvId, CancellationToken cancellationToken = default, bool includeRelated = false)
+    public async Task<Cv?> GetByIdAsync(
+        Guid cvId,
+        CancellationToken cancellationToken = default,
+        bool includeRelated = false)
     {
         try
         {
             var cv = await _context.Cvs
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "Cvs" WHERE "Id" = {cvId.ToString()}
-                          """)
+                                      SELECT * FROM "Cvs" WHERE "Id" = {cvId.ToString()}
+                                      """)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -29,22 +32,22 @@ public class CvsRepository : ICvsRepository
 
             cv.WorkExperiences = await _context.Set<CvWorkExperience>()
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "CvWorkExperiences" WHERE "CvId" = {cvId.ToString()}
-                          """)
+                                      SELECT * FROM "CvWorkExperiences" WHERE "CvId" = {cvId.ToString()}
+                                      """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
             cv.Skills = await _context.Set<CvSkill>()
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "CvSkills" WHERE "CvId" = {cvId.ToString()}
-                          """)
+                                      SELECT * FROM "CvSkills" WHERE "CvId" = {cvId.ToString()}
+                                      """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
             cv.Languages = await _context.Set<CvLanguage>()
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "CvLanguages" WHERE "CvId" = {cvId.ToString()}
-                          """)
+                                      SELECT * FROM "CvLanguages" WHERE "CvId" = {cvId.ToString()}
+                                      """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
@@ -57,16 +60,18 @@ public class CvsRepository : ICvsRepository
         }
     }
 
-    public async Task<IReadOnlyList<Cv>> GetByFreelancerIdAsync(Guid freelancerUserId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<Cv>> GetByFreelancerIdAsync(
+        Guid freelancerUserId,
+        CancellationToken cancellationToken = default)
     {
         try
         {
             return await _context.Cvs
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "Cvs" 
-                          WHERE "FreelancerUserId" = {freelancerUserId.ToString()}
-                          ORDER BY "Id"
-                          """)
+                                      SELECT * FROM "Cvs" 
+                                      WHERE "FreelancerUserId" = {freelancerUserId.ToString()}
+                                      ORDER BY "Id"
+                                      """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }
@@ -83,9 +88,9 @@ public class CvsRepository : ICvsRepository
         {
             var cv = await _context.Cvs
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "Cvs" 
-                          WHERE "Id" = {cvId.ToString()} AND "IsPublic" = true
-                          """)
+                                      SELECT * FROM "Cvs" 
+                                      WHERE "Id" = {cvId.ToString()} AND "IsPublic" = true
+                                      """)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -96,22 +101,22 @@ public class CvsRepository : ICvsRepository
 
             cv.WorkExperiences = await _context.Set<CvWorkExperience>()
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "CvWorkExperiences" WHERE "CvId" = {cvId.ToString()}
-                          """)
+                                      SELECT * FROM "CvWorkExperiences" WHERE "CvId" = {cvId.ToString()}
+                                      """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
             cv.Skills = await _context.Set<CvSkill>()
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "CvSkills" WHERE "CvId" = {cvId.ToString()}
-                          """)
+                                      SELECT * FROM "CvSkills" WHERE "CvId" = {cvId.ToString()}
+                                      """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
             cv.Languages = await _context.Set<CvLanguage>()
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "CvLanguages" WHERE "CvId" = {cvId.ToString()}
-                          """)
+                                      SELECT * FROM "CvLanguages" WHERE "CvId" = {cvId.ToString()}
+                                      """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
@@ -121,6 +126,29 @@ public class CvsRepository : ICvsRepository
         {
             _logger.LogError(ex, "Failed to get public CV {CvId}", cvId);
             throw new InvalidOperationException($"Failed to get public CV {cvId}", ex);
+        }
+    }
+
+    public async Task<IReadOnlyList<Cv>> GetAllPaginatedAsync(
+        int offset,
+        int limit,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await _context.Cvs
+                .FromSqlInterpolated($"""
+                                      SELECT * FROM "Cvs"
+                                      ORDER BY "Id"
+                                      LIMIT {limit} OFFSET {offset}
+                                      """)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to get paginated employer industries. Error: {Message}", ex.Message);
+            throw new InvalidOperationException($"Failed to get paginated employer industries. Error: {ex.Message}");
         }
     }
 

@@ -1,23 +1,19 @@
 import {Component, OnInit} from '@angular/core';
 import {ProfileService} from '../../services/profile.service';
 import {NzFlexDirective} from 'ng-zorro-antd/flex';
-import {DatePipe, NgForOf, NgIf} from '@angular/common';
+import {DatePipe, NgIf} from '@angular/common';
 import {NzCardComponent} from 'ng-zorro-antd/card';
-import {NzTagComponent} from 'ng-zorro-antd/tag';
 import {NzButtonComponent} from 'ng-zorro-antd/button';
 import {NzIconDirective} from 'ng-zorro-antd/icon';
 import {AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators} from '@angular/forms';
 import {NzInputDirective, NzInputGroupComponent} from 'ng-zorro-antd/input';
 import {NzSpaceComponent, NzSpaceItemDirective} from 'ng-zorro-antd/space';
-import {NzOptionComponent, NzSelectComponent} from 'ng-zorro-antd/select';
 import {NzSpinComponent} from "ng-zorro-antd/spin";
-import {FreelancerSkill} from "../../../core/interfaces/freelancer/freelancer-skill.interface";
 import {FreelancerUser} from "../../../core/interfaces/freelancer/freelancer-user.interface";
 import {NzMessageService} from "ng-zorro-antd/message";
 import {NzModalService} from "ng-zorro-antd/modal";
 import {Router, RouterModule} from "@angular/router";
 import {UsersService} from "../../../core/services/users/users.service";
-import { ProfileServiceMockService } from "../../services/profile-service-mock.service";
 
 @Component({
   selector: 'app-profile',
@@ -25,16 +21,12 @@ import { ProfileServiceMockService } from "../../services/profile-service-mock.s
   imports: [
     NzFlexDirective,
     NzCardComponent,
-    NzTagComponent,
     NzButtonComponent,
     NzIconDirective,
     NzInputDirective,
     NzSpaceComponent,
-    NzSelectComponent,
-    NzOptionComponent,
     NzSpaceItemDirective,
     NgIf,
-    NgForOf,
     NzSpinComponent,
     ReactiveFormsModule,
     DatePipe,
@@ -46,12 +38,9 @@ import { ProfileServiceMockService } from "../../services/profile-service-mock.s
   styleUrls: ['./profile.component.scss']
 })
 export class ProfileComponent implements OnInit {
-  availableSkills: FreelancerSkill[] = [];
-
   isEditing: boolean = false;
   isChangingPassword: boolean = false;
   isLoadingUserData: boolean = true;
-  isLoadingSkills: boolean = true;
   isUpdating: boolean = false;
   isChangingPasswordInProgress: boolean = false;
 
@@ -68,7 +57,6 @@ export class ProfileComponent implements OnInit {
     email: '',
     registeredAt: '',
     stripeAccountId: null,
-    skills: [],
     imageUrl: null,
     roleName: ''
   };
@@ -86,9 +74,6 @@ export class ProfileComponent implements OnInit {
       nonNullable: true,
       validators: [Validators.maxLength(1000)]
     }),
-    skillIds: new FormControl<string[]>([], {
-      nonNullable: true
-    }),
     resetImage: new FormControl(false, {
       nonNullable: true
     }),
@@ -102,7 +87,7 @@ export class ProfileComponent implements OnInit {
   }, { validators: this.passwordsMatchValidator });
 
   constructor(
-    private profileService: ProfileServiceMockService,
+    private profileService: ProfileService,
     private userService: UsersService,
     private message: NzMessageService,
     private modal: NzModalService,
@@ -111,7 +96,6 @@ export class ProfileComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadUserData();
-    this.loadAvailableSkills();
   }
 
   loadUserData(): void {
@@ -125,21 +109,6 @@ export class ProfileComponent implements OnInit {
         console.error('Error loading user data:', err);
         this.message.error('Failed to load user data', { nzDuration: 3000 });
         this.isLoadingUserData = false;
-      }
-    });
-  }
-
-  loadAvailableSkills(): void {
-    this.isLoadingSkills = true;
-    this.profileService.getAvailableSkill().subscribe({
-      next: (value) => {
-        this.availableSkills = value.items;
-        this.isLoadingSkills = false;
-      },
-      error: (err) => {
-        console.error('Error loading skills:', err);
-        this.message.error('Failed to load skills', { nzDuration: 3000 });
-        this.isLoadingSkills = false;
       }
     });
   }
@@ -162,9 +131,6 @@ export class ProfileComponent implements OnInit {
       formData.append('FreelancerProfile.LastName', formValue.lastName);
       formData.append('FreelancerProfile.About', formValue.about);
       formData.append('FreelancerProfile.ResetImage', String(formValue.resetImage));
-      formValue.skillIds.forEach((id, index) => {
-        formData.append(`FreelancerProfile.SkillIds[${index}]`, id);
-      });
       if (formValue.image) {
         formData.append('ImageFile', formValue.image);
       }
@@ -193,7 +159,6 @@ export class ProfileComponent implements OnInit {
         firstName: this.userData.firstName,
         lastName: this.userData.lastName,
         about: this.userData.about,
-        skillIds: this.userData.skills.map(skill => skill.id)
       });
     }
   }
@@ -204,7 +169,6 @@ export class ProfileComponent implements OnInit {
       firstName: this.userData.firstName,
       lastName: this.userData.lastName,
       about: this.userData.about,
-      skillIds: this.userData.skills.map(skill => skill.id),
       resetImage: false,
       image: null
     });

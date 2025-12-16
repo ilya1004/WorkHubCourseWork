@@ -58,18 +58,18 @@ public static class DependencyInjection
 
         services.AddHostedService<EmployerAccountsConsumerService>();
         services.AddHostedService<FreelancerAccountsConsumerService>();
-        
+
         services.AddHealthChecks()
             .AddAzureBlobStorage(_ => new BlobServiceClient(azuriteSettings.ConnectionString))
             .AddCheck<SmtpHealthCheck>("smtp_mailhog", HealthStatus.Unhealthy)
             .AddKafka(new ProducerConfig
             {
                 BootstrapServers = kafkaSettings.BootstrapServers
-            }, name: "kafka")
-            .AddElasticsearch(
-                elasticsearchUri: configuration["Elasticsearch:Url"]!,
-                name: "elasticsearch",
-                failureStatus: HealthStatus.Unhealthy);
+            }, name: "kafka");
+            // .AddElasticsearch(
+            //     elasticsearchUri: configuration["Elasticsearch:Url"]!,
+            //     name: "elasticsearch",
+            //     failureStatus: HealthStatus.Unhealthy);
         
         Log.Logger = new LoggerConfiguration()
             .Enrich.FromLogContext()

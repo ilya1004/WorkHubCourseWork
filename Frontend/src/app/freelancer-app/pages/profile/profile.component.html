@@ -46,16 +46,6 @@
         <div><strong>About me:</strong></div>
         <div>{{ userData.about || 'No description provided' }}</div>
         <br />
-        <div><strong>My skills:</strong></div>
-        <div>
-          @if (userData.skills.length > 0) {
-            @for (skill of userData.skills; track skill.id) {
-              <nz-tag nzColor="blue">{{ skill.name }}</nz-tag>
-            }
-          } @else {
-            <span>No skills added yet</span>
-          }
-        </div>
       </nz-spin>
     </nz-card>
     
@@ -101,17 +91,6 @@
                 <div *ngIf="editFreelancerForm.controls.about.invalid && editFreelancerForm.controls.about.touched" class="input-error-message">
                   <div *ngIf="editFreelancerForm.controls.about.errors?.['maxlength']">Max 1000 characters</div>
                 </div>
-              </div>
-              
-              <div *nzSpaceItem>
-                <nz-select
-                  nzMode="multiple"
-                  formControlName="skillIds"
-                  nzPlaceHolder="Select your skills"
-                  style="min-width: 300px; max-width: 350px;"
-                  [nzLoading]="isLoadingSkills">
-                  <nz-option *ngFor="let skill of availableSkills" [nzValue]="skill.id" [nzLabel]="skill.name"></nz-option>
-                </nz-select>
               </div>
               
               <div *nzSpaceItem>

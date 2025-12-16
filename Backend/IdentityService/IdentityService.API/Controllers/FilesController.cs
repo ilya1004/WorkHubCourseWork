@@ -5,14 +5,21 @@ namespace IdentityService.API.Controllers;
 
 [ApiController]
 [Route("api/files")]
-public class FilesController(IMediator mediator) : ControllerBase
+public class FilesController : ControllerBase
 {
+    private readonly IMediator _mediator;
+
+    public FilesController(IMediator mediator)
+    {
+        _mediator = mediator;
+    }
+
     [HttpGet]
     [Route("by-user-id/{userId:guid}")]
     [Authorize]
     public async Task<IActionResult> GetFileByUserId(Guid userId, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetImageByUserIdQuery(userId), cancellationToken);
+        var result = await _mediator.Send(new GetImageByUserIdQuery(userId), cancellationToken);
 
         return File(result.Stream, result.ContentType);
     }
@@ -22,7 +29,7 @@ public class FilesController(IMediator mediator) : ControllerBase
     [Authorize(Policy = AuthPolicies.AdminPolicy)]
     public async Task<IActionResult> GetFileById(Guid id, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetImageByIdQuery(id), cancellationToken);
+        var result = await _mediator.Send(new GetImageByIdQuery(id), cancellationToken);
 
         return File(result.Stream, result.ContentType);
     }

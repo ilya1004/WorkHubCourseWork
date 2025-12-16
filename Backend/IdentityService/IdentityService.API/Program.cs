@@ -13,7 +13,7 @@ var services = builder.Services;
 
 services.AddHttpContextAccessor();
 
-services.AddAPI(builder.Configuration);
+services.AddApi(builder.Configuration);
 services.AddBll(builder.Configuration);
 services.AddDAL(builder.Configuration);
 

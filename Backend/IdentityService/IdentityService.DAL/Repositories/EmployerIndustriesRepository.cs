@@ -76,9 +76,9 @@ public class EmployerIndustriesRepository : IEmployerIndustriesRepository
         {
             return await _context.Database
                 .SqlQuery<int>($"""
-                                SELECT COUNT(*) FROM "EmployerIndustries"
+                                SELECT COUNT(*) AS "Value" FROM "EmployerIndustries"
                                 """)
-                .FirstOrDefaultAsync(cancellationToken);
+                .SingleAsync(cancellationToken);
         }
         catch (Exception ex)
         {

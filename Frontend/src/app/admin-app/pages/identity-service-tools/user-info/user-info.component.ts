@@ -6,7 +6,6 @@ import {NzButtonComponent} from "ng-zorro-antd/button";
 import {NzCardComponent} from "ng-zorro-antd/card";
 import {NzDescriptionsComponent, NzDescriptionsItemComponent} from "ng-zorro-antd/descriptions";
 import {DatePipe, NgIf} from "@angular/common";
-import {NzTagComponent} from "ng-zorro-antd/tag";
 
 @Component({
   selector: 'app-user-info',
@@ -16,8 +15,7 @@ import {NzTagComponent} from "ng-zorro-antd/tag";
     NzDescriptionsComponent,
     NgIf,
     NzDescriptionsItemComponent,
-    DatePipe,
-    NzTagComponent
+    DatePipe
   ],
   templateUrl: './user-info.component.html',
   styleUrl: './user-info.component.scss'

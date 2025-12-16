@@ -5,14 +5,17 @@ public class GetEmployerIndustryByIdQueryHandler : IRequestHandler<GetEmployerIn
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<GetEmployerIndustryByIdQueryHandler> _logger;
 
-    public GetEmployerIndustryByIdQueryHandler(IUnitOfWork unitOfWork,
+    public GetEmployerIndustryByIdQueryHandler(
+        IUnitOfWork unitOfWork,
         ILogger<GetEmployerIndustryByIdQueryHandler> logger)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
     }
 
-    public async Task<EmployerIndustry> Handle(GetEmployerIndustryByIdQuery request, CancellationToken cancellationToken)
+    public async Task<EmployerIndustry> Handle(
+        GetEmployerIndustryByIdQuery request,
+        CancellationToken cancellationToken)
     {
         var industry = await _unitOfWork.EmployerIndustriesRepository.GetByIdAsync(request.Id, cancellationToken);
 
