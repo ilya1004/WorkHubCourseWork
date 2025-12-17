@@ -1,9 +1,9 @@
+using System.Reflection;
 using Confluent.Kafka;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using ProjectsService.Domain.Abstractions.KafkaProducerServices;
 using ProjectsService.Domain.Abstractions.StartupServices;
 using ProjectsService.Infrastructure.Data;
@@ -21,7 +21,10 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("PostgresConnectionDb")));
+            options.UseNpgsql(configuration.GetConnectionString("PostgresConnectionDb"))
+                .LogTo(Console.WriteLine)
+                .EnableSensitiveDataLogging()
+                .EnableDetailedErrors());
 
         services.AddScoped<IUnitOfWork, AppUnitOfWork>();
 
@@ -30,6 +33,9 @@ public static class DependencyInjection
                 options.UseNpgsqlConnection(configuration.GetConnectionString("PostgresConnectionHangfireDb"))));
 
         services.AddHangfireServer();
+
+        services.AddAutoMapper(config =>
+            config.AddMaps(Assembly.GetExecutingAssembly()));
 
         services.AddOptionsWithValidateOnStart<CacheOptions>()
             .BindConfiguration("CacheOptions");

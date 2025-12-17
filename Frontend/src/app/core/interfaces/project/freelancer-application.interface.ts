@@ -6,7 +6,8 @@ export interface FreelancerApplication {
   status: ApplicationStatus;
   projectId: string;
   project: Project | null;
-  freelancerId: string;
+  freelancerUserId: string;
+  cvId: string | null;
 }
 
 export enum ApplicationStatus {

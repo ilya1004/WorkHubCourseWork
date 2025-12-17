@@ -1,19 +1,19 @@
-import {Component, OnInit} from '@angular/core';
-import {Project} from '../../../core/interfaces/project/project.interface';
-import {FreelancerUser} from "../../../core/interfaces/freelancer/freelancer-user.interface";
-import {ActivatedRoute, Router, RouterModule} from "@angular/router";
-import {ProjectsService} from "../../../core/services/projects/projects.service";
-import {UsersService} from "../../../core/services/users/users.service";
-import {NzMessageService} from "ng-zorro-antd/message";
-import {NzButtonComponent} from "ng-zorro-antd/button";
-import {NzFlexDirective} from "ng-zorro-antd/flex";
-import {NzDescriptionsComponent, NzDescriptionsItemComponent, NzDescriptionsModule} from "ng-zorro-antd/descriptions";
-import {CommonModule, NgIf} from "@angular/common";
-import {NzCardModule} from "ng-zorro-antd/card";
-import {NzGridModule} from "ng-zorro-antd/grid";
-import {ProjectChatComponent} from "./project-chat/project-chat.component";
-import {ChatService} from "../../../core/services/chat/chat.service";
-import {ProjectStatus} from '../../../core/interfaces/project/lifecycle.interface';
+import { Component, OnInit } from '@angular/core';
+import { Project } from '../../../core/interfaces/project/project.interface';
+import { FreelancerUser } from "../../../core/interfaces/freelancer/freelancer-user.interface";
+import { ActivatedRoute, Router, RouterModule } from "@angular/router";
+import { ProjectsService } from "../../../core/services/projects/projects.service";
+import { UsersService } from "../../../core/services/users/users.service";
+import { NzMessageService } from "ng-zorro-antd/message";
+import { NzButtonComponent } from "ng-zorro-antd/button";
+import { NzFlexDirective } from "ng-zorro-antd/flex";
+import { NzDescriptionsComponent, NzDescriptionsItemComponent, NzDescriptionsModule } from "ng-zorro-antd/descriptions";
+import { CommonModule, NgIf } from "@angular/common";
+import { NzCardModule } from "ng-zorro-antd/card";
+import { NzGridModule } from "ng-zorro-antd/grid";
+import { ProjectChatComponent } from "./project-chat/project-chat.component";
+import { ChatService } from "../../../core/services/chat/chat.service";
+import { ProjectAcceptanceStatus, ProjectStatus } from '../../../core/interfaces/project/lifecycle.interface';
 
 @Component({
   selector: 'app-my-project-info',
@@ -63,8 +63,8 @@ export class MyProjectInfoComponent implements OnInit {
     this.projectsService.getProjectById(projectId).subscribe({
       next: (project: Project) => {
         this.project = project;
-        if (project.freelancerId) {
-          this.loadFreelancer(project.freelancerId);
+        if (project.freelancerUserId) {
+          this.loadFreelancer(project.freelancerUserId);
         } else {
           this.loading = false;
         }
@@ -106,13 +106,13 @@ export class MyProjectInfoComponent implements OnInit {
   }
   
   canCompleteProject(): boolean {
-    if (!this.project || this.project.lifecycle.status === ProjectStatus.Completed) {
+    if (!this.project || this.project.lifecycle.projectStatus === ProjectStatus.Completed) {
       return false;
     }
-    const status = this.project.lifecycle.status;
+    const status = this.project.lifecycle.projectStatus;
     return (
       status === ProjectStatus.PendingForReview &&
-      this.project.lifecycle.acceptanceRequested
+      this.project.lifecycle.acceptanceStatus === ProjectAcceptanceStatus.Requested
     );
   }
   
@@ -121,7 +121,7 @@ export class MyProjectInfoComponent implements OnInit {
     this.submitting = true;
     try {
       if (isAccepted) {
-        this.project.lifecycle.status = ProjectStatus.Completed;
+        this.project.lifecycle.projectStatus = ProjectStatus.Completed;
         this.message.success('Project marked as completed successfully!');
         
         try {

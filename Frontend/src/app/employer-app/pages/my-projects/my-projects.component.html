@@ -84,7 +84,7 @@
     <td>{{project.title}}</td>
     <td>{{project.budget}}</td>
     <td>{{project.category?.name || 'None'}}</td>
-    <td>{{getStatusLabel(project.lifecycle.status)}}</td>
+    <td>{{getStatusLabel(project.lifecycle.projectStatus)}}</td>
     <td>{{project.lifecycle.createdAt | date}}</td>
     <td>
       <button

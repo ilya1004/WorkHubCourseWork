@@ -23,7 +23,7 @@ public class LifecyclesRepository : ILifecyclesRepository
         {
             var lifecycle = await _context.Lifecycles
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "Lifecycles" WHERE "ProjectId" = {projectId.ToString()}
+                          SELECT * FROM "Lifecycles" WHERE "ProjectId" = {projectId}
                           """)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
@@ -32,7 +32,7 @@ public class LifecyclesRepository : ILifecyclesRepository
             {
                 lifecycle.Project = await _context.Projects
                     .FromSqlInterpolated($"""
-                              SELECT * FROM "Projects" WHERE "Id" = {projectId.ToString()}
+                              SELECT * FROM "Projects" WHERE "Id" = {projectId}
                               """)
                     .AsNoTracking()
                     .FirstOrDefaultAsync(cancellationToken);
@@ -61,7 +61,7 @@ public class LifecyclesRepository : ILifecyclesRepository
                  SET 
                      "UpdatedAt" = {updatedAt},
                      "ProjectStatus" = {status.ToString()}
-                 WHERE "Id" = {projectId.ToString()}
+                 WHERE "Id" = {projectId}
                  """,
                 cancellationToken);
 
@@ -130,7 +130,7 @@ public class LifecyclesRepository : ILifecyclesRepository
                      "WorkDeadline" = {lifecycle.WorkDeadline},
                      "AcceptanceStatus" = {lifecycle.AcceptanceStatus.ToString()},
                      "ProjectStatus" = {lifecycle.ProjectStatus.ToString()}
-                 WHERE "Id" = {lifecycle.Id.ToString()}
+                 WHERE "Id" = {lifecycle.Id}
                  """,
                 cancellationToken);
 
@@ -161,7 +161,7 @@ public class LifecyclesRepository : ILifecyclesRepository
                  SET 
                      "ProjectStatus" = {projectStatus.ToString()}, 
                      "UpdatedAt" = {updatedAt}
-                 WHERE "ProjectId" = {projectId.ToString()}
+                 WHERE "ProjectId" = {projectId}
                  """,
                 cancellationToken);
 
@@ -193,7 +193,7 @@ public class LifecyclesRepository : ILifecyclesRepository
                  SET 
                      "AcceptanceStatus" = {projectAcceptanceStatus.ToString()}, 
                      "UpdatedAt" = {updatedAt}
-                 WHERE "ProjectId" = {projectId.ToString()}
+                 WHERE "ProjectId" = {projectId}
                  """,
                 cancellationToken);
 

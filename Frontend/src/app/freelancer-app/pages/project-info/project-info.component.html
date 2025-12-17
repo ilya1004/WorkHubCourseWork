@@ -16,7 +16,7 @@
       <nz-descriptions-item nzTitle="Description" nzSpan="2">{{ project.description }}</nz-descriptions-item>
       <nz-descriptions-item nzTitle="Budget">{{ project.budget }}</nz-descriptions-item>
       <nz-descriptions-item nzTitle="Category">{{project.category?.name || 'None'}}</nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Status" nzSpan="2">{{ getStatusLabel(project.lifecycle.status) }}</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Status" nzSpan="2">{{ getStatusLabel(project.lifecycle.projectStatus) }}</nz-descriptions-item>
       <nz-descriptions-item nzTitle="Applications Start">{{ project.lifecycle.applicationsStartDate | date }}</nz-descriptions-item>
       <nz-descriptions-item nzTitle="Applications Deadline">{{ project.lifecycle.applicationsDeadline | date }}</nz-descriptions-item>
       <nz-descriptions-item nzTitle="Work Start">{{ project.lifecycle.workStartDate | date }}</nz-descriptions-item>
@@ -36,12 +36,12 @@
     </nz-descriptions>
     
     <div style="margin-top: 20px">
-      @if (project && project.lifecycle.status === 1) {
+      @if (project && project.lifecycle.projectStatus === 1) {
         <h3>Applications</h3>
         <p>Current number of applications: {{ project!.freelancerApplications.length }}</p>
       }
       
-      @if (project && project.lifecycle.status !== 0 && project.lifecycle.status !== 1) {
+      @if (project && project.lifecycle.projectStatus !== 0 && project.lifecycle.projectStatus !== 1) {
         <h3>Freelancer Information</h3>
         <nz-descriptions
           nzBordered

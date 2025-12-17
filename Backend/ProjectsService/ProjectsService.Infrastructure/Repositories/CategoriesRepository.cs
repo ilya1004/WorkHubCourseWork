@@ -20,8 +20,8 @@ public class CategoriesRepository : ICategoriesRepository
         try
         {
             return await _context.Categories
-                .FromSqlInterpolated($"""
-                          SELECT * FROM "Categories" WHERE "Id" = {id.ToString()}
+                .FromSql($"""
+                          SELECT * FROM "Categories" WHERE "Id" = {id}
                           """)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
@@ -38,7 +38,7 @@ public class CategoriesRepository : ICategoriesRepository
         try
         {
             return await _context.Categories
-                .FromSqlInterpolated($"""
+                .FromSql($"""
                           SELECT * FROM "Categories" WHERE "Name" = {name}
                           """)
                 .AsNoTracking()
@@ -56,7 +56,7 @@ public class CategoriesRepository : ICategoriesRepository
         try
         {
             return await _context.Categories
-                .FromSqlInterpolated($"""
+                .FromSql($"""
                           SELECT * FROM "Categories"
                           ORDER BY "Id"
                           """)
@@ -75,7 +75,7 @@ public class CategoriesRepository : ICategoriesRepository
         try
         {
             return await _context.Categories
-                .FromSqlInterpolated($"""
+                .FromSql($"""
                           SELECT * FROM "Categories"
                           ORDER BY "Id"
                           LIMIT {limit} OFFSET {offset}
@@ -112,7 +112,7 @@ public class CategoriesRepository : ICategoriesRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlAsync(
                 $"""
                  INSERT INTO "Categories" ("Id", "Name")
                  VALUES ({category.Id}, {category.Name})
@@ -136,11 +136,11 @@ public class CategoriesRepository : ICategoriesRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlAsync(
                 $"""
                  UPDATE "Categories"
                  SET "Name" = {category.Name}
-                 WHERE "Id" = {category.ToString()}
+                 WHERE "Id" = {category.Id}
                  """,
                 cancellationToken);
 
@@ -161,10 +161,10 @@ public class CategoriesRepository : ICategoriesRepository
     {
         try
         {
-            var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
+            var rowsAffected = await _context.Database.ExecuteSqlAsync(
                 $"""
                  DELETE FROM "Categories"
-                 WHERE "Id" = {id.ToString()}
+                 WHERE "Id" = {id}
                  """,
                 cancellationToken);
 

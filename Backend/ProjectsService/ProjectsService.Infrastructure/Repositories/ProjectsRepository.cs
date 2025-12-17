@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.Runtime.CompilerServices;
+using AutoMapper;
 using ProjectsService.Domain.Enums;
 using ProjectsService.Domain.Models;
 using ProjectsService.Infrastructure.Data;
@@ -10,13 +11,16 @@ public class ProjectsRepository : IProjectsRepository
 {
     private readonly ApplicationDbContext _context;
     private readonly ILogger<ProjectsRepository> _logger;
+    private readonly IMapper _mapper;
 
     public ProjectsRepository(
         ApplicationDbContext context,
-        ILogger<ProjectsRepository> logger)
+        ILogger<ProjectsRepository> logger,
+        IMapper mapper)
     {
         _context = context;
         _logger = logger;
+        _mapper = mapper;
     }
 
     public async Task<Project?> GetByIdAsync(
@@ -29,8 +33,8 @@ public class ProjectsRepository : IProjectsRepository
         {
             var project = await _context.Projects
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "Projects" WHERE "Id" = {id.ToString()}
-                          """)
+                                      SELECT * FROM "Projects" WHERE "Id" = {id}
+                                      """)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -39,8 +43,8 @@ public class ProjectsRepository : IProjectsRepository
 
             project.Lifecycle = await _context.Lifecycles
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "Lifecycles" WHERE "ProjectId" = {id.ToString()}
-                          """)
+                                      SELECT * FROM "Lifecycles" WHERE "ProjectId" = {id}
+                                      """)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -48,8 +52,8 @@ public class ProjectsRepository : IProjectsRepository
             {
                 project.Category = await _context.Categories
                     .FromSqlInterpolated($"""
-                              SELECT * FROM "Categories" WHERE "Id" = {project.CategoryId.Value.ToString()}
-                              """)
+                                          SELECT * FROM "Categories" WHERE "Id" = {project.CategoryId.Value}
+                                          """)
                     .AsNoTracking()
                     .FirstOrDefaultAsync(cancellationToken);
             }
@@ -58,10 +62,10 @@ public class ProjectsRepository : IProjectsRepository
             {
                 project.FreelancerApplications = await _context.FreelancerApplications
                     .FromSqlInterpolated($"""
-                              SELECT * FROM "FreelancerApplications" 
-                              WHERE "ProjectId" = {project.Id.ToString()}
-                              ORDER BY "Id" DESC
-                              """)
+                                          SELECT * FROM "FreelancerApplications" 
+                                          WHERE "ProjectId" = {project.Id}
+                                          ORDER BY "Id" DESC
+                                          """)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken);
             }
@@ -82,14 +86,16 @@ public class ProjectsRepository : IProjectsRepository
     {
         try
         {
-            return await _context.Database
-                .SqlQuery<ProjectInfo>($"""
-                                        SELECT * FROM "ProjectInfo"
-                                        ORDER BY "Id" DESC
-                                        LIMIT {limit} OFFSET {offset}
-                                        """)
+            var entities = await _context.Database
+                .SqlQuery<ProjectInfoView>($"""
+                                            SELECT * FROM "ProjectInfo"
+                                            ORDER BY "Id" DESC
+                                            LIMIT {limit} OFFSET {offset}
+                                            """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
+
+            return entities.Select(x => _mapper.Map<ProjectInfo>(x)).ToList();
         }
         catch (Exception ex)
         {
@@ -106,10 +112,10 @@ public class ProjectsRepository : IProjectsRepository
         {
             return await _context.Projects
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "Projects" 
-                          WHERE "EmployerUserId" = {employerUserId.ToString()}
-                          ORDER BY "Id" DESC
-                          """)
+                                      SELECT * FROM "Projects" 
+                                      WHERE "EmployerUserId" = {employerUserId}
+                                      ORDER BY "Id" DESC
+                                      """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }
@@ -129,9 +135,9 @@ public class ProjectsRepository : IProjectsRepository
         {
             return await _context.Projects
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "Projects" 
-                          WHERE "EmployerUserId" = {employerUserId.ToString()} AND "Title" = {title}
-                          """)
+                                      SELECT * FROM "Projects" 
+                                      WHERE "EmployerUserId" = {employerUserId} AND "Title" = {title}
+                                      """)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
         }
@@ -182,90 +188,66 @@ public class ProjectsRepository : IProjectsRepository
     {
         try
         {
-            var sql = """
-                      SELECT * FROM "ProjectInfo"
-                      WHERE 1 = 1
-                      """;
-
             var conditions = new List<string>();
 
             if (categoryId.HasValue)
-            {
-                conditions.Add($""" "CategoryId" = {categoryId.Value.ToString()} """);
-            }
+                conditions.Add($"\"CategoryId\" = '{categoryId.Value}'");
 
             if (employerUserId.HasValue)
-            {
-                conditions.Add($""" "EmployerUserId" = {employerUserId.Value.ToString()} """);
-            }
+                conditions.Add($"\"EmployerUserId\" = '{employerUserId.Value}'");
 
             if (freelancerUserId.HasValue)
-            {
-                conditions.Add($""" "FreelancerUserId" = {freelancerUserId.Value.ToString()} """);
-            }
+                conditions.Add($"\"FreelancerUserId\" = '{freelancerUserId.Value}'");
 
             if (projectStatus.HasValue)
-            {
-                conditions.Add($""" "ProjectStatus" = {projectStatus.Value.ToString()} """);
-            }
+                conditions.Add($"\"ProjectStatus\" = '{projectStatus.Value}'");
 
             if (acceptanceStatus.HasValue)
-            {
-                conditions.Add($""" "AcceptanceStatus" = {acceptanceStatus.Value.ToString()} """);
-            }
+                conditions.Add($"\"AcceptanceStatus\" = '{acceptanceStatus.Value}'");
 
             if (!string.IsNullOrWhiteSpace(searchTitle))
             {
-                var search = searchTitle.Trim().ToLower();
-                conditions.Add($"""
-                                LOWER("Title") LIKE '%{search}%'
-                                """);
+                var search = searchTitle.Trim().ToLower().Replace("'", "''");
+                conditions.Add($"LOWER(\"Title\") LIKE '%{search}%'");
             }
 
             if (isActive.HasValue)
-            {
-                conditions.Add($""" "IsActive" = {isActive.Value.ToString().ToLower()} """);
-            }
+                conditions.Add($"\"IsActive\" = {isActive.Value.ToString().ToLower()}");
 
             if (updatedAtStartDate.HasValue)
             {
-                conditions.Add($""" "UpdatedAt" >= {updatedAtStartDate.Value} """);
+                var start = updatedAtStartDate.Value.ToString("yyyy-MM-dd HH:mm:ss");
+                conditions.Add($"\"UpdatedAt\" >= '{start}'");
             }
 
             if (updatedAtEndDate.HasValue)
             {
-                var endOfDay = updatedAtEndDate.Value.Date.AddDays(1).AddTicks(-1);
-                conditions.Add($""" "UpdatedAt" <= {endOfDay} """);
+                var endOfDay = updatedAtEndDate.Value.Date.AddDays(1).AddTicks(-1).ToString("yyyy-MM-dd HH:mm:ss");
+                conditions.Add($"\"UpdatedAt\" <= '{endOfDay}'");
             }
 
             if (budgetFrom.HasValue)
-            {
-                conditions.Add($""" "Budget"Budget" >= {budgetFrom.Value} """);
-            }
+                conditions.Add($"\"Budget\" >= {budgetFrom.Value}");
 
             if (budgetTo.HasValue)
-            {
-                conditions.Add($""" "Budget" <= {budgetTo.Value} """);
-            }
+                conditions.Add($"\"Budget\" <= {budgetTo.Value}");
 
-            if (conditions.Count > 0)
-            {
-                sql += string.Join(" AND ", conditions);
-            }
+            var whereClause = conditions.Count > 0
+                ? "WHERE " + string.Join(" AND ", conditions)
+                : string.Empty;
 
-            sql += $"""
-                    ORDER BY "CreatedAt" DESC
-                    LIMIT {limit} OFFSET {offset}
-                    """;
+            var sql = $"SELECT * FROM \"ProjectInfo\" {whereClause} ORDER BY \"Id\" DESC LIMIT {limit} OFFSET {offset}";
 
-            return await _context.Set<ProjectInfo>()
-                .FromSqlInterpolated(FormattableStringFactory.Create(sql))
+            var entities = await _context.Database
+                .SqlQuery<ProjectInfoView>(FormattableStringFactory.Create(sql))
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
+
+            return entities.Select(view => _mapper.Map<ProjectInfo>(view)).ToList();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to get filtered projects (with budget filter).");
+            _logger.LogError(ex, "Failed to get filtered projects with filters.");
             throw new InvalidOperationException("Failed to retrieve projects with filters.", ex);
         }
     }
@@ -286,76 +268,55 @@ public class ProjectsRepository : IProjectsRepository
     {
         try
         {
-            var sql = """
-                      SELECT COUNT(*) AS "Value" FROM "ProjectInfo"
-                      WHERE 1 = 1
-                      """;
-
             var conditions = new List<string>();
 
             if (categoryId.HasValue)
-            {
-                conditions.Add($""" "CategoryId" = {categoryId.Value.ToString()} """);
-            }
+                conditions.Add($"\"CategoryId\" = '{categoryId.Value}'");
 
             if (employerUserId.HasValue)
-            {
-                conditions.Add($""" "EmployerUserId" = {employerUserId.Value.ToString()} """);
-            }
+                conditions.Add($"\"EmployerUserId\" = '{employerUserId.Value}'");
 
             if (freelancerUserId.HasValue)
-            {
-                conditions.Add($""" "FreelancerUserId" = {freelancerUserId.Value.ToString()} """);
-            }
+                conditions.Add($"\"FreelancerUserId\" = '{freelancerUserId.Value}'");
 
             if (projectStatus.HasValue)
-            {
-                conditions.Add($""" "ProjectStatus" = {projectStatus.Value.ToString()} """);
-            }
+                conditions.Add($"\"ProjectStatus\" = '{projectStatus.Value}'");
 
             if (acceptanceStatus.HasValue)
-            {
-                conditions.Add($""" "AcceptanceStatus" = {acceptanceStatus.Value.ToString()} """);
-            }
+                conditions.Add($"\"AcceptanceStatus\" = '{acceptanceStatus.Value}'");
 
             if (!string.IsNullOrWhiteSpace(searchTitle))
             {
-                var search = searchTitle.Trim().ToLower();
-                conditions.Add($"""
-                                LOWER("Title") LIKE '%{search}%'
-                                """);
+                var search = searchTitle.Trim().ToLower().Replace("'", "''");
+                conditions.Add($"LOWER(\"Title\") LIKE '%{search}%'");
             }
 
             if (isActive.HasValue)
-            {
-                conditions.Add($""" "IsActive" = {isActive.Value.ToString().ToLower()} """);
-            }
+                conditions.Add($"\"IsActive\" = {isActive.Value.ToString().ToLower()}");
 
             if (updatedAtStartDate.HasValue)
             {
-                conditions.Add($""" "UpdatedAt" >= {updatedAtStartDate.Value} """);
+                var start = updatedAtStartDate.Value.ToString("yyyy-MM-dd HH:mm:ss");
+                conditions.Add($"\"UpdatedAt\" >= '{start}'");
             }
 
             if (updatedAtEndDate.HasValue)
             {
-                var endOfDay = updatedAtEndDate.Value.Date.AddDays(1).AddTicks(-1);
-                conditions.Add($""" "UpdatedAt" <= {endOfDay} """);
+                var endOfDay = updatedAtEndDate.Value.Date.AddDays(1).AddTicks(-1).ToString("yyyy-MM-dd HH:mm:ss");
+                conditions.Add($"\"UpdatedAt\" <= '{endOfDay}'");
             }
 
             if (budgetFrom.HasValue)
-            {
-                conditions.Add($""" "Budget" >= {budgetFrom.Value} """);
-            }
+                conditions.Add($"\"Budget\" >= {budgetFrom.Value}");
 
             if (budgetTo.HasValue)
-            {
-                conditions.Add($""" "Budget" <= {budgetTo.Value} """);
-            }
+                conditions.Add($"\"Budget\" <= {budgetTo.Value}");
 
-            if (conditions.Count > 0)
-            {
-                sql += string.Join(" AND ", conditions);
-            }
+            var whereClause = conditions.Count > 0
+                ? " WHERE " + string.Join(" AND ", conditions)
+                : string.Empty;
+
+            var sql = $"SELECT COUNT(*) AS \"Value\" FROM \"ProjectInfo\"{whereClause}";
 
             var count = await _context.Database
                 .SqlQuery<int>(FormattableStringFactory.Create(sql))
@@ -365,7 +326,7 @@ public class ProjectsRepository : IProjectsRepository
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to count projects with budget filter.");
+            _logger.LogError(ex, "Failed to count projects with filters.");
             throw new InvalidOperationException("Failed to count projects with filters.", ex);
         }
     }
@@ -464,9 +425,9 @@ public class ProjectsRepository : IProjectsRepository
                  SET "FreelancerUserId" = (
                     SELECT "FreelancerUserId" 
                     FROM "FreelancerApplications"
-                    WHERE "ProjectId" = {id.ToString()} AND "Status" = 'Accepted'
+                    WHERE "ProjectId" = {id} AND "Status" = 'Accepted'
                     LIMIT 1)
-                 WHERE "Id" = {id.ToString()}
+                 WHERE "Id" = {id}
                  """,
                 cancellationToken);
 
@@ -496,7 +457,7 @@ public class ProjectsRepository : IProjectsRepository
                      "Budget" = {project.Budget},
                      "FreelancerUserId" = {project.FreelancerUserId},
                      "CategoryId" = {project.CategoryId}
-                 WHERE "Id" = {project.Id.ToString()}
+                 WHERE "Id" = {project.Id}
                  """,
                 cancellationToken);
 
@@ -521,7 +482,7 @@ public class ProjectsRepository : IProjectsRepository
                 $"""
                  UPDATE "Projects"
                  SET "PaymentIntentId" = {paymentIntentId}
-                 WHERE "Id" = {id.ToString()}
+                 WHERE "Id" = {id}
                  """,
                 cancellationToken);
 
@@ -546,7 +507,7 @@ public class ProjectsRepository : IProjectsRepository
                 $"""
                  UPDATE "Projects"
                  SET "IsActive" = {isActive}
-                 WHERE "Id" = {id.ToString()}
+                 WHERE "Id" = {id}
                  """,
                 cancellationToken);
 
@@ -571,7 +532,7 @@ public class ProjectsRepository : IProjectsRepository
         {
             var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
-                 DELETE FROM "Projects" WHERE "Id" = {id.ToString()}
+                 DELETE FROM "Projects" WHERE "Id" = {id}
                  """,
                 cancellationToken);
 

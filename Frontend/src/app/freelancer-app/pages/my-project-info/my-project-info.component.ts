@@ -1,19 +1,19 @@
-import {Component, OnInit} from '@angular/core';
-import {NzCardModule} from "ng-zorro-antd/card";
-import {EmployerUser} from '../../../core/interfaces/employer/employer-user.interface';
-import {ActivatedRoute, Router, RouterModule} from "@angular/router";
-import {ProjectsService} from "../../../core/services/projects/projects.service";
-import {Project} from "../../../core/interfaces/project/project.interface";
-import {CommonModule} from "@angular/common";
-import {NzDescriptionsModule} from "ng-zorro-antd/descriptions";
-import {NzGridModule} from "ng-zorro-antd/grid";
-import {UsersService} from "../../../core/services/users/users.service";
-import {PROJECT_STATUSES} from "../../../core/data/constants";
-import {NzFlexDirective} from "ng-zorro-antd/flex";
-import {NzButtonComponent} from "ng-zorro-antd/button";
-import {NzMessageService} from "ng-zorro-antd/message";
-import {ProjectChatComponent} from "./project-chat/project-chat.component";
-import {ProjectStatus} from "../../../core/interfaces/project/lifecycle.interface";
+import { Component, OnInit } from '@angular/core';
+import { NzCardModule } from "ng-zorro-antd/card";
+import { EmployerUser } from '../../../core/interfaces/employer/employer-user.interface';
+import { ActivatedRoute, Router, RouterModule } from "@angular/router";
+import { ProjectsService } from "../../../core/services/projects/projects.service";
+import { Project } from "../../../core/interfaces/project/project.interface";
+import { CommonModule } from "@angular/common";
+import { NzDescriptionsModule } from "ng-zorro-antd/descriptions";
+import { NzGridModule } from "ng-zorro-antd/grid";
+import { UsersService } from "../../../core/services/users/users.service";
+import { PROJECT_STATUSES } from "../../../core/data/constants";
+import { NzFlexDirective } from "ng-zorro-antd/flex";
+import { NzButtonComponent } from "ng-zorro-antd/button";
+import { NzMessageService } from "ng-zorro-antd/message";
+import { ProjectChatComponent } from "./project-chat/project-chat.component";
+import { ProjectAcceptanceStatus, ProjectStatus } from "../../../core/interfaces/project/lifecycle.interface";
 
 @Component({
   selector: 'app-my-project-info',
@@ -58,7 +58,7 @@ export class MyProjectInfoComponent implements OnInit {
     this.projectsService.getProjectById(projectId).subscribe({
       next: (project: Project) => {
         this.project = project;
-        this.loadEmployer(project.employerId);
+        this.loadEmployer(project.employerUserId);
       },
       error: (error) => {
         console.error('Error loading project:', error);
@@ -96,9 +96,9 @@ export class MyProjectInfoComponent implements OnInit {
   }
   
   canRequestAcceptance(): boolean {
-    if (!this.project || this.project.lifecycle.acceptanceRequested)
+    if (!this.project || this.project.lifecycle.acceptanceStatus === ProjectAcceptanceStatus.Requested)
       return false;
-    const status = this.project.lifecycle.status;
+    const status = this.project.lifecycle.projectStatus;
     return status === ProjectStatus.InProgress || status === ProjectStatus.Expired;
   }
   
@@ -110,7 +110,7 @@ export class MyProjectInfoComponent implements OnInit {
       next: () => {
         this.submitting = false;
         if (this.project) {
-          this.project.lifecycle.acceptanceRequested = true;
+          this.project.lifecycle.acceptanceStatus = ProjectAcceptanceStatus.Requested;
         }
         this.message.success('Acceptance request sent successfully!');
       },
@@ -127,4 +127,5 @@ export class MyProjectInfoComponent implements OnInit {
   }
   
   protected readonly ProjectStatus = ProjectStatus;
+  protected readonly ProjectAcceptanceStatus = ProjectAcceptanceStatus;
 }

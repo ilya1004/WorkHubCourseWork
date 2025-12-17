@@ -22,7 +22,7 @@ public class ReportsRepository : IReportsRepository
         {
             return await _context.Reports
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "Reports" WHERE "Id" = {id.ToString()}
+                          SELECT * FROM "Reports" WHERE "Id" = {id}
                           """)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
@@ -88,7 +88,7 @@ public class ReportsRepository : IReportsRepository
                 $"""
                  UPDATE "Reports"
                  SET "Status" = {reportStatus}
-                 WHERE "Id" = {reportId.ToString()}
+                 WHERE "Id" = {reportId}
                  """,
                 cancellationToken);
 
@@ -112,7 +112,7 @@ public class ReportsRepository : IReportsRepository
             var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  DELETE FROM "Categories"
-                 WHERE "Id" = {id.ToString()}
+                 WHERE "Id" = {id}
                  """,
                 cancellationToken);
 

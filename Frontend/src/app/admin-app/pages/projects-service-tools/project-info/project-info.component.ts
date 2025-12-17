@@ -9,6 +9,7 @@ import {NzButtonComponent} from "ng-zorro-antd/button";
 import {NzCardComponent} from "ng-zorro-antd/card";
 import {NzDescriptionsComponent, NzDescriptionsItemComponent} from "ng-zorro-antd/descriptions";
 import {DatePipe, NgIf} from "@angular/common";
+import { ProjectAcceptanceStatus } from "../../../../core/interfaces/project/lifecycle.interface";
 
 @Component({
   selector: 'app-project-info',
@@ -61,8 +62,8 @@ export class ProjectInfoComponent implements OnInit {
   loadUserInfo(): void {
     if (!this.project) return;
     
-    if (this.project.freelancerId) {
-      this.usersService.getFreelancerInfo(this.project.freelancerId).subscribe({
+    if (this.project.freelancerUserId) {
+      this.usersService.getFreelancerInfo(this.project.freelancerUserId).subscribe({
         next: (freelancer) => {
           this.freelancer = freelancer || null;
           this.loading = false;
@@ -74,7 +75,7 @@ export class ProjectInfoComponent implements OnInit {
       });
     }
     
-    this.usersService.getEmployerInfo(this.project.employerId).subscribe({
+    this.usersService.getEmployerInfo(this.project.employerUserId).subscribe({
       next: (employer) => {
         this.employer = employer;
         this.loading = false;
@@ -103,4 +104,6 @@ export class ProjectInfoComponent implements OnInit {
   navigateBack(): void {
     this.router.navigate(['/admin/projects-service-tools']);
   }
+
+  protected readonly ProjectAcceptanceStatus = ProjectAcceptanceStatus;
 }

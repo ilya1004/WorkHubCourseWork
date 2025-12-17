@@ -30,7 +30,7 @@ public class GetProjectsByEmployerFilterQueryHandler : IRequestHandler<GetProjec
             freelancerUserId: null,
             projectStatus: null,
             acceptanceStatus: null,
-            searchTitle:  null,
+            searchTitle: null,
             isActive: null,
             updatedAtStartDate: request.UpdatedAtStartDate,
             updatedAtEndDate: request.UpdatedAtEndDate,
@@ -38,7 +38,7 @@ public class GetProjectsByEmployerFilterQueryHandler : IRequestHandler<GetProjec
             budgetTo: null,
             offset: offset,
             limit: request.PageSize,
-            cancellationToken);
+            cancellationToken: cancellationToken);
 
         var projectsCount = await _unitOfWork.ProjectsRepository.CountByFilteredAsync(
             categoryId: null,

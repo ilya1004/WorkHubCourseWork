@@ -191,7 +191,7 @@ export class ProjectToolsComponent implements OnInit {
   }
   
   onEditProject(project: Project): void {
-    if (project.lifecycle.status !== 0) {
+    if (project.lifecycle.projectStatus !== 0) {
       this.message.warning('Only projects in "Published" status can be edited.');
       return;
     }
@@ -286,7 +286,7 @@ export class ProjectToolsComponent implements OnInit {
       this.isViewingApplicationDetails = true;
     }
     if (this.selectedApplication === null || this.selectedApplication.id !== application.id) {
-      this.loadFreelancerDetails(application.freelancerId);
+      this.loadFreelancerDetails(application.freelancerUserId);
     }
     this.selectedApplication = application;
   }
