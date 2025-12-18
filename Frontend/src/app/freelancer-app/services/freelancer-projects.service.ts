@@ -4,6 +4,7 @@ import {Project} from "../../core/interfaces/project/project.interface";
 import {HttpClient, HttpParams} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {environment} from "../../../environments/environment";
+import { ProjectInfo } from "../../core/interfaces/project/project-info";
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +20,7 @@ export class FreelancerProjectsService {
     employerId: string | null,
     pageNo: number,
     pageSize: number
-  } ): Observable<PaginatedResult<Project>> {
+  } ): Observable<PaginatedResult<ProjectInfo>> {
     let params = new HttpParams()
         .set('pageNo', filter.pageNo.toString())
         .set('pageSize', filter.pageSize.toString());
@@ -32,7 +33,7 @@ export class FreelancerProjectsService {
       params = params.set('employerId', filter.employerId);
     }
 
-    return this.httpClient.get<PaginatedResult<Project>>(
+    return this.httpClient.get<PaginatedResult<ProjectInfo>>(
         `${environment.PROJECTS_SERVICE_API_URL}projects/my-freelancer-projects-filter`,
         { params },
     );

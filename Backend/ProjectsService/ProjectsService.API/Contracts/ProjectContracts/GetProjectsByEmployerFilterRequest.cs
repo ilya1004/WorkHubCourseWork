@@ -6,6 +6,6 @@ public sealed record GetProjectsByEmployerFilterRequest(
     DateTime? UpdatedAtStartDate,
     DateTime? UpdatedAtEndDate,
     ProjectStatus? ProjectStatus,
-    bool? AcceptanceRequestedAndNotConfirmed,
+    ProjectAcceptanceStatus? ProjectAcceptanceStatus,
     int PageNo = 1,
     int PageSize = 10);

@@ -21,10 +21,10 @@ public class UsersRepository : IUsersRepository
     {
         try
         {
-            var user = await _context.Database
-                .SqlQuery<User>($"""
-                                 SELECT * FROM "Users" WHERE "Id" = {id.ToString()}
-                                 """)
+            var user = await _context.Users
+                .FromSqlInterpolated($"""
+                                      SELECT * FROM "Users" WHERE "Id" = {id}
+                                      """)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -35,7 +35,7 @@ public class UsersRepository : IUsersRepository
 
             var role = await _context.Roles
                 .FromSqlInterpolated($"""
-                                      SELECT * FROM "Roles" WHERE "Id" = {user.RoleId.ToString()}
+                                      SELECT * FROM "Roles" WHERE "Id" = {user.RoleId}
                                       """)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
@@ -44,7 +44,7 @@ public class UsersRepository : IUsersRepository
             {
                 user.FreelancerProfile = await _context.FreelancerProfiles
                     .FromSqlInterpolated($"""
-                                          SELECT * FROM "FreelancerProfiles" WHERE "UserId" = {user.Id.ToString()}
+                                          SELECT * FROM "FreelancerProfiles" WHERE "UserId" = {user.Id}
                                           """)
                     .AsNoTracking()
                     .FirstOrDefaultAsync(cancellationToken);
@@ -54,7 +54,7 @@ public class UsersRepository : IUsersRepository
             {
                 user.EmployerProfile = await _context.EmployerProfiles
                     .FromSqlInterpolated($"""
-                                          SELECT * FROM "EmployerProfiles" WHERE "UserId" = {user.Id.ToString()}
+                                          SELECT * FROM "EmployerProfiles" WHERE "UserId" = {user.Id}
                                           """)
                     .AsNoTracking()
                     .FirstOrDefaultAsync(cancellationToken);
@@ -63,7 +63,7 @@ public class UsersRepository : IUsersRepository
                 {
                     user.EmployerProfile.Industry = await _context.EmployerIndustries
                         .FromSqlInterpolated($"""
-                                              SELECT * FROM "EmployerIndustries" WHERE "Id" = {user.EmployerProfile.IndustryId.ToString()}
+                                              SELECT * FROM "EmployerIndustries" WHERE "Id" = {user.EmployerProfile.IndustryId}
                                               """)
                         .AsNoTracking()
                         .FirstOrDefaultAsync(cancellationToken);
@@ -229,7 +229,7 @@ public class UsersRepository : IUsersRepository
                 .SqlQuery<int>(
                     $"""
                         SELECT COUNT(*) AS "Value" FROM "Users"
-                        WHERE "IsActive" = {isActive.ToString()}
+                        WHERE "IsActive" = {isActive.ToString().ToLower()}
                      """)
                 .SingleAsync(cancellationToken);
         }
@@ -266,7 +266,7 @@ public class UsersRepository : IUsersRepository
                 $"""
                  UPDATE "Users"
                  SET "IsEmailConfirmed" = TRUE
-                 WHERE "Id" = {id.ToString()}
+                 WHERE "Id" = {id}
                  """,
                 cancellationToken);
 
@@ -294,7 +294,7 @@ public class UsersRepository : IUsersRepository
                 $"""
                  UPDATE "Users"
                  SET "PasswordHash" = {passwordHash}
-                 WHERE "Id" = {id.ToString()}
+                 WHERE "Id" = {id}
                  """,
                 cancellationToken);
 
@@ -319,7 +319,7 @@ public class UsersRepository : IUsersRepository
                 $"""
                  UPDATE "Users"
                  SET "ImageUrl" = {imageUrl}
-                 WHERE "Id" = {id.ToString()}
+                 WHERE "Id" = {id}
                  """,
                 cancellationToken);
 

@@ -1,6 +1,6 @@
 export interface FreelancerUser {
   id: string;
-  userName: string;
+  nickname: string;
   firstName: string;
   lastName: string;
   about: string;
@@ -10,4 +10,3 @@ export interface FreelancerUser {
   imageUrl: string | null;
   roleName: string;
 }
-

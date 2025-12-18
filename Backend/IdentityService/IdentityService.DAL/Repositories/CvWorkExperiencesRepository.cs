@@ -15,7 +15,7 @@ public class CvWorkExperiencesRepository : ICvWorkExperiencesRepository
     {
         return await _context.Set<CvWorkExperience>()
             .FromSqlInterpolated($"""
-                      SELECT * FROM "CvWorkExperiences" WHERE "Id" = {id.ToString()}
+                      SELECT * FROM "CvWorkExperiences" WHERE "Id" = {id}
                       """)
             .AsNoTracking()
             .FirstOrDefaultAsync(cancellationToken);
@@ -25,7 +25,7 @@ public class CvWorkExperiencesRepository : ICvWorkExperiencesRepository
     {
         return await _context.Set<CvWorkExperience>()
             .FromSqlInterpolated($"""
-                      SELECT * FROM "CvWorkExperiences" WHERE "CvId" = {cvId.ToString()} ORDER BY "StartDate" DESC
+                      SELECT * FROM "CvWorkExperiences" WHERE "CvId" = {cvId} ORDER BY "StartDate" DESC
                       """)
             .AsNoTracking()
             .ToListAsync(cancellationToken);

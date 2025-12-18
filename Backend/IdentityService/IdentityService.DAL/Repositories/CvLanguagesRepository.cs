@@ -17,8 +17,8 @@ public class CvLanguagesRepository : ICvLanguagesRepository
         {
             return await _context.Set<CvLanguage>()
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "CvLanguages" WHERE "Id" = {id.ToString()}
-                          """)
+                                      SELECT * FROM "CvLanguages" WHERE "Id" = {id}
+                                      """)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
         }
@@ -35,8 +35,10 @@ public class CvLanguagesRepository : ICvLanguagesRepository
         {
             return await _context.Set<CvLanguage>()
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "CvLanguages" WHERE "CvId" = {cvId.ToString()} ORDER BY "Name"
-                          """)
+                                      SELECT * FROM "CvLanguages" 
+                                      WHERE "CvId" = {cvId} 
+                                      ORDER BY "Id"
+                                      """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }

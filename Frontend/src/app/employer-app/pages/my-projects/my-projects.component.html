@@ -31,15 +31,15 @@
     </nz-select>
   </nz-form-item>
   
-  <nz-form-item>
-    <nz-form-label>Acceptance Requested</nz-form-label>
-      <label
-        nz-checkbox
-        [ngModel]="filterForm.acceptanceRequestedAndNotConfirmed"
-        (ngModelChange)="onAcceptanceRequestedCheck($event)">
-        Requested & Not Confirmed
-      </label>
-  </nz-form-item>
+<!--  <nz-form-item>-->
+<!--    <nz-form-label>Acceptance Requested</nz-form-label>-->
+<!--      <label-->
+<!--        nz-checkbox-->
+<!--        [ngModel]="filterForm.acceptanceRequestedAndNotConfirmed"-->
+<!--        (ngModelChange)="onAcceptanceRequestedCheck($event)">-->
+<!--        Requested & Not Confirmed-->
+<!--      </label>-->
+<!--  </nz-form-item>-->
   
   <div nz-flex nzGap="10px" nzJustify="center" style="min-width: 200px; margin: 8px 0 0 0" >
     <button
@@ -83,9 +83,9 @@
     <td>{{project.id}}</td>
     <td>{{project.title}}</td>
     <td>{{project.budget}}</td>
-    <td>{{project.category?.name || 'None'}}</td>
-    <td>{{getStatusLabel(project.lifecycle.projectStatus)}}</td>
-    <td>{{project.lifecycle.createdAt | date}}</td>
+    <td>{{project.categoryName || 'None'}}</td>
+    <td>{{getStatusLabel(project.projectStatus)}}</td>
+    <td>{{project.createdAt | date}}</td>
     <td>
       <button
         nz-button

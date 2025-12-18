@@ -20,9 +20,9 @@ public class GetProjectsByEmployerFilterRequestValidator : AbstractValidator<Get
             .IsInEnum().When(x => x.ProjectStatus.HasValue)
             .WithMessage("ProjectStatus must be a valid Enum value.");
         
-        RuleFor(x => x.AcceptanceRequestedAndNotConfirmed)
-            .Equal(true).WithMessage("AcceptanceRequestedAndNotConfirmed value must be true or null.")
-            .When(x => x.AcceptanceRequestedAndNotConfirmed.HasValue);
+        RuleFor(x => x.ProjectAcceptanceStatus)
+            .IsInEnum().When(x => x.ProjectStatus.HasValue)
+            .WithMessage("ProjectAcceptanceStatus must be a valid Enum value.");
         
         RuleFor(x => x.PageNo)
             .InclusiveBetween(1, 100_000)

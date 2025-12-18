@@ -41,7 +41,7 @@
       <nz-spin [nzSpinning]="isLoadingUserData">
         <h2>{{ userData.firstName }} {{ userData.lastName }}</h2>
         <div><strong>My nickname:</strong></div>
-        <div>{{ userData.userName }}</div>
+        <div>{{ userData.nickname }}</div>
         <br />
         <div><strong>About me:</strong></div>
         <div>{{ userData.about || 'No description provided' }}</div>
@@ -78,6 +78,18 @@
                 <div *ngIf="editFreelancerForm.controls.lastName.invalid && editFreelancerForm.controls.lastName.touched" class="input-error-message">
                   <div *ngIf="editFreelancerForm.controls.lastName.errors?.['required']">Last name is required</div>
                   <div *ngIf="editFreelancerForm.controls.lastName.errors?.['maxlength']">Max 100 characters</div>
+                </div>
+              </div>
+
+              <div *nzSpaceItem>
+                <input
+                  nz-input
+                  formControlName="nickname"
+                  placeholder="Enter your nickname"
+                  class="profile-input" />
+                <div *ngIf="editFreelancerForm.controls.nickname.invalid && editFreelancerForm.controls.nickname.touched" class="input-error-message">
+                  <div *ngIf="editFreelancerForm.controls.nickname.errors?.['required']">Nickname is required</div>
+                  <div *ngIf="editFreelancerForm.controls.nickname.errors?.['maxlength']">Max 100 characters</div>
                 </div>
               </div>
               

@@ -15,7 +15,6 @@
     <thead>
     <tr>
       <th>ID</th>
-      <th>Username</th>
       <th>Email</th>
       <th>Role</th>
       <th>Registered At</th>
@@ -26,9 +25,8 @@
     <tbody>
     <tr *ngFor="let user of userTable.data">
       <td>{{ user.id }}</td>
-      <td>{{ user.userName }}</td>
       <td>{{ user.email }}</td>
-      <td>{{ user.role.name }}</td>
+      <td>{{ user.role?.name }}</td>
       <td>{{ user.registeredAt | date }}</td>
       <td>
         {{ user.freelancerProfile ? 'Freelancer' : user.employerProfile ? 'Employer' : 'None' }}

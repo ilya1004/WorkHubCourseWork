@@ -20,7 +20,7 @@ public class CvsRepository : ICvsRepository
         {
             var cv = await _context.Cvs
                 .FromSqlInterpolated($"""
-                                      SELECT * FROM "Cvs" WHERE "Id" = {cvId.ToString()}
+                                      SELECT * FROM "Cvs" WHERE "Id" = {cvId}
                                       """)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
@@ -32,21 +32,21 @@ public class CvsRepository : ICvsRepository
 
             cv.WorkExperiences = await _context.Set<CvWorkExperience>()
                 .FromSqlInterpolated($"""
-                                      SELECT * FROM "CvWorkExperiences" WHERE "CvId" = {cvId.ToString()}
+                                      SELECT * FROM "CvWorkExperiences" WHERE "CvId" = {cvId}
                                       """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
             cv.Skills = await _context.Set<CvSkill>()
                 .FromSqlInterpolated($"""
-                                      SELECT * FROM "CvSkills" WHERE "CvId" = {cvId.ToString()}
+                                      SELECT * FROM "CvSkills" WHERE "CvId" = {cvId}
                                       """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
             cv.Languages = await _context.Set<CvLanguage>()
                 .FromSqlInterpolated($"""
-                                      SELECT * FROM "CvLanguages" WHERE "CvId" = {cvId.ToString()}
+                                      SELECT * FROM "CvLanguages" WHERE "CvId" = {cvId}
                                       """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
@@ -69,7 +69,7 @@ public class CvsRepository : ICvsRepository
             return await _context.Cvs
                 .FromSqlInterpolated($"""
                                       SELECT * FROM "Cvs" 
-                                      WHERE "FreelancerUserId" = {freelancerUserId.ToString()}
+                                      WHERE "FreelancerUserId" = {freelancerUserId}
                                       ORDER BY "Id"
                                       """)
                 .AsNoTracking()
@@ -89,7 +89,7 @@ public class CvsRepository : ICvsRepository
             var cv = await _context.Cvs
                 .FromSqlInterpolated($"""
                                       SELECT * FROM "Cvs" 
-                                      WHERE "Id" = {cvId.ToString()} AND "IsPublic" = true
+                                      WHERE "Id" = {cvId} AND "IsPublic" = true
                                       """)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
@@ -101,21 +101,21 @@ public class CvsRepository : ICvsRepository
 
             cv.WorkExperiences = await _context.Set<CvWorkExperience>()
                 .FromSqlInterpolated($"""
-                                      SELECT * FROM "CvWorkExperiences" WHERE "CvId" = {cvId.ToString()}
+                                      SELECT * FROM "CvWorkExperiences" WHERE "CvId" = {cvId}
                                       """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
             cv.Skills = await _context.Set<CvSkill>()
                 .FromSqlInterpolated($"""
-                                      SELECT * FROM "CvSkills" WHERE "CvId" = {cvId.ToString()}
+                                      SELECT * FROM "CvSkills" WHERE "CvId" = {cvId}
                                       """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
             cv.Languages = await _context.Set<CvLanguage>()
                 .FromSqlInterpolated($"""
-                                      SELECT * FROM "CvLanguages" WHERE "CvId" = {cvId.ToString()}
+                                      SELECT * FROM "CvLanguages" WHERE "CvId" = {cvId}
                                       """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);

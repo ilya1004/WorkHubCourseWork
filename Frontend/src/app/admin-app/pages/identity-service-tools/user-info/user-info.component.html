@@ -10,9 +10,8 @@
       [nzColumn]="{ xxl: 1, xl: 1, lg: 1, md: 1, sm: 1, xs: 1 }"
     >
       <nz-descriptions-item nzTitle="ID">{{ user.id }}</nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Username">{{ user.userName }}</nz-descriptions-item>
       <nz-descriptions-item nzTitle="Email">{{ user.email }}</nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Role">{{ user.role.name }}</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Role">{{ user.role?.name }}</nz-descriptions-item>
       <nz-descriptions-item nzTitle="Registered At">{{ user.registeredAt | date }}</nz-descriptions-item>
       <nz-descriptions-item nzTitle="Image URL">{{ user.imageUrl || 'None' }}</nz-descriptions-item>
     </nz-descriptions>

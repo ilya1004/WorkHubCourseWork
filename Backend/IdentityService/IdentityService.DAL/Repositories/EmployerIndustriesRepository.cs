@@ -17,7 +17,7 @@ public class EmployerIndustriesRepository : IEmployerIndustriesRepository
         {
             return await _context.EmployerIndustries
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "EmployerIndustries" WHERE "Id" = {id.ToString()}
+                          SELECT * FROM "EmployerIndustries" WHERE "Id" = {id}
                           """)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
@@ -119,7 +119,7 @@ public class EmployerIndustriesRepository : IEmployerIndustriesRepository
                 $"""
                  UPDATE "EmployerIndustries"
                  SET "Name" = {employerIndustry.Name}
-                 WHERE "Id" = {employerIndustry.ToString()}
+                 WHERE "Id" = {employerIndustry}
                  """,
                 cancellationToken);
 
@@ -143,7 +143,7 @@ public class EmployerIndustriesRepository : IEmployerIndustriesRepository
             var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  DELETE FROM "EmployerIndustries"
-                 WHERE "Id" = {id.ToString()}
+                 WHERE "Id" = {id}
                  """,
                 cancellationToken);
 

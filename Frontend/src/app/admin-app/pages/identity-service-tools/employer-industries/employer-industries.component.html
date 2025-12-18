@@ -43,13 +43,13 @@
       </tr>
       </tbody>
     </nz-table>
-    
+
     <div>
       <button nz-button nzType="primary" (click)="toggleCreateForm()">
         {{ showCreateForm ? 'Cancel' : 'Create New' }}
       </button>
     </div>
-    
+
     <div *ngIf="showCreateForm" style="margin-top: 16px;">
       <h4 style="margin-bottom: 12px;">Create Industry</h4>
       <nz-form-item>
@@ -68,7 +68,7 @@
         <button nz-button (click)="toggleCreateForm()">Cancel</button>
       </div>
     </div>
-    
+
     <div *ngIf="showEditForm" style="margin-top: 16px;">
       <h4 style="margin-bottom: 12px;">Edit Industry</h4>
       <nz-form-item>

@@ -16,7 +16,7 @@ public class EmployerProfilesRepository : IEmployerProfilesRepository
         try {
             return await _context.EmployerProfiles
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "EmployerProfiles" WHERE "UserId" = {userId.ToString()}
+                          SELECT * FROM "EmployerProfiles" WHERE "UserId" = {userId}
                           """)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
@@ -36,7 +36,7 @@ public class EmployerProfilesRepository : IEmployerProfilesRepository
                 $"""
                  UPDATE "EmployerProfiles"
                  SET "StripeCustomerId" = {stripeCustomerId}
-                 WHERE "UserId" = {userId.ToString()}
+                 WHERE "UserId" = {userId}
                  """,
                 cancellationToken);
 
@@ -64,7 +64,7 @@ public class EmployerProfilesRepository : IEmployerProfilesRepository
                 $"""
                  UPDATE "EmployerProfiles"
                  SET "CompanyName" = {profile.CompanyName}, "About" = {profile.About}, "IndustryId" = {profile.IndustryId}  
-                 WHERE "Id" = {id.ToString()}
+                 WHERE "Id" = {id}
                  """,
                 cancellationToken);
 

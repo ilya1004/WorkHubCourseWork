@@ -50,7 +50,7 @@ export class ProfileComponent implements OnInit {
 
   userData: FreelancerUser = {
     id: '',
-    userName: '',
+    nickname: '',
     firstName: '',
     lastName: '',
     about: '',
@@ -67,6 +67,10 @@ export class ProfileComponent implements OnInit {
       validators: [Validators.required, Validators.maxLength(100)]
     }),
     lastName: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.maxLength(100)]
+    }),
+    nickname: new FormControl('', {
       nonNullable: true,
       validators: [Validators.required, Validators.maxLength(100)]
     }),
@@ -129,6 +133,7 @@ export class ProfileComponent implements OnInit {
 
       formData.append('FreelancerProfile.FirstName', formValue.firstName);
       formData.append('FreelancerProfile.LastName', formValue.lastName);
+      formData.append('FreelancerProfile.Nickname', formValue.nickname);
       formData.append('FreelancerProfile.About', formValue.about);
       formData.append('FreelancerProfile.ResetImage', String(formValue.resetImage));
       if (formValue.image) {

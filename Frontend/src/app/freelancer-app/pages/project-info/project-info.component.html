@@ -48,7 +48,7 @@
           *ngIf="freelancer"
           [nzColumn]="{ xxl: 2, xl: 2, lg: 2, md: 2, sm: 2, xs: 1 }">
           <nz-descriptions-item nzTitle="Full Name">{{ freelancer.firstName }} {{ freelancer.lastName }}</nz-descriptions-item>
-          <nz-descriptions-item nzTitle="Username">{{ freelancer.userName }}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Username">{{ freelancer.nickname }}</nz-descriptions-item>
         </nz-descriptions>
         <p *ngIf="!freelancer" style="margin-top: 10px">No freelancer assigned to this project yet.</p>
       }

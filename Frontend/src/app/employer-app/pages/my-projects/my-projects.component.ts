@@ -22,6 +22,7 @@ import {Router} from "@angular/router";
 import {NzFlexDirective} from "ng-zorro-antd/flex";
 import {NzCheckboxComponent} from "ng-zorro-antd/checkbox";
 import {NzDatePickerComponent} from "ng-zorro-antd/date-picker";
+import { ProjectInfo } from "../../../core/interfaces/project/project-info";
 
 @Component({
   selector: 'app-my-projects',
@@ -64,12 +65,12 @@ export class MyProjectsComponent implements OnInit {
     updatedAtStartDate: null as Date | null,
     updatedAtEndDate: null as Date | null,
     projectStatus: null as string | null,
-    acceptanceRequestedAndNotConfirmed: false as boolean,
+    projectAcceptanceStatus: null as string | null,
     pageNo: 1,
     pageSize: 10
   };
   
-  projects: Project[] = [];
+  projects: ProjectInfo[] = [];
   totalCount = 0;
   loading = false;
   
@@ -80,7 +81,7 @@ export class MyProjectsComponent implements OnInit {
   loadProjects(): void {
     this.loading = true;
     this.myProjectsService.getMyEmployerProjects(this.filterForm).subscribe({
-      next: (result: PaginatedResult<Project>) => {
+      next: (result: PaginatedResult<ProjectInfo>) => {
         this.projects = result.items;
         this.totalCount = result.totalCount;
         this.loading = false;
@@ -113,16 +114,16 @@ export class MyProjectsComponent implements OnInit {
       updatedAtStartDate: null,
       updatedAtEndDate: null,
       projectStatus: null,
-      acceptanceRequestedAndNotConfirmed: false,
+      projectAcceptanceStatus: null,
       pageNo: 1,
       pageSize: 10
     };
     this.loadProjects();
   }
   
-  onAcceptanceRequestedCheck(event: any) {
-    this.filterForm.acceptanceRequestedAndNotConfirmed = !this.filterForm.acceptanceRequestedAndNotConfirmed;
-  }
+  // onAcceptanceRequestedCheck(event: any) {
+  //   this.filterForm.acceptanceRequestedAndNotConfirmed = !this.filterForm.acceptanceRequestedAndNotConfirmed;
+  // }
   
   getStatusLabel(status: number): string {
     const statuses = [

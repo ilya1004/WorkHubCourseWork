@@ -4,6 +4,7 @@ import {PaginatedResult} from "../../core/interfaces/common/paginated-result.int
 import {Project} from "../../core/interfaces/project/project.interface";
 import {HttpClient, HttpParams} from "@angular/common/http";
 import {environment} from "../../../environments/environment";
+import { ProjectInfo } from "../../core/interfaces/project/project-info";
 
 @Injectable({
   providedIn: 'root'
@@ -18,10 +19,10 @@ export class EmployerProjectsService {
     updatedAtStartDate: Date | null,
     updatedAtEndDate: Date | null,
     projectStatus: string | null,
-    acceptanceRequestedAndNotConfirmed: boolean | null,
+    projectAcceptanceStatus: string | null,
     pageNo: number,
     pageSize: number
-  }): Observable<PaginatedResult<Project>> {
+  }): Observable<PaginatedResult<ProjectInfo>> {
 
     let params = new HttpParams()
       .set('pageNo', filter.pageNo.toString())
@@ -39,11 +40,11 @@ export class EmployerProjectsService {
       params = params.set('projectStatus', filter.projectStatus);
     }
     
-    if (filter.acceptanceRequestedAndNotConfirmed) {
-      params = params.set('AcceptanceRequestedAndNotConfirmed', 'true');
-    }
+    // if (filter.projectAcceptanceStatus !== null) {
+    //   params = params.set('projectAcceptanceStatus', );
+    // }
 
-    return this.httpClient.get<PaginatedResult<Project>>(
+    return this.httpClient.get<PaginatedResult<ProjectInfo>>(
       `${environment.PROJECTS_SERVICE_API_URL}projects/my-employer-projects-filter`,
       { params }
     );

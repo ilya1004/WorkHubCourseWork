@@ -19,7 +19,7 @@ public class FreelancerProfilesRepository : IFreelancerProfilesRepository
                 $"""
                  UPDATE "FreelancerProfiles"
                  SET "StripeAccountId" = {stripeAccountId}
-                 WHERE "UserId" = {userId.ToString()}
+                 WHERE "UserId" = {userId}
                  """,
                 cancellationToken);
 
@@ -50,7 +50,7 @@ public class FreelancerProfilesRepository : IFreelancerProfilesRepository
                      "LastName" = {profile.LastName}, 
                      "Nickname" = {profile.Nickname},
                      "About" = {profile.About}
-                 WHERE "Id" = {id.ToString()}
+                 WHERE "Id" = {id}
                  """,
                 cancellationToken);
 

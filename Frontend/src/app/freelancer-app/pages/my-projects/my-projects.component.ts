@@ -22,6 +22,7 @@ import {Router} from "@angular/router";
 import {NzFlexDirective} from "ng-zorro-antd/flex";
 import { ProjectsService } from "../../../core/services/projects/projects.service";
 import { FreelancerProjectsService } from "../../services/freelancer-projects.service";
+import { ProjectInfo } from "../../../core/interfaces/project/project-info";
 
 @Component({
   selector: 'app-my-projects',
@@ -67,7 +68,7 @@ export class MyProjectsComponent implements OnInit {
     pageSize: 10
   };
   
-  projects: Project[] = [];
+  projects: ProjectInfo[] = [];
   totalCount = 0;
   loading = false;
 
@@ -78,7 +79,7 @@ export class MyProjectsComponent implements OnInit {
   loadProjects(): void {
     this.loading = true;
     this.myProjectsService.getMyFreelancerProjects(this.filterForm).subscribe({
-      next: (result: PaginatedResult<Project>) => {
+      next: (result: PaginatedResult<ProjectInfo>) => {
         this.projects = result.items;
         this.totalCount = result.totalCount;
         this.loading = false;
