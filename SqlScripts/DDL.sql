@@ -87,15 +87,6 @@ CREATE TABLE "CvLanguages" (
 );
 
 
--- Table: Logs
-CREATE TABLE SystemLogs (
-    "Id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    "LogTimestamp" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    "Source" VARCHAR(255),
-    "Message" TEXT NOT NULL,
-);
-
-
 -- Indexes
 CREATE UNIQUE INDEX IX_Users_Email ON "Users" ("Email");
 
@@ -220,15 +211,6 @@ CREATE TABLE "StarredProjects" (
     "Id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "ProjectId" UUID NOT NULL REFERENCES "Projects" ("Id") ON DELETE RESTRICT,
     "FreelancerUserId" UUID NOT NULL
-);
-
-
--- Table: Logs
-CREATE TABLE SystemLogs (
-    "Id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    "LogTimestamp" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    "Source" VARCHAR(255),
-    "Message" TEXT NOT NULL,
 );
 
 

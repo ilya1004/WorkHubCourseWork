@@ -1,10 +1,5 @@
 -- CREATE DATABASE IF NOT EXISTS "ProjectsServiceDb";
 
--- \c ProjectsServiceDb
--- GRANT ALL PRIVILEGES ON DATABASE "ProjectsServiceDb" TO postgres;
-
-
-
 -- Enable UUID extension if not already enabled
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
@@ -68,15 +63,6 @@ CREATE TABLE "StarredProjects" (
     "Id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "ProjectId" UUID NOT NULL REFERENCES "Projects" ("Id") ON DELETE RESTRICT,
     "FreelancerUserId" UUID NOT NULL
-);
-
-
--- Table: Logs
-CREATE TABLE SystemLogs (
-    "Id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    "LogTimestamp" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    "Source" VARCHAR(255),
-    "Message" TEXT NOT NULL
 );
 
 

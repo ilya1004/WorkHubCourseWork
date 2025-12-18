@@ -1,10 +1,5 @@
 -- CREATE DATABASE IF NOT EXISTS "IdentityServiceDb";
 
--- \c IdentityServiceDb
--- GRANT ALL PRIVILEGES ON DATABASE "IdentityServiceDb" TO postgres;
-
-
-
 -- Enable UUID extension if not already enabled
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
@@ -93,15 +88,6 @@ CREATE TABLE "CvLanguages" (
     "Name" VARCHAR(256) NOT NULL,
     "Level" VARCHAR(256) NOT NULL,
     "CvId" UUID NOT NULL REFERENCES "Cvs" ("Id") ON DELETE RESTRICT
-);
-
-
--- Table: Logs
-CREATE TABLE SystemLogs (
-    "Id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    "LogTimestamp" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    "Source" VARCHAR(255),
-    "Message" TEXT NOT NULL
 );
 
 
