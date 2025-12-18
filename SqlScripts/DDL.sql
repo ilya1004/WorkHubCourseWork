@@ -257,5 +257,5 @@ SELECT
     l."ProjectStatus"
 
 FROM "Projects" p
-INNER JOIN "Lifecycles" l ON l."ProjectId" = p."Id";
+INNER JOIN "Lifecycles" l ON l."ProjectId" = p."Id"
 INNER JOIN "Categories" c ON p."CategoryId" = c."Id";

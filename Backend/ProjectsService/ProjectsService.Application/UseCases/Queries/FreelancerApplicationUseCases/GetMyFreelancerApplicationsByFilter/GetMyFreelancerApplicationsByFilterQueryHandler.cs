@@ -38,7 +38,7 @@ public class GetMyFreelancerApplicationsByFilterQueryHandler : IRequestHandler<G
             request.StartDate, request.EndDate, request.ApplicationStatus, request.PageSize, offset, cancellationToken);
 
         var applicationsCount = await _unitOfWork.FreelancerApplicationsRepository.CountByFilterAsync(
-            request.StartDate, request.EndDate, request.ApplicationStatus, request.PageSize, offset, cancellationToken);
+            request.StartDate, request.EndDate, request.ApplicationStatus, cancellationToken);
 
         return new PaginatedResultModel<FreelancerApplication>
         {

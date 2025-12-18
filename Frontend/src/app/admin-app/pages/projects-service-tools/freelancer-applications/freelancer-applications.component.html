@@ -68,7 +68,7 @@
     <tr *ngFor="let application of applicationTable.data">
       <td>{{ application.id }}</td>
       <td>{{ application.project?.title || 'N/A' }}</td>
-      <td>{{ application.freelancerId }}</td>
+      <td>{{ application.freelancerUserId }}</td>
       <td>{{ getStatusLabel(application.status) }}</td>
       <td>{{ application.createdAt | date }}</td>
     </tr>

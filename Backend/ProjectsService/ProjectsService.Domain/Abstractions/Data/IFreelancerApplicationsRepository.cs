@@ -35,8 +35,6 @@ public interface IFreelancerApplicationsRepository
         DateTime? startDate,
         DateTime? endDate,
         ApplicationStatus? applicationStatus,
-        int limit,
-        int offset,
         CancellationToken cancellationToken = default);
 
     Task<int> CountAllAsync(CancellationToken cancellationToken = default);

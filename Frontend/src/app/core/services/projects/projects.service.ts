@@ -4,6 +4,7 @@ import {PaginatedResult} from "../../interfaces/common/paginated-result.interfac
 import {Project} from "../../interfaces/project/project.interface";
 import {HttpClient, HttpParams} from "@angular/common/http";
 import {environment} from "../../../../environments/environment";
+import { ProjectInfo } from "../../interfaces/project/project-info";
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +24,7 @@ export class ProjectsService {
     projectStatus: string | null,
     pageNo: number,
     pageSize: number
-  }): Observable<PaginatedResult<Project>> {
+  }): Observable<PaginatedResult<ProjectInfo>> {
 
     let params = new HttpParams()
       .set('pageNo', filter.pageNo.toString())
@@ -53,7 +54,7 @@ export class ProjectsService {
       params = params.set('projectStatus', filter.projectStatus);
     }
 
-    return this.httpClient.get<PaginatedResult<Project>>(
+    return this.httpClient.get<PaginatedResult<ProjectInfo>>(
       `${environment.PROJECTS_SERVICE_API_URL}projects/by-filter`,
       { params }
     );

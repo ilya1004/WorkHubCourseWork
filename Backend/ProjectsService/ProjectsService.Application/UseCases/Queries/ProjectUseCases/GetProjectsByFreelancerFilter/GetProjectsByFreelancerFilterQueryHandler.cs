@@ -40,7 +40,7 @@ public class GetProjectsByFreelancerFilterQueryHandler : IRequestHandler<GetProj
             budgetTo: null,
             offset: offset,
             limit: request.PageSize,
-            cancellationToken);
+            cancellationToken: cancellationToken);
 
         var projectsCount = await _unitOfWork.ProjectsRepository.CountByFilteredAsync(
             categoryId: null,

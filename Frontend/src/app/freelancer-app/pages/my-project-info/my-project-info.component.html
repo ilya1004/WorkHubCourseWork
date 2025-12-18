@@ -13,7 +13,7 @@
         <nz-descriptions-item nzTitle="Description">{{project.description}}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="Budget">{{project.budget}}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="Category">{{project.category?.name || 'None'}}</nz-descriptions-item>
-        <nz-descriptions-item nzTitle="Status">{{getStatusLabel(project.lifecycle.status)}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Status">{{getStatusLabel(project.lifecycle.projectStatus)}}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="Applications Start">{{project.lifecycle.applicationsStartDate | date}}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="Applications Deadline">{{project.lifecycle.applicationsDeadline | date}}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="Work Start">{{project.lifecycle.workStartDate | date}}</nz-descriptions-item>
@@ -37,9 +37,9 @@
           nz-button
           nzType="primary"
           [nzLoading]="submitting"
-          [disabled]="project.lifecycle.acceptanceRequested"
+          [disabled]="project.lifecycle.acceptanceStatus === ProjectAcceptanceStatus.Requested"
           (click)="requestAcceptance()">
-          {{ project.lifecycle.acceptanceRequested ? 'Acceptance Requested' : 'Request Acceptance' }}
+          {{ project.lifecycle.acceptanceStatus === ProjectAcceptanceStatus.Requested ? 'Acceptance Requested' : 'Request Acceptance' }}
         </button>
       </div>
     </div>
@@ -47,10 +47,10 @@
   
   <div>
     <app-freelancer-project-chat
-      *ngIf="project && project.freelancerId && project.lifecycle.status !== ProjectStatus.Completed"
+      *ngIf="project && project.freelancerUserId && project.lifecycle.projectStatus !== ProjectStatus.Completed"
       [projectId]="project.id.toString()"
-      [employerId]="project.employerId"
-      [freelancerId]="project.freelancerId">
+      [employerId]="project.employerUserId"
+      [freelancerId]="project.freelancerUserId">
     </app-freelancer-project-chat>
   </div>
 </div>

@@ -31,7 +31,7 @@ public class GetProjectsByFilterQueryHandler : IRequestHandler<GetProjectsByFilt
             budgetTo: request.BudgetTo,
             offset: offset,
             limit: request.PageSize,
-            cancellationToken);
+            cancellationToken: cancellationToken);
 
         var projectsCount = await _unitOfWork.ProjectsRepository.CountByFilteredAsync(
             categoryId: request.CategoryId,

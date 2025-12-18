@@ -25,8 +25,7 @@ public class StarredProjectsRepository : IStarredProjectsRepository
             return await _context.StarredProjects
                 .FromSqlInterpolated($"""
                           SELECT 1 FROM "StarredProjects" 
-                          WHERE "ProjectId" = {projectId.ToString()} 
-                            AND "FreelancerUserId" = {freelancerUserId.ToString()}
+                          WHERE "ProjectId" = {projectId} AND "FreelancerUserId" = {freelancerUserId}
                           """)
                 .AnyAsync(cancellationToken);
         }
@@ -46,7 +45,7 @@ public class StarredProjectsRepository : IStarredProjectsRepository
             return await _context.StarredProjects
                 .FromSqlInterpolated($"""
                           SELECT * FROM "StarredProjects" 
-                          WHERE "FreelancerUserId" = {freelancerUserId.ToString()}
+                          WHERE "FreelancerUserId" = {freelancerUserId}
                           ORDER BY "Id" DESC
                           """)
                 .AsNoTracking()
@@ -90,7 +89,7 @@ public class StarredProjectsRepository : IStarredProjectsRepository
             var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  DELETE FROM "StarredProjects"
-                 WHERE "Id" = {id.ToString()}
+                 WHERE "Id" = {id}
                  """,
                 cancellationToken);
 

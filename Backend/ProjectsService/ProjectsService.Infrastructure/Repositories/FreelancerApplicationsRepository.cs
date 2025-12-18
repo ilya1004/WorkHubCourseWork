@@ -27,8 +27,8 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
         {
             var freelancerApplication = await _context.FreelancerApplications
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "FreelancerApplications" WHERE "Id" = {id.ToString()}
-                          """)
+                                      SELECT * FROM "FreelancerApplications" WHERE "Id" = {id}
+                                      """)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -39,8 +39,8 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
 
             freelancerApplication.Project = await _context.Projects
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "Projects" WHERE "Id" = {id.ToString()}
-                          """)
+                                      SELECT * FROM "Projects" WHERE "Id" = {id}
+                                      """)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -61,10 +61,10 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
         {
             return await _context.FreelancerApplications
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "FreelancerApplications" 
-                          WHERE "ProjectId" = {projectId.ToString()}
-                          ORDER BY "Id" DESC
-                          """)
+                                      SELECT * FROM "FreelancerApplications" 
+                                      WHERE "ProjectId" = {projectId}
+                                      ORDER BY "Id" DESC
+                                      """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }
@@ -83,10 +83,10 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
         {
             return await _context.FreelancerApplications
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "FreelancerApplications" 
-                          WHERE "FreelancerUserId" = {freelancerUserId.ToString()}
-                          ORDER BY "Id" DESC
-                          """)
+                                      SELECT * FROM "FreelancerApplications" 
+                                      WHERE "FreelancerUserId" = {freelancerUserId}
+                                      ORDER BY "Id" DESC
+                                      """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }
@@ -107,10 +107,10 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
         {
             return await _context.FreelancerApplications
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "FreelancerApplications"
-                          ORDER BY "Id"
-                          LIMIT {limit} OFFSET {offset}
-                          """)
+                                      SELECT * FROM "FreelancerApplications"
+                                      ORDER BY "Id"
+                                      LIMIT {limit} OFFSET {offset}
+                                      """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }
@@ -131,11 +131,11 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
         {
             return await _context.FreelancerApplications
                 .FromSqlInterpolated($"""
-                          SELECT * FROM "FreelancerApplications"
-                          ORDER BY "Id"
-                          WHERE "ProjectId" = {projectId.ToString()}
-                          LIMIT {limit} OFFSET {offset}
-                          """)
+                                      SELECT * FROM "FreelancerApplications"
+                                      ORDER BY "Id"
+                                      WHERE "ProjectId" = {projectId}
+                                      LIMIT {limit} OFFSET {offset}
+                                      """)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }
@@ -156,38 +156,26 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
     {
         try
         {
-            var sql = """
-                      SELECT * FROM "FreelancerApplications"
-                      WHERE 1 = 1
-                      """;
-
-            var conditions = new List<string>();
+            var conditions = new List<FormattableString>();
 
             if (startDate.HasValue)
-            {
-                conditions.Add($""" "CreatedAt" >= {startDate.Value} """);
-            }
+                conditions.Add($"\"CreatedAt\" >= {startDate.Value}");
 
             if (endDate.HasValue)
             {
-                var endOfDay = endDate.Value.AddDays(1).AddTicks(-1);
-                conditions.Add($""" "CreatedAt" <= {endOfDay} """);
+                var endOfDay = endDate.Value.Date.AddDays(1).AddTicks(-1);
+                conditions.Add($"\"CreatedAt\" <= {endOfDay}");
             }
 
             if (applicationStatus.HasValue)
-            {
-                conditions.Add($""" "Status" = {applicationStatus.Value.ToString()} """);
-            }
+                conditions.Add($"\"Status\" = {applicationStatus.Value}");
 
-            if (conditions.Any())
-            {
-                sql += string.Join(" AND ", conditions);
-            }
+            var whereClause = conditions.Count > 0
+                ? "WHERE " + string.Join(" AND ", conditions.Select(c => c.Format),
+                    conditions.SelectMany(c => c.GetArguments()).ToArray())
+                : string.Empty;
 
-            sql += $"""
-                    ORDER BY "Id" DESC
-                    LIMIT {limit} OFFSET {offset}
-                    """;
+            var sql = $"""SELECT * FROM "FreelancerApplications" {whereClause} ORDER BY "Id" DESC LIMIT {limit} OFFSET {offset}""";
 
             return await _context.FreelancerApplications
                 .FromSqlInterpolated(FormattableStringFactory.Create(sql))
@@ -196,53 +184,43 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex,
-                "Failed to get freelancer applications by filter. StartDate: {StartDate}, EndDate: {EndDate}, Status: {Status}",
-                startDate, endDate, applicationStatus);
+            _logger.LogError(ex, "Failed to get freelancer applications by filter.");
             throw new InvalidOperationException("Failed to retrieve freelancer applications by filter.", ex);
         }
     }
+
 
     public async Task<int> CountByFilterAsync(
         DateTime? startDate,
         DateTime? endDate,
         ApplicationStatus? applicationStatus,
-        int limit,
-        int offset,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            var sql = """
-                      SELECT COUNT(*) AS "Value" FROM "FreelancerApplications"
-                      WHERE 1 = 1
-                      """;
-
-            var conditions = new List<string>();
+            var conditions = new List<FormattableString>();
 
             if (startDate.HasValue)
-            {
-                conditions.Add($""" "CreatedAt" >= {startDate.Value} """);
-            }
+                conditions.Add($"\"CreatedAt\" >= {startDate.Value}");
 
             if (endDate.HasValue)
             {
-                var endOfDay = endDate.Value.AddDays(1).AddTicks(-1);
-                conditions.Add($""" "CreatedAt" <= {endOfDay} """);
+                var endOfDay = endDate.Value.Date.AddDays(1).AddTicks(-1);
+                conditions.Add($"\"CreatedAt\" <= {endOfDay}");
             }
 
             if (applicationStatus.HasValue)
-            {
-                conditions.Add($""" "Status" = {applicationStatus.Value.ToString()} """);
-            }
+                conditions.Add($"\"Status\" = {applicationStatus.Value}");
 
-            if (conditions.Any())
-            {
-                sql += string.Join(" AND ", conditions);
-            }
+            var whereClause = conditions.Count > 0
+                ? "WHERE " + string.Join(" AND ", conditions.Select(c => c.Format),
+                    conditions.SelectMany(c => c.GetArguments()).ToArray())
+                : string.Empty;
+
+            var sql = $"""SELECT COUNT(*) AS "Value" FROM "FreelancerApplications"{whereClause} """;
 
             return await _context.Database
-                .SqlQueryRaw<int>(sql)
+                .SqlQuery<int>(FormattableStringFactory.Create(sql))
                 .SingleAsync(cancellationToken);
         }
         catch (Exception ex)
@@ -251,6 +229,7 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
             throw new InvalidOperationException("Failed to count freelancer applications by filter.", ex);
         }
     }
+
 
     public async Task<int> CountAllAsync(CancellationToken cancellationToken = default)
     {
@@ -278,7 +257,7 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
                 .SqlQuery<int>(
                     $"""
                         SELECT COUNT(*) AS "Value" FROM "FreelancerApplications"
-                        WHERE "ProjectId" = {projectId.ToString()}
+                        WHERE "ProjectId" = {projectId}
                      """)
                 .SingleAsync(cancellationToken);
         }
@@ -301,7 +280,7 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
                                  SELECT EXISTS (
                                      SELECT 1
                                      FROM "FreelancerApplications"
-                                     WHERE "Status" = {status.ToString()} AND "ProjectId" = {projectId.ToString()}
+                                     WHERE "Status" = {status.ToString()} AND "ProjectId" = {projectId}
                                  )
                                  """)
                 .FirstOrDefaultAsync(cancellationToken);
@@ -324,7 +303,7 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
                 $"""
                  UPDATE "FreelancerApplications"
                  SET "Status" = {nameof(ApplicationStatus.Rejected)},
-                 WHERE "ProjectId" = {projectId.ToString()} AND "Status" != "Accepted"
+                 WHERE "ProjectId" = {projectId} AND "Status" != 'Accepted'
                  """,
                 cancellationToken);
         }
@@ -381,7 +360,7 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
                  SET 
                      "Status" = {application.Status.ToString()}, 
                      "CvId" = {application.CvId}
-                 WHERE "Id" = {application.Id.ToString()}
+                 WHERE "Id" = {application.Id}
                  """,
                 cancellationToken);
 
@@ -407,7 +386,7 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
             var rowsAffected = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"""
                  DELETE FROM "FreelancerApplications"
-                 WHERE "Id" = {id.ToString()}
+                 WHERE "Id" = {id}
                  """,
                 cancellationToken);
 

@@ -15,6 +15,7 @@ import {FormsModule} from "@angular/forms";
 import {NzOptionComponent, NzSelectComponent, NzSelectModule} from "ng-zorro-antd/select";
 import {CategoriesComponent} from "./categories/categories.component";
 import {FreelancerApplicationsComponent} from "./freelancer-applications/freelancer-applications.component";
+import { ProjectInfo } from "../../../core/interfaces/project/project-info";
 
 @Component({
   selector: 'app-projects-service-tools',
@@ -54,7 +55,7 @@ export class ProjectsServiceToolsComponent implements OnInit {
     pageSize: 5
   };
   
-  projects: Project[] = [];
+  projects: ProjectInfo[] = [];
   totalCount = 0;
   loading = false;
   categories: Category[] = [];
@@ -73,7 +74,7 @@ export class ProjectsServiceToolsComponent implements OnInit {
   loadProjects(): void {
     this.loading = true;
     this.projectsService.getProjectsByFilter(this.filterForm).subscribe({
-      next: (result: PaginatedResult<Project>) => {
+      next: (result: PaginatedResult<ProjectInfo>) => {
         this.projects = result.items;
         this.totalCount = result.totalCount;
         this.loading = false;

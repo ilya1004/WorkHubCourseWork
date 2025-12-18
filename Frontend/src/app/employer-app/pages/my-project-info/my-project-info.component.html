@@ -13,7 +13,7 @@
         <nz-descriptions-item nzTitle="Description">{{ project.description }}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="Budget">{{ project.budget }}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="Category">{{ project.category?.name || 'None' }}</nz-descriptions-item>
-        <nz-descriptions-item nzTitle="Status">{{ getStatusLabel(project.lifecycle.status) }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Status">{{ getStatusLabel(project.lifecycle.projectStatus) }}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="Applications Start">{{ project.lifecycle.applicationsStartDate | date }}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="Applications Deadline">{{ project.lifecycle.applicationsDeadline | date }}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="Work Start">{{ project.lifecycle.workStartDate | date }}</nz-descriptions-item>
@@ -38,7 +38,7 @@
         nz-button
         nzType="primary"
         [nzLoading]="submitting"
-        [disabled]="project.lifecycle.status === ProjectStatus.Completed"
+        [disabled]="project.lifecycle.projectStatus === ProjectStatus.Completed"
         (click)="setProjectAcceptanceStatus(true)">
         Accept project
       </button>
@@ -46,18 +46,18 @@
         nz-button
         nzType="default"
         [nzLoading]="submitting"
-        [disabled]="project.lifecycle.status === ProjectStatus.Completed"
+        [disabled]="project.lifecycle.projectStatus === ProjectStatus.Completed"
         (click)="setProjectAcceptanceStatus(false)">
         Reject acceptance request
       </button>
     </div>
   </div>
   
-  <div *ngIf="project && project.freelancerId && project.lifecycle.status !== ProjectStatus.Completed">
+  <div *ngIf="project && project.freelancerUserId && project.lifecycle.projectStatus !== ProjectStatus.Completed">
     <app-employer-project-chat
       [projectId]="project.id.toString()"
-      [employerId]="project.employerId"
-      [freelancerId]="project.freelancerId">
+      [employerId]="project.employerUserId"
+      [freelancerId]="project.freelancerUserId">
     </app-employer-project-chat>
   </div>
 </div>

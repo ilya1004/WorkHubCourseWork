@@ -1,8 +1,6 @@
-using ProjectsService.Domain.Enums;
+﻿namespace ProjectsService.Domain.Models;
 
-namespace ProjectsService.Domain.Models;
-
-public class ProjectInfo
+public class ProjectInfoView
 {
     public Guid Id { get; set; }
     public string Title { get; set; }
@@ -19,6 +17,6 @@ public class ProjectInfo
     public DateTime ApplicationsDeadline { get; set; }
     public DateTime WorkStartDate { get; set; }
     public DateTime WorkDeadline { get; set; }
-    public ProjectAcceptanceStatus  AcceptanceStatus { get; set; }
-    public ProjectStatus ProjectStatus { get; set; }
+    public string AcceptanceStatus { get; set; }
+    public string ProjectStatus { get; set; }
 }

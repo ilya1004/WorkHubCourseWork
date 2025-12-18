@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Options;
 using ProjectsService.Application.Settings;
-using ProjectsService.Domain.Models;
 
 namespace ProjectsService.Application.BackgroundJobs.UpdateProjectStatuses;
 
