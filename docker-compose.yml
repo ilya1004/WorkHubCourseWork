@@ -154,7 +154,7 @@ services:
     image: postgres:latest
     container_name: postgres_identity
     ports:
-      - "5433:5432"
+      - "5435:5432"
     volumes:
       - postgres_identity_data:/var/lib/postgresql
       - ./DockerConfig/InitPostgresIdentityDb:/docker-entrypoint-initdb.d:ro
@@ -196,7 +196,7 @@ services:
     image: postgres:latest
     container_name: postgres_hangfire
     ports:
-      - "5435:5432"
+      - "5436:5432"
     volumes:
       - postgres_hangfire_data:/var/lib/postgresql
     environment:

@@ -11,6 +11,7 @@ import {NzSelectModule} from "ng-zorro-antd/select";
 import {NzDatePickerModule} from 'ng-zorro-antd/date-picker';
 import {NzInputNumberModule} from "ng-zorro-antd/input-number";
 import {ProjectUpdateData, UpdateProjectForm} from "../../../interfaces/project-tools/update-project.interface";
+import { ProjectInfo } from "../../../../core/interfaces/project/project-info";
 
 @Component({
   selector: 'app-edit-project',
@@ -30,7 +31,7 @@ import {ProjectUpdateData, UpdateProjectForm} from "../../../interfaces/project-
   styleUrls: ['./edit-project.component.scss']
 })
 export class EditProjectComponent implements OnInit {
-  @Input() project!: Project;
+  @Input() project!: ProjectInfo;
   @Input() categories: Category[] = [];
   @Input() disablePastDates!: (current: Date) => boolean;
   @Output() projectUpdated = new EventEmitter<ProjectUpdateData>();
@@ -91,10 +92,10 @@ export class EditProjectComponent implements OnInit {
       description: this.project.description,
       budget: this.project.budget,
       categoryId: this.project.categoryId,
-      applicationsStartDate: new Date(this.project.lifecycle.applicationsStartDate),
-      applicationsDeadline: new Date(this.project.lifecycle.applicationsDeadline),
-      workStartDate: new Date(this.project.lifecycle.workStartDate),
-      workDeadline: new Date(this.project.lifecycle.workDeadline)
+      applicationsStartDate: new Date(this.project.applicationsStartDate),
+      applicationsDeadline: new Date(this.project.applicationsDeadline),
+      workStartDate: new Date(this.project.workStartDate),
+      workDeadline: new Date(this.project.workDeadline)
     });
   }
   

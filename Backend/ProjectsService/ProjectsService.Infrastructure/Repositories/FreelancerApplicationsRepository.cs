@@ -132,8 +132,8 @@ public class FreelancerApplicationsRepository : IFreelancerApplicationsRepositor
             return await _context.FreelancerApplications
                 .FromSqlInterpolated($"""
                                       SELECT * FROM "FreelancerApplications"
-                                      ORDER BY "Id"
                                       WHERE "ProjectId" = {projectId}
+                                      ORDER BY "Id"
                                       LIMIT {limit} OFFSET {offset}
                                       """)
                 .AsNoTracking()

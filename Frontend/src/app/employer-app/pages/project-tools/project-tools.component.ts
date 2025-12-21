@@ -27,6 +27,7 @@ import {ProjectCreateData} from "../../interfaces/project-tools/create-project.i
 import {ProjectUpdateData} from "../../interfaces/project-tools/update-project.interface";
 import {FinanceService} from "../../services/finance.service";
 import {ProjectStatus} from '../../../core/interfaces/project/lifecycle.interface';
+import { ProjectInfo } from "../../../core/interfaces/project/project-info";
 
 @Component({
   selector: 'app-project-tools',
@@ -64,10 +65,10 @@ export class ProjectToolsComponent implements OnInit {
     private modal: NzModalService
   ) {}
   
-  projects: Project[] = [];
+  projects: ProjectInfo[] = [];
   categories: Category[] = [];
   
-  selectedProject: Project | null = null;
+  selectedProject: ProjectInfo | null = null;
   applications: FreelancerApplication[] = [];
   selectedApplication: FreelancerApplication | null = null;
   freelancerDetails: FreelancerUser | null = null;
@@ -100,7 +101,7 @@ export class ProjectToolsComponent implements OnInit {
   
   loadProjects(): void {
     this.projectService.getEmployerProjects(this.projectPageNo, this.projectPageSize).subscribe({
-      next: (result: PaginatedResult<Project>) => {
+      next: (result: PaginatedResult<ProjectInfo>) => {
         this.projects = result.items;
         this.projectTotalCount = result.totalCount;
       },
@@ -190,8 +191,8 @@ export class ProjectToolsComponent implements OnInit {
     });
   }
   
-  onEditProject(project: Project): void {
-    if (project.lifecycle.projectStatus !== 0) {
+  onEditProject(project: ProjectInfo): void {
+    if (project.projectStatus !== 0) {
       this.message.warning('Only projects in "Published" status can be edited.');
       return;
     }
@@ -232,7 +233,7 @@ export class ProjectToolsComponent implements OnInit {
     }
   }
   
-  onViewApplications(project: Project): void {
+  onViewApplications(project: ProjectInfo): void {
     if (this.selectedProject?.id === project.id) {
       this.isViewingApplications = !this.isViewingApplications;
     } else {

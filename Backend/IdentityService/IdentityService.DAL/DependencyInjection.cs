@@ -12,7 +12,10 @@ public static class DependencyInjection
     public static IServiceCollection AddDAL(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("PostgresConnection")));
+            options.UseNpgsql(configuration.GetConnectionString("PostgresConnection"))
+                .LogTo(Console.WriteLine)
+                .EnableSensitiveDataLogging()
+                .EnableDetailedErrors());
 
         services.AddStackExchangeRedisCache(options =>
         {

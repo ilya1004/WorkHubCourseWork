@@ -6,6 +6,7 @@ import {Project} from "../../core/interfaces/project/project.interface";
 import {FreelancerApplication} from "../../core/interfaces/project/freelancer-application.interface";
 import {FreelancerUser} from "../../core/interfaces/freelancer/freelancer-user.interface";
 import {environment} from "../../../environments/environment";
+import { ProjectInfo } from "../../core/interfaces/project/project-info";
 
 @Injectable({
   providedIn: 'root'
@@ -16,11 +17,11 @@ export class ProjectToolsService {
     private httpClient: HttpClient
   ) { }
   
-  getEmployerProjects(pageNo: number, pageSize: number): Observable<PaginatedResult<Project>> {
+  getEmployerProjects(pageNo: number, pageSize: number): Observable<PaginatedResult<ProjectInfo>> {
     const params = new HttpParams()
       .set('PageNo', pageNo.toString())
       .set('PageSize', pageSize.toString());
-    return this.httpClient.get<PaginatedResult<Project>>(
+    return this.httpClient.get<PaginatedResult<ProjectInfo>>(
       `${environment.PROJECTS_SERVICE_API_URL}projects/my-employer-projects-filter`,
       { params }
     );
